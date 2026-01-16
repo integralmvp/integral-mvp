@@ -1,28 +1,8 @@
-// INTEGRAL MVP - PR2-1: 100vh 싱글 페이지 레이아웃
-import Header from './components/layout/Header'
-import IntroSection from './components/layout/IntroSection'
-import ThreeColumnLayout from './components/layout/ThreeColumnLayout'
-import ServicePanel from './components/service-panel/ServicePanel'
-import MapSection from './components/map/MapSection'
-import InfoPanel from './components/info-panel/InfoPanel'
+// INTEGRAL MVP - PR2-2: 관제 센터 UI + Mapbox
+import CommandLayout from './components/Layout/CommandLayout'
 
 function App() {
-  return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      {/* 헤더 */}
-      <Header />
-
-      {/* 소개 문구 */}
-      <IntroSection />
-
-      {/* 3칸 레이아웃 */}
-      <ThreeColumnLayout
-        leftPanel={<ServicePanel />}
-        centerPanel={<MapSection />}
-        rightPanel={<InfoPanel />}
-      />
-    </div>
-  )
+  return <CommandLayout />
 }
 
 export default App

@@ -1,0 +1,67 @@
+/* 폰트 임포트 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --font-primary: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-number: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  font-family: var(--font-primary);
+}
+
+/* 로고 */
+.logo {
+  font-family: var(--font-primary);
+  font-weight: 900;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+}
+
+/* 메인 타이틀 */
+.main-title {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #ffffff;
+}
+
+/* 서브 타이틀 */
+.sub-title {
+  font-family: var(--font-primary);
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+/* LIVE 표시 */
+.live-indicator {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #34d399;
+}
+
+/* 숫자/통계 */
+.stat-number {
+  font-family: var(--font-number);
+  font-weight: 700;
+}
+
+/* 펄스 애니메이션 */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
