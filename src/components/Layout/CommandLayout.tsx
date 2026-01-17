@@ -6,6 +6,7 @@ import SpaceBackground from '../Background/SpaceBackground'
 import PopularProducts from '../Widgets/PopularProducts'
 import ProductStats from '../Widgets/ProductStats'
 import ServicePanel from '../Widgets/ServicePanel'
+import MainlandMinimapWithLegend from '../Widgets/MainlandMinimapWithLegend'
 
 export default function CommandLayout() {
   // 목업 인기 상품 데이터 (임시)
@@ -109,6 +110,9 @@ export default function CommandLayout() {
 
         {/* 우측 위젯 - 서비스 선택 */}
         <ServicePanel />
+
+        {/* 육지 미니맵 + 범례 */}
+        <MainlandMinimapWithLegend inboundRoutes={2} outboundRoutes={2} />
       </div>
     </div>
   )
