@@ -29,7 +29,7 @@ export default function ServicePanel() {
         >
           <div className="text-4xl mb-2">📦</div>
           <div className="text-xl font-bold text-white">보관하기</div>
-          <div className="text-sm text-cyan-400 mt-1">공간을 구매하세요</div>
+          <div className="text-sm text-cyan-400 mt-1">비어있는 공간을 구매하세요</div>
         </button>
 
         {/* 운송하기 버튼 */}
@@ -49,7 +49,7 @@ export default function ServicePanel() {
         >
           <div className="text-4xl mb-2">🚛</div>
           <div className="text-xl font-bold text-white">운송하기</div>
-          <div className="text-sm text-emerald-400 mt-1">경로를 구매하세요</div>
+          <div className="text-sm text-emerald-400 mt-1">비어있는 경로를 구매하세요</div>
         </button>
       </div>
 
