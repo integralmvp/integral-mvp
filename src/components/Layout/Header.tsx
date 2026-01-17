@@ -20,7 +20,10 @@ export default function Header() {
     <>
       {/* 로고 영역 - 좌상단 */}
       <div className="absolute top-4 left-6 z-30">
-        <div className="border-t border-b border-white/50 py-2 px-1">
+        <div
+          className="border-t border-b border-white/50 py-2 px-1 cursor-pointer hover:bg-white/10 transition-colors"
+          onClick={() => window.location.reload()}
+        >
           <span className="text-white text-2xl font-black tracking-tight">
             INTEGRAL
           </span>

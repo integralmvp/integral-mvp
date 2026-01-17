@@ -1,4 +1,4 @@
-// 육지 미니맵 + 범례 (통합)
+// 육지 미니맵 + 범례 (통합) - 수평 배치
 interface MainlandMinimapProps {
   inboundRoutes?: number
   outboundRoutes?: number
@@ -9,19 +9,13 @@ export default function MainlandMinimapWithLegend({
   outboundRoutes = 2
 }: MainlandMinimapProps) {
   return (
-    <div className="absolute top-36 left-[calc(50%-200px)] z-20">
-      <div className="flex gap-4">
-        {/* 미니맵 */}
-        <div className="w-44">
-          {/* 타이틀 */}
-          <h3 className="text-white text-xs font-semibold tracking-wide">
-            MAINLAND
-          </h3>
-          <div className="w-full h-px bg-white/50 mt-1 mb-2"></div>
-
-          {/* 맵 */}
+    <div className="absolute top-36 left-6 z-20">
+      <div className="flex flex-col gap-2">
+        {/* 미니맵 + 범례 (수평 배치) */}
+        <div className="flex items-center gap-3">
+          {/* 미니맵 */}
           <div className="bg-[rgba(10,10,30,0.5)] backdrop-blur-sm rounded-lg p-2">
-            <svg viewBox="0 0 140 100" className="w-full h-auto">
+            <svg viewBox="0 0 140 100" className="w-36 h-auto">
               {/* 한반도 윤곽 */}
               <path
                 d="M 70,8 Q 85,5 95,15 Q 105,25 100,40 Q 95,50 100,60 Q 105,70 95,80 Q 85,88 75,85 Q 65,82 55,78 Q 45,74 40,65 Q 35,55 40,45 Q 45,35 50,25 Q 55,15 70,8"
@@ -178,17 +172,12 @@ export default function MainlandMinimapWithLegend({
               </text>
             </svg>
           </div>
-        </div>
 
-        {/* 범례 */}
-        <div className="w-32">
-          <h3 className="text-white text-xs font-semibold tracking-wide">범례</h3>
-          <div className="w-full h-px bg-white/50 mt-1 mb-2"></div>
-
-          <div className="bg-[rgba(10,10,30,0.5)] backdrop-blur-sm rounded-lg p-2 space-y-2">
+          {/* 범례 (수평 배치) */}
+          <div className="flex items-center gap-4 text-white/80 text-xs">
             {/* 공간상품 */}
-            <div className="flex items-center gap-2">
-              <svg width="16" height="12" viewBox="0 0 16 12">
+            <div className="flex items-center gap-1.5">
+              <svg width="14" height="10" viewBox="0 0 16 12">
                 <rect
                   x="1"
                   y="1"
@@ -209,28 +198,28 @@ export default function MainlandMinimapWithLegend({
                   strokeWidth="1.5"
                 />
               </svg>
-              <span className="text-white/80 text-xs">공간상품</span>
+              <span>공간</span>
             </div>
 
             {/* 도내경로 */}
-            <div className="flex items-center gap-2">
-              <svg width="20" height="10" viewBox="0 0 20 10">
+            <div className="flex items-center gap-1.5">
+              <svg width="18" height="8" viewBox="0 0 20 10">
                 <path
-                  d="M 2,7 Q 10,2 18,7"
+                  d="M 2,5 L 18,5"
                   fill="none"
                   stroke="#00bfff"
                   strokeWidth="2"
                   style={{ filter: 'drop-shadow(0 0 3px rgba(0, 191, 255, 0.8))' }}
                 />
               </svg>
-              <span className="text-white/80 text-xs">도내경로</span>
+              <span>도내</span>
             </div>
 
             {/* 입도 */}
-            <div className="flex items-center gap-2">
-              <svg width="20" height="10" viewBox="0 0 20 10">
+            <div className="flex items-center gap-1.5">
+              <svg width="18" height="8" viewBox="0 0 20 10">
                 <path
-                  d="M 2,7 Q 10,2 18,7"
+                  d="M 2,5 L 18,5"
                   fill="none"
                   stroke="#00ff88"
                   strokeWidth="2"
@@ -238,14 +227,14 @@ export default function MainlandMinimapWithLegend({
                   style={{ filter: 'drop-shadow(0 0 3px rgba(0, 255, 136, 0.8))' }}
                 />
               </svg>
-              <span className="text-white/80 text-xs">입도</span>
+              <span>입도</span>
             </div>
 
             {/* 출도 */}
-            <div className="flex items-center gap-2">
-              <svg width="20" height="10" viewBox="0 0 20 10">
+            <div className="flex items-center gap-1.5">
+              <svg width="18" height="8" viewBox="0 0 20 10">
                 <path
-                  d="M 18,7 Q 10,2 2,7"
+                  d="M 2,5 L 18,5"
                   fill="none"
                   stroke="#ff00ff"
                   strokeWidth="2"
@@ -253,9 +242,16 @@ export default function MainlandMinimapWithLegend({
                   style={{ filter: 'drop-shadow(0 0 3px rgba(255, 0, 255, 0.8))' }}
                 />
               </svg>
-              <span className="text-white/80 text-xs">출도</span>
+              <span>출도</span>
             </div>
           </div>
+        </div>
+
+        {/* MAINLAND 타이틀 (하단) */}
+        <div className="pl-2">
+          <h3 className="text-white/60 text-xs font-semibold tracking-wide">
+            MAINLAND
+          </h3>
         </div>
       </div>
     </div>
