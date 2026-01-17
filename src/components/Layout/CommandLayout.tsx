@@ -1,5 +1,6 @@
 // 관제 센터 레이아웃
-import CommandHeader from './CommandHeader'
+import Header from './Header'
+import CenterTitle from './CenterTitle'
 import LeftConsole from './LeftConsole'
 import RightConsole from './RightConsole'
 import MapboxContainer from '../Map/MapboxContainer'
@@ -7,19 +8,23 @@ import SpaceBackground from '../Background/SpaceBackground'
 
 export default function CommandLayout() {
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a1a] relative">
+    <div className="h-screen bg-[#0a0a1a] relative overflow-hidden">
       {/* 우주 배경 */}
       <SpaceBackground />
-      {/* 헤더 */}
-      <CommandHeader />
 
-      {/* 메인 영역 (3칸 레이아웃) */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* 투명 헤더 (로고/LIVE) */}
+      <Header />
+
+      {/* 중앙 글로우 타이틀 */}
+      <CenterTitle />
+
+      {/* 메인 영역 */}
+      <div className="h-full w-full">
         {/* 좌측 콘솔 */}
         <LeftConsole />
 
         {/* 중앙 지도 */}
-        <div className="flex-1">
+        <div className="absolute inset-0">
           <MapboxContainer />
         </div>
 
