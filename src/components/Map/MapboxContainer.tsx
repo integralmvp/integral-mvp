@@ -2,7 +2,8 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../data/mockData'
-import MainlandMinimapWithLegend from '../Widgets/MainlandMinimapWithLegend'
+import MainlandMinimap from '../Widgets/MainlandMinimap'
+import Legend from '../Widgets/Legend'
 
 // Mapbox Access Token (환경 변수에서 가져옴)
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || ''
@@ -14,6 +15,8 @@ if (MAPBOX_TOKEN) {
 export default function MapboxContainer() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
+  const minimapRef = useRef<HTMLDivElement>(null)
+  const legendRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return
@@ -48,7 +51,14 @@ export default function MapboxContainer() {
 
       // 곡선 경로 추가
       addCurvedRoutes()
+
+      // 미니맵/범례 위치 업데이트
+      updateOverlayPositions()
     })
+
+    // 지도 이동/줌 시 미니맵/범례 위치 업데이트
+    map.current.on('move', updateOverlayPositions)
+    map.current.on('zoom', updateOverlayPositions)
 
     // 네비게이션 컨트롤
     map.current.addControl(
@@ -61,11 +71,47 @@ export default function MapboxContainer() {
     }
   }, [])
 
+  // 미니맵/범례 위치 업데이트 (제주도 좌표 기준)
+  const updateOverlayPositions = () => {
+    if (!map.current) return
+
+    // 제주도 북서쪽 좌표 (미니맵 기준점)
+    const jejuNorthWest: [number, number] = [126.15, 33.55]
+    // 제주도 중앙 상단 좌표 (범례 기준점)
+    const jejuNorthCenter: [number, number] = [126.55, 33.55]
+
+    // 좌표를 화면 픽셀로 변환
+    const minimapPos = map.current.project(jejuNorthWest)
+    const legendPos = map.current.project(jejuNorthCenter)
+
+    // 미니맵 위치 설정
+    if (minimapRef.current) {
+      minimapRef.current.style.left = `${minimapPos.x + 10}px`
+      minimapRef.current.style.top = `${minimapPos.y + 10}px`
+    }
+
+    // 범례 위치 설정
+    if (legendRef.current) {
+      legendRef.current.style.left = `${legendPos.x}px`
+      legendRef.current.style.top = `${legendPos.y + 10}px`
+      legendRef.current.style.transform = 'translateX(-50%)'
+    }
+  }
+
   // 아이소메트릭 파렛트 마커 추가
   const addPalletMarkers = () => {
     if (!map.current) return
 
+    console.log('[MapboxContainer] Adding pallet markers...')
+
     STORAGE_PRODUCTS.forEach((storage) => {
+      console.log(`[Marker] ${storage.location.name}:`, {
+        lng: storage.location.lng,
+        lat: storage.location.lat,
+        isValid: storage.location.lng >= 126.1 && storage.location.lng <= 126.95 &&
+                 storage.location.lat >= 33.1 && storage.location.lat <= 33.6
+      })
+
       const capacity = parseInt(storage.capacity.match(/\d+/)?.[0] || '0')
 
       // 크기 결정
@@ -294,9 +340,22 @@ export default function MapboxContainer() {
       {/* 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* 미니맵 + 범례 (지도 내 좌측 상단) */}
-      <div className="absolute top-4 left-4 z-10">
-        <MainlandMinimapWithLegend inboundRoutes={2} outboundRoutes={2} />
+      {/* 미니맵 - 제주도 좌표 기준 동적 배치 */}
+      <div
+        ref={minimapRef}
+        className="absolute z-10 pointer-events-auto"
+        style={{ position: 'absolute' }}
+      >
+        <MainlandMinimap inboundRoutes={2} outboundRoutes={2} />
+      </div>
+
+      {/* 범례 - 제주도 좌표 기준 동적 배치 */}
+      <div
+        ref={legendRef}
+        className="absolute z-10"
+        style={{ position: 'absolute' }}
+      >
+        <Legend />
       </div>
     </div>
   )

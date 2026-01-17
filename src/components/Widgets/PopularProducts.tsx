@@ -13,7 +13,7 @@ interface PopularProductsProps {
 
 export default function PopularProducts({ products }: PopularProductsProps) {
   return (
-    <div className="absolute left-6 top-36 z-20 w-64">
+    <div className="absolute left-6 top-36 z-20 w-64 mb-6">
       {/* 타이틀 */}
       <h2 className="text-white text-sm font-semibold tracking-wide">
         실시간 인기 상품
@@ -22,9 +22,9 @@ export default function PopularProducts({ products }: PopularProductsProps) {
       {/* 구분선 */}
       <div className="w-full h-px bg-white/50 mt-2 mb-3"></div>
 
-      {/* 컨텐츠 (투명 배경 + 스크롤) */}
+      {/* 컨텐츠 (투명 배경 + 스크롤) - 4개만 보이도록 높이 제한 */}
       <div
-        className="bg-[rgba(10,10,30,0.2)] backdrop-blur-sm rounded-lg p-3 space-y-2 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
+        className="bg-[rgba(10,10,30,0.2)] backdrop-blur-sm rounded-lg p-3 space-y-2 max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent'
