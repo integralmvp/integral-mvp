@@ -4,14 +4,14 @@ export default function ServicePanel() {
     <div className="absolute right-6 top-36 z-20 w-72">
       {/* 타이틀 */}
       <h2 className="text-white text-sm font-semibold tracking-wide">
-        서비스 선택
+        서비스
       </h2>
 
       {/* 구분선 */}
       <div className="w-full h-px bg-white/50 mt-2 mb-3"></div>
 
-      {/* 컨텐츠 (덜 투명한 배경) */}
-      <div className="bg-[rgba(10,10,30,0.85)] backdrop-blur-md rounded-lg p-4 space-y-4">
+      {/* 컨텐츠 (투명한 배경) */}
+      <div className="bg-[rgba(10,10,30,0.3)] backdrop-blur-md rounded-lg p-4 space-y-4">
         {/* 보관하기 버튼 */}
         <button
           className="w-full p-5 rounded-xl text-center transition-all duration-300
@@ -29,7 +29,7 @@ export default function ServicePanel() {
         >
           <div className="text-4xl mb-2">📦</div>
           <div className="text-xl font-bold text-white">보관하기</div>
-          <div className="text-sm text-cyan-400 mt-1">공간이 상품이 되다</div>
+          <div className="text-sm text-cyan-400 mt-1">공간을 구매하세요</div>
         </button>
 
         {/* 운송하기 버튼 */}
@@ -49,7 +49,7 @@ export default function ServicePanel() {
         >
           <div className="text-4xl mb-2">🚛</div>
           <div className="text-xl font-bold text-white">운송하기</div>
-          <div className="text-sm text-emerald-400 mt-1">경로가 상품이 되다</div>
+          <div className="text-sm text-emerald-400 mt-1">경로를 구매하세요</div>
         </button>
       </div>
 
