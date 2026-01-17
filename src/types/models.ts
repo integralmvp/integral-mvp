@@ -21,6 +21,11 @@ export interface RegulationStatus {
   restrictions?: string[];
 }
 
+// ============ 경로 범위 및 방향 ============
+export type RouteScope = "INTRA_JEJU" | "SEA";
+export type Direction = "INBOUND" | "OUTBOUND";
+export type TripType = "ONE_WAY" | "ROUND_TRIP";
+
 // ============ 경로 상품 (PR2에서 확장) ============
 export interface RouteProduct {
   id: string;
@@ -34,6 +39,10 @@ export interface RouteProduct {
   priceUnit: string;
   canIntegrateWith?: string[];
   regulationStatus: RegulationStatus;
+  // PR2 추가 필드
+  routeScope: RouteScope;
+  direction?: Direction;  // routeScope === "SEA"일 때만 사용
+  tripType?: TripType;     // 표현용 필드
 }
 
 // ============ 공간 상품 (PR2에서 확장) ============
@@ -60,12 +69,41 @@ export interface ProductCardProps {
   onClick?: () => void;
 }
 
-// PR2, PR3에서 추가될 타입들:
-// - UnitLoadModule
-// - HandlingOption
-// - CargoCondition
-// - MatchResult
-// - CostEstimate
+// ============ PR2: 거래 모달용 타입 ============
+export type UnitLoadModule = "소형" | "대형" | "특수";
+
+export type HandlingOption =
+  | "파손주의"
+  | "냉장"
+  | "냉동"
+  | "위험물"
+  | "온도민감"
+  | "적재방향";
+
+export interface CargoCondition {
+  unitLoadModule: UnitLoadModule;
+  handlingOptions: HandlingOption[];
+  quantity: number;
+  notes?: string;
+}
+
+export type MatchStatus = "가능" | "주의" | "불가";
+
+export interface MatchResult {
+  status: MatchStatus;
+  message: string;
+  restrictions?: { reason: string; detail: string }[];
+  warnings?: string[];
+}
+
+export interface CostEstimate {
+  basePrice: number;
+  handlingFee?: number;
+  totalPrice: number;
+  breakdown: { label: string; amount: number }[];
+}
+
+// PR3에서 추가될 타입들:
 // - DealRequest/Response
 // - RegulationRule
 // - RegionHeatmap
