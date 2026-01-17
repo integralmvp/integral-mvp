@@ -26,9 +26,9 @@ export const MAINLAND_PORTS = {
   mokpo: { lat: 34.7806, lng: 126.3789 },
 }
 
-// ============ 경로 상품 (6개) ============
+// ============ 경로 상품 (8개) ============
 
-// 도내 경로 (3개)
+// 도내 경로 (4개)
 export const ROUTE_PRODUCTS: RouteProduct[] = [
   {
     id: 'R1',
@@ -64,10 +64,10 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lng: JEJU_COORDS.seongsan.lng,
     },
     schedule: '월수금',
-    capacity: '1톤',
+    capacity: '3.5톤',
     vehicleType: '다마스',
     cargoTypes: ['일반'] as CargoType[],
-    price: 85000,
+    price: 90000,
     priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
@@ -75,28 +75,49 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
   {
     id: 'R3',
     origin: {
-      name: '서귀포',
-      lat: JEJU_COORDS.seogwipo.lat,
-      lng: JEJU_COORDS.seogwipo.lng,
-    },
-    destination: {
       name: '애월',
       lat: JEJU_COORDS.aewol.lat,
       lng: JEJU_COORDS.aewol.lng,
     },
+    destination: {
+      name: '서귀포',
+      lat: JEJU_COORDS.seogwipo.lat,
+      lng: JEJU_COORDS.seogwipo.lng,
+    },
     schedule: '화목',
-    capacity: '2.5톤',
+    capacity: '5톤',
     vehicleType: '윙바디',
     cargoTypes: ['일반', '냉동'] as CargoType[],
-    price: 120000,
+    price: 160000,
+    priceUnit: '회',
+    regulationStatus: { allowed: true },
+    routeScope: 'INTRA_JEJU',
+  },
+  {
+    id: 'R4',
+    origin: {
+      name: '한림',
+      lat: 33.41,
+      lng: 126.27,
+    },
+    destination: {
+      name: '조천',
+      lat: 33.538,
+      lng: 126.64,
+    },
+    schedule: '수금',
+    capacity: '1톤',
+    vehicleType: '라보',
+    cargoTypes: ['일반'] as CargoType[],
+    price: 75000,
     priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
   },
 
-  // 입·출도 경로 (3개)
+  // 입도 경로 (2개)
   {
-    id: 'R4',
+    id: 'R5',
     origin: {
       name: '부산항',
       lat: MAINLAND_PORTS.busan.lat,
@@ -111,34 +132,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '11톤',
     vehicleType: '윙바디',
     cargoTypes: ['일반', '냉장', '냉동'] as CargoType[],
-    price: 350000,
+    price: 352000,
     priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'SEA',
     direction: 'INBOUND',
-    tripType: 'ONE_WAY',
-  },
-  {
-    id: 'R5',
-    origin: {
-      name: '제주항',
-      lat: JEJU_COORDS.jejuPort.lat,
-      lng: JEJU_COORDS.jejuPort.lng,
-    },
-    destination: {
-      name: '인천항',
-      lat: MAINLAND_PORTS.incheon.lat,
-      lng: MAINLAND_PORTS.incheon.lng,
-    },
-    schedule: '월수',
-    capacity: '5톤',
-    vehicleType: '카고',
-    cargoTypes: ['일반'] as CargoType[],
-    price: 280000,
-    priceUnit: '회',
-    regulationStatus: { allowed: true },
-    routeScope: 'SEA',
-    direction: 'OUTBOUND',
     tripType: 'ONE_WAY',
   },
   {
@@ -154,19 +152,67 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lng: JEJU_COORDS.jejuPort.lng,
     },
     schedule: '매일',
-    capacity: '5톤',
+    capacity: '8톤',
     vehicleType: '윙바디',
     cargoTypes: ['일반', '냉장'] as CargoType[],
-    price: 400000,
+    price: 224000,
     priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'SEA',
     direction: 'INBOUND',
     tripType: 'ROUND_TRIP',
   },
+
+  // 출도 경로 (2개)
+  {
+    id: 'R7',
+    origin: {
+      name: '제주항',
+      lat: JEJU_COORDS.jejuPort.lat,
+      lng: JEJU_COORDS.jejuPort.lng,
+    },
+    destination: {
+      name: '인천항',
+      lat: MAINLAND_PORTS.incheon.lat,
+      lng: MAINLAND_PORTS.incheon.lng,
+    },
+    schedule: '월수',
+    capacity: '11톤',
+    vehicleType: '카고',
+    cargoTypes: ['일반'] as CargoType[],
+    price: 495000,
+    priceUnit: '회',
+    regulationStatus: { allowed: true },
+    routeScope: 'SEA',
+    direction: 'OUTBOUND',
+    tripType: 'ONE_WAY',
+  },
+  {
+    id: 'R8',
+    origin: {
+      name: '서귀포',
+      lat: JEJU_COORDS.seogwipo.lat,
+      lng: JEJU_COORDS.seogwipo.lng,
+    },
+    destination: {
+      name: '부산항',
+      lat: MAINLAND_PORTS.busan.lat,
+      lng: MAINLAND_PORTS.busan.lng,
+    },
+    schedule: '화금',
+    capacity: '5톤',
+    vehicleType: '윙바디',
+    cargoTypes: ['일반', '냉장'] as CargoType[],
+    price: 190000,
+    priceUnit: '회',
+    regulationStatus: { allowed: true },
+    routeScope: 'SEA',
+    direction: 'OUTBOUND',
+    tripType: 'ONE_WAY',
+  },
 ]
 
-// ============ 공간 상품 (6개) ============
+// ============ 공간 상품 (8개) ============
 export const STORAGE_PRODUCTS: StorageProduct[] = [
   {
     id: 'S1',
@@ -256,6 +302,36 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     price: 70000,
     priceUnit: '일',
     features: ['서부권 거점', '농산물 특화'],
+    regulationStatus: { allowed: true },
+  },
+  {
+    id: 'S7',
+    location: {
+      name: '한림',
+      lat: 33.41,
+      lng: 126.27,
+      region: '한림',
+    },
+    storageType: '상온' as StorageType,
+    capacity: '파렛트 22개',
+    price: 38000,
+    priceUnit: '일',
+    features: ['서부권 거점', '도로 접근성 우수'],
+    regulationStatus: { allowed: true },
+  },
+  {
+    id: 'S8',
+    location: {
+      name: '조천',
+      lat: 33.538,
+      lng: 126.64,
+      region: '조천',
+    },
+    storageType: '냉장' as StorageType,
+    capacity: '파렛트 18개',
+    price: 75000,
+    priceUnit: '일',
+    features: ['동부권 거점', '온도관리 시설'],
     regulationStatus: { allowed: true },
   },
 ]

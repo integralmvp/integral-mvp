@@ -1,8 +1,7 @@
 // Mapbox 지도 컨테이너
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../data/mockData'
-import MainlandMinimap from './MainlandMinimap'
 
 // Mapbox Access Token (환경 변수에서 가져옴)
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || ''
@@ -14,7 +13,6 @@ if (MAPBOX_TOKEN) {
 export default function MapboxContainer() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
-  const [mapLoaded, setMapLoaded] = useState(false)
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return
@@ -29,7 +27,7 @@ export default function MapboxContainer() {
     // 지도 초기화
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11', // 밝은 스타일
+      style: 'mapbox://styles/mapbox/dark-v11', // 다크 스타일
       center: [126.5312, 33.4996], // 제주도 중심
       zoom: 9,
       minZoom: 7,
@@ -43,8 +41,6 @@ export default function MapboxContainer() {
     // 지도 로드 완료 후
     map.current.on('load', () => {
       if (!map.current) return
-
-      setMapLoaded(true)
 
       // 파렛트 마커 추가
       addPalletMarkers()
@@ -64,7 +60,7 @@ export default function MapboxContainer() {
     }
   }, [])
 
-  // 파렛트 마커 추가
+  // 아이소메트릭 파렛트 마커 추가
   const addPalletMarkers = () => {
     if (!map.current) return
 
@@ -72,41 +68,51 @@ export default function MapboxContainer() {
       const capacity = parseInt(storage.capacity.match(/\d+/)?.[0] || '0')
 
       // 크기 결정
-      let size = 24
-      if (capacity > 30) size = 40
-      else if (capacity > 15) size = 32
+      let size = 32
+      if (capacity > 30) size = 48
+      else if (capacity > 15) size = 40
 
-      // 색상 결정
-      let color = '#f97316' // 기본: 주황색
-
-      // 파렛트 아이콘 생성
+      // 아이소메트릭 파렛트 아이콘 생성
       const el = document.createElement('div')
       el.className = 'pallet-marker'
       el.style.width = `${size}px`
       el.style.height = `${size}px`
       el.style.cursor = 'pointer'
+      el.style.transition = 'transform 0.2s'
+      el.style.transformOrigin = 'center center'
       el.innerHTML = `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 24">
-          <!-- 그림자 -->
-          <rect x="2" y="4" width="28" height="18" rx="3" fill="rgba(0,0,0,0.2)" />
-          <!-- 파렛트 본체 -->
-          <rect x="0" y="2" width="28" height="18" rx="3" fill="${color}" stroke="#ea580c" stroke-width="1" />
-          <!-- 파렛트 라인 -->
-          <line x1="7" y1="5" x2="7" y2="17" stroke="#fed7aa" stroke-width="2" />
-          <line x1="14" y1="5" x2="14" y2="17" stroke="#fed7aa" stroke-width="2" />
-          <line x1="21" y1="5" x2="21" y2="17" stroke="#fed7aa" stroke-width="2" />
+        <svg width="${size}" height="${size}" viewBox="0 0 32 28" style="filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.8));">
+          <!-- 아이소메트릭 3D 파렛트 (녹색) -->
+          <!-- 상판 -->
+          <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#00ff88" stroke="#00ffaa" stroke-width="0.5"/>
+          <!-- 좌측면 -->
+          <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#00cc66" stroke="#00ff88" stroke-width="0.5"/>
+          <!-- 우측면 -->
+          <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#00dd77" stroke="#00ff88" stroke-width="0.5"/>
+          <!-- 하단 다리 -->
+          <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#009955"/>
+          <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#009955"/>
+          <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#009955"/>
         </svg>
       `
+
+      // 호버 효과 (위치 고정)
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.2)'
+      })
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'scale(1)'
+      })
 
       // 마커 추가
       new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([storage.location.lng, storage.location.lat])
         .setPopup(
           new mapboxgl.Popup({ offset: 25 }).setHTML(`
-            <div class="p-2">
+            <div class="p-2 bg-slate-900 text-white rounded">
               <h3 class="font-bold">${storage.location.name}</h3>
               <p class="text-sm">${storage.storageType} | ${storage.capacity}</p>
-              <p class="text-sm font-bold">₩${storage.price.toLocaleString()}/${storage.priceUnit}</p>
+              <p class="text-sm font-bold text-orange-400">₩${storage.price.toLocaleString()}/${storage.priceUnit}</p>
             </div>
           `)
         )
@@ -114,7 +120,7 @@ export default function MapboxContainer() {
     })
   }
 
-  // 곡선 경로 추가
+  // 야광 곡선 경로 추가 (4레이어 글로우)
   const addCurvedRoutes = () => {
     if (!map.current) return
 
@@ -144,10 +150,11 @@ export default function MapboxContainer() {
       }
 
       const routeId = `route-${route.id}`
+      const color = '#00bfff' // 네온 시안
 
-      // 그림자 레이어
+      // 레이어 1: 글로우 (바깥쪽)
       map.current!.addLayer({
-        id: `${routeId}-shadow`,
+        id: `${routeId}-glow-outer`,
         type: 'line',
         source: {
           type: 'geojson',
@@ -158,14 +165,34 @@ export default function MapboxContainer() {
           },
         },
         paint: {
-          'line-color': '#1e40af',
-          'line-width': 8,
+          'line-color': color,
+          'line-width': 12,
           'line-opacity': 0.2,
-          'line-blur': 3,
+          'line-blur': 8,
         },
       })
 
-      // 메인 레이어
+      // 레이어 2: 글로우 (안쪽)
+      map.current!.addLayer({
+        id: `${routeId}-glow-inner`,
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates: curvePoints },
+          },
+        },
+        paint: {
+          'line-color': color,
+          'line-width': 6,
+          'line-opacity': 0.4,
+          'line-blur': 4,
+        },
+      })
+
+      // 레이어 3: 메인 라인
       map.current!.addLayer({
         id: `${routeId}-main`,
         type: 'line',
@@ -178,13 +205,13 @@ export default function MapboxContainer() {
           },
         },
         paint: {
-          'line-color': '#2563eb',
-          'line-width': 4,
-          'line-opacity': 0.9,
+          'line-color': color,
+          'line-width': 3,
+          'line-opacity': 1,
         },
       })
 
-      // 하이라이트 레이어
+      // 레이어 4: 하이라이트 (밝은 중심선)
       map.current!.addLayer({
         id: `${routeId}-highlight`,
         type: 'line',
@@ -197,11 +224,35 @@ export default function MapboxContainer() {
           },
         },
         paint: {
-          'line-color': '#60a5fa',
-          'line-width': 1.5,
-          'line-opacity': 0.8,
+          'line-color': '#ffffff',
+          'line-width': 1,
+          'line-opacity': 0.6,
         },
       })
+
+      // 화살표 추가 (도착지)
+      const lastPoint = curvePoints[curvePoints.length - 1]
+      const secondLastPoint = curvePoints[curvePoints.length - 2]
+
+      // 각도 계산
+      const angle = Math.atan2(
+        lastPoint[1] - secondLastPoint[1],
+        lastPoint[0] - secondLastPoint[0]
+      ) * (180 / Math.PI)
+
+      // 화살표 마커 생성
+      const arrowEl = document.createElement('div')
+      arrowEl.style.width = '16px'
+      arrowEl.style.height = '16px'
+      arrowEl.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 16 16" style="transform: rotate(${angle}deg);">
+          <path d="M 0,6 L 10,8 L 0,10 Z" fill="${color}" style="filter: drop-shadow(0 0 4px ${color});"/>
+        </svg>
+      `
+
+      new mapboxgl.Marker({ element: arrowEl, anchor: 'center' })
+        .setLngLat(lastPoint as [number, number])
+        .addTo(map.current!)
     })
   }
 
@@ -222,33 +273,8 @@ export default function MapboxContainer() {
 
   return (
     <div className="relative w-full h-full">
-      {/* 범례 바 */}
-      <div className="absolute top-0 left-0 right-0 z-10">
-        <div className="bg-slate-900/80 backdrop-blur-md px-4 py-2 flex items-center justify-center gap-8">
-          <span className="flex items-center gap-2 text-sm text-slate-300">
-            <span className="w-4 h-3 bg-orange-500 rounded-sm"></span>
-            공간상품
-          </span>
-          <span className="flex items-center gap-2 text-sm text-slate-300">
-            <svg width="24" height="12" viewBox="0 0 24 12">
-              <path
-                d="M 2,8 Q 12,2 22,8"
-                fill="none"
-                stroke="#2563eb"
-                strokeWidth="2.5"
-              />
-              <polygon points="20,6 24,8 20,10" fill="#2563eb" />
-            </svg>
-            도내경로
-          </span>
-        </div>
-      </div>
-
       {/* 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
-
-      {/* 육지 미니맵 */}
-      {mapLoaded && <MainlandMinimap />}
     </div>
   )
 }
