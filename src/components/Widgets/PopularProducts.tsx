@@ -22,8 +22,14 @@ export default function PopularProducts({ products }: PopularProductsProps) {
       {/* 구분선 */}
       <div className="w-full h-px bg-white/50 mt-2 mb-3"></div>
 
-      {/* 컨텐츠 (반투명 배경) */}
-      <div className="bg-[rgba(10,10,30,0.5)] backdrop-blur-sm rounded-lg p-3 space-y-2">
+      {/* 컨텐츠 (반투명 배경 + 스크롤) */}
+      <div
+        className="bg-[rgba(10,10,30,0.5)] backdrop-blur-sm rounded-lg p-3 space-y-2 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
+        style={{
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent'
+        }}
+      >
         {products.map((product, index) => (
           <ProductItem key={product.id} rank={index + 1} product={product} />
         ))}

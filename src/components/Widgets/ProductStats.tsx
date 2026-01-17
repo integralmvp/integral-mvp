@@ -37,17 +37,22 @@ export default function ProductStats({
             </span>
           </div>
           {/* 막대 그래프 */}
-          <div className="h-6 bg-orange-500/20 rounded-full overflow-hidden relative">
-            <div
-              className="h-full bg-gradient-to-r from-orange-600 to-orange-400 rounded-full transition-all duration-500"
-              style={{
-                width: `${spacePercentage}%`,
-                boxShadow: '0 0 10px rgba(255, 107, 53, 0.5)'
-              }}
-            ></div>
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white font-mono">
-              사용 {spaceStats.used}P ({spacePercentage}%)
-            </span>
+          <div className="relative">
+            <div className="absolute -top-5 left-1 text-xs text-white/60">
+              사용중
+            </div>
+            <div className="h-6 bg-orange-500/20 rounded-full overflow-hidden relative">
+              <div
+                className="h-full bg-gradient-to-r from-orange-600 to-orange-400 rounded-full transition-all duration-500"
+                style={{
+                  width: `${spacePercentage}%`,
+                  boxShadow: '0 0 10px rgba(255, 107, 53, 0.5)'
+                }}
+              ></div>
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white font-mono">
+                {spaceStats.used}P ({spacePercentage}%)
+              </span>
+            </div>
           </div>
         </div>
 
@@ -60,17 +65,22 @@ export default function ProductStats({
             </span>
           </div>
           {/* 막대 그래프 */}
-          <div className="h-6 bg-cyan-500/20 rounded-full overflow-hidden relative">
-            <div
-              className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 rounded-full transition-all duration-500"
-              style={{
-                width: `${routePercentage}%`,
-                boxShadow: '0 0 10px rgba(0, 191, 255, 0.5)'
-              }}
-            ></div>
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white font-mono">
-              70%↑ {routeStats.used}건 ({routePercentage}%)
-            </span>
+          <div className="relative">
+            <div className="absolute -top-5 left-1 text-xs text-white/60">
+              사용중 (70%↑)
+            </div>
+            <div className="h-6 bg-cyan-500/20 rounded-full overflow-hidden relative">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 rounded-full transition-all duration-500"
+                style={{
+                  width: `${routePercentage}%`,
+                  boxShadow: '0 0 10px rgba(0, 191, 255, 0.5)'
+                }}
+              ></div>
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white font-mono">
+                {routeStats.used}건 ({routePercentage}%)
+              </span>
+            </div>
           </div>
         </div>
       </div>
