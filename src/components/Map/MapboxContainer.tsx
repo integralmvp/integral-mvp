@@ -79,27 +79,24 @@ export default function MapboxContainer() {
       el.style.height = `${size}px`
       el.style.cursor = 'pointer'
       el.style.transition = 'transform 0.2s'
+      el.style.transformOrigin = 'center center'
       el.innerHTML = `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 28" style="filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.8));">
-          <!-- 아이소메트릭 3D 파렛트 -->
+        <svg width="${size}" height="${size}" viewBox="0 0 32 28" style="filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.8));">
+          <!-- 아이소메트릭 3D 파렛트 (녹색) -->
           <!-- 상판 -->
-          <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" stroke-width="0.5"/>
-          <!-- 상판 라인 -->
-          <line x1="8" y1="6" x2="8" y2="14" stroke="#fed7aa" stroke-width="1" transform="rotate(-30, 8, 10)"/>
-          <line x1="16" y1="6" x2="16" y2="14" stroke="#fed7aa" stroke-width="1"/>
-          <line x1="24" y1="6" x2="24" y2="14" stroke="#fed7aa" stroke-width="1" transform="rotate(30, 24, 10)"/>
+          <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#00ff88" stroke="#00ffaa" stroke-width="0.5"/>
           <!-- 좌측면 -->
-          <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" stroke-width="0.5"/>
+          <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#00cc66" stroke="#00ff88" stroke-width="0.5"/>
           <!-- 우측면 -->
-          <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" stroke-width="0.5"/>
+          <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#00dd77" stroke="#00ff88" stroke-width="0.5"/>
           <!-- 하단 다리 -->
-          <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#993d1f"/>
-          <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#993d1f"/>
-          <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#993d1f"/>
+          <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#009955"/>
+          <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#009955"/>
+          <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#009955"/>
         </svg>
       `
 
-      // 호버 효과
+      // 호버 효과 (위치 고정)
       el.addEventListener('mouseenter', () => {
         el.style.transform = 'scale(1.2)'
       })
@@ -232,6 +229,30 @@ export default function MapboxContainer() {
           'line-opacity': 0.6,
         },
       })
+
+      // 화살표 추가 (도착지)
+      const lastPoint = curvePoints[curvePoints.length - 1]
+      const secondLastPoint = curvePoints[curvePoints.length - 2]
+
+      // 각도 계산
+      const angle = Math.atan2(
+        lastPoint[1] - secondLastPoint[1],
+        lastPoint[0] - secondLastPoint[0]
+      ) * (180 / Math.PI)
+
+      // 화살표 마커 생성
+      const arrowEl = document.createElement('div')
+      arrowEl.style.width = '16px'
+      arrowEl.style.height = '16px'
+      arrowEl.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 16 16" style="transform: rotate(${angle}deg);">
+          <path d="M 0,6 L 10,8 L 0,10 Z" fill="${color}" style="filter: drop-shadow(0 0 4px ${color});"/>
+        </svg>
+      `
+
+      new mapboxgl.Marker({ element: arrowEl, anchor: 'center' })
+        .setLngLat(lastPoint as [number, number])
+        .addTo(map.current!)
     })
   }
 
