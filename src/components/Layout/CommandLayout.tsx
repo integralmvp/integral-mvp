@@ -3,10 +3,13 @@ import CommandHeader from './CommandHeader'
 import LeftConsole from './LeftConsole'
 import RightConsole from './RightConsole'
 import MapboxContainer from '../Map/MapboxContainer'
+import SpaceBackground from '../Background/SpaceBackground'
 
 export default function CommandLayout() {
   return (
-    <div className="h-screen flex flex-col bg-slate-950">
+    <div className="h-screen flex flex-col bg-[#0a0a1a] relative">
+      {/* 우주 배경 */}
+      <SpaceBackground />
       {/* 헤더 */}
       <CommandHeader />
 
