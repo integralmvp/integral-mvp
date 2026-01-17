@@ -247,12 +247,46 @@ export default function MainlandMinimapWithLegend({
           </div>
         </div>
 
-        {/* MAINLAND 타이틀 (하단) */}
+        {/* MAINLAND 타이틀 + 설명 (하단) */}
         <div className="pl-2">
           <h3 className="text-white/60 text-xs font-semibold tracking-wide">
             MAINLAND
           </h3>
+          <p className="text-white/40 text-xs mt-1">
+            {inboundRoutes > 0 && `입도: ${inboundRoutes}건`}
+            {inboundRoutes > 0 && outboundRoutes > 0 && ' | '}
+            {outboundRoutes > 0 && `출도: ${outboundRoutes}건`}
+          </p>
         </div>
+      </div>
+
+      {/* 연결 표시 화살표 (장식용) */}
+      <div className="absolute left-40 top-8 pointer-events-none">
+        <svg width="60" height="40" className="opacity-40">
+          <defs>
+            <marker
+              id="mainland-arrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="4"
+              refY="4"
+              orient="auto"
+            >
+              <path d="M 0 0 L 8 4 L 0 8 Z" fill="#00ff88" />
+            </marker>
+          </defs>
+          <path
+            d="M 5,20 Q 30,20 55,20"
+            stroke="#00ff88"
+            strokeWidth="1"
+            strokeDasharray="2,2"
+            fill="none"
+            markerEnd="url(#mainland-arrow)"
+          />
+          <text x="15" y="15" fill="white" fontSize="8" opacity="0.6">
+            제주도
+          </text>
+        </svg>
       </div>
     </div>
   )
