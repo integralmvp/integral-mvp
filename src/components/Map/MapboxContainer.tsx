@@ -84,16 +84,16 @@ export default function MapboxContainer() {
     const minimapPos = map.current.project(jejuNorthWest)
     const legendPos = map.current.project(jejuNorthCenter)
 
-    // 미니맵 위치 설정
+    // 미니맵 위치 설정 (지도에서 더 떨어지게)
     if (minimapRef.current) {
-      minimapRef.current.style.left = `${minimapPos.x + 10}px`
-      minimapRef.current.style.top = `${minimapPos.y + 10}px`
+      minimapRef.current.style.left = `${minimapPos.x - 70}px`
+      minimapRef.current.style.top = `${minimapPos.y - 170}px`
     }
 
-    // 범례 위치 설정
+    // 범례 위치 설정 (지도에서 더 떨어지게)
     if (legendRef.current) {
       legendRef.current.style.left = `${legendPos.x}px`
-      legendRef.current.style.top = `${legendPos.y + 10}px`
+      legendRef.current.style.top = `${legendPos.y - 150}px`
       legendRef.current.style.transform = 'translateX(-50%)'
     }
   }
@@ -125,7 +125,6 @@ export default function MapboxContainer() {
       el.style.width = `${size}px`
       el.style.height = `${size}px`
       el.style.cursor = 'pointer'
-      el.style.position = 'relative'
       el.innerHTML = `
         <div style="
           width: 100%;
