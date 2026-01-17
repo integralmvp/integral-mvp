@@ -24,7 +24,7 @@ export default function PopularProducts({ products }: PopularProductsProps) {
 
       {/* 컨텐츠 (투명 배경 + 스크롤) */}
       <div
-        className="bg-[rgba(10,10,30,0.3)] backdrop-blur-sm rounded-lg p-3 space-y-2 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
+        className="bg-[rgba(10,10,30,0.2)] backdrop-blur-sm rounded-lg p-3 space-y-2 max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent'

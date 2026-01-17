@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../data/mockData'
+import MainlandMinimapWithLegend from '../Widgets/MainlandMinimapWithLegend'
 
 // Mapbox Access Token (환경 변수에서 가져옴)
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || ''
@@ -78,30 +79,37 @@ export default function MapboxContainer() {
       el.style.width = `${size}px`
       el.style.height = `${size}px`
       el.style.cursor = 'pointer'
-      el.style.transition = 'transform 0.2s'
-      el.style.transformOrigin = 'center center'
+      el.style.position = 'relative'
       el.innerHTML = `
-        <svg width="${size}" height="${size}" viewBox="0 0 32 28" style="filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.8));">
-          <!-- 아이소메트릭 3D 파렛트 (녹색) -->
-          <!-- 상판 -->
-          <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#00ff88" stroke="#00ffaa" stroke-width="0.5"/>
-          <!-- 좌측면 -->
-          <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#00cc66" stroke="#00ff88" stroke-width="0.5"/>
-          <!-- 우측면 -->
-          <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#00dd77" stroke="#00ff88" stroke-width="0.5"/>
-          <!-- 하단 다리 -->
-          <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#009955"/>
-          <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#009955"/>
-          <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#009955"/>
-        </svg>
+        <div style="
+          width: 100%;
+          height: 100%;
+          transition: transform 0.2s ease;
+          transform-origin: center center;
+        " class="pallet-marker-inner">
+          <svg width="${size}" height="${size}" viewBox="0 0 32 28" style="filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.8));">
+            <!-- 아이소메트릭 3D 파렛트 (녹색) -->
+            <!-- 상판 -->
+            <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#00ff88" stroke="#00ffaa" stroke-width="0.5"/>
+            <!-- 좌측면 -->
+            <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#00cc66" stroke="#00ff88" stroke-width="0.5"/>
+            <!-- 우측면 -->
+            <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#00dd77" stroke="#00ff88" stroke-width="0.5"/>
+            <!-- 하단 다리 -->
+            <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#009955"/>
+            <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#009955"/>
+            <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#009955"/>
+          </svg>
+        </div>
       `
 
-      // 호버 효과 (위치 고정)
+      // 호버 효과 (내부 div에만 적용)
+      const innerDiv = el.querySelector('.pallet-marker-inner') as HTMLElement
       el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.2)'
+        if (innerDiv) innerDiv.style.transform = 'scale(1.2)'
       })
       el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)'
+        if (innerDiv) innerDiv.style.transform = 'scale(1)'
       })
 
       // 마커 추가
@@ -240,13 +248,23 @@ export default function MapboxContainer() {
         lastPoint[0] - secondLastPoint[0]
       ) * (180 / Math.PI)
 
-      // 화살표 마커 생성
+      // 화살표 마커 생성 (더 크고 명확하게)
       const arrowEl = document.createElement('div')
-      arrowEl.style.width = '16px'
-      arrowEl.style.height = '16px'
+      arrowEl.style.width = '24px'
+      arrowEl.style.height = '24px'
+      arrowEl.style.pointerEvents = 'none'
       arrowEl.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 16 16" style="transform: rotate(${angle}deg);">
-          <path d="M 0,6 L 10,8 L 0,10 Z" fill="${color}" style="filter: drop-shadow(0 0 4px ${color});"/>
+        <svg width="24" height="24" viewBox="0 0 24 24" style="transform: rotate(${angle}deg);">
+          <defs>
+            <filter id="arrow-glow-${route.id}">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <path d="M 4,10 L 16,12 L 4,14 Z" fill="${color}" stroke="#ffffff" stroke-width="0.5" filter="url(#arrow-glow-${route.id})"/>
         </svg>
       `
 
@@ -275,6 +293,11 @@ export default function MapboxContainer() {
     <div className="relative w-full h-full">
       {/* 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
+
+      {/* 미니맵 + 범례 (지도 내 좌측 상단) */}
+      <div className="absolute top-4 left-4 z-10">
+        <MainlandMinimapWithLegend inboundRoutes={2} outboundRoutes={2} />
+      </div>
     </div>
   )
 }
