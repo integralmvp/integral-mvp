@@ -167,8 +167,8 @@ export default function MainlandMinimap({
         </text>
       </svg>
 
-      {/* MAINLAND 타이틀 + 설명 */}
-      <div className="mt-2">
+      {/* MAINLAND 타이틀 + 설명 (중앙 정렬) */}
+      <div className="mt-2 text-center">
         <h3 className="text-white/60 text-xs font-semibold tracking-wide">
           MAINLAND
         </h3>
