@@ -13,7 +13,6 @@ if (MAPBOX_TOKEN) {
 export default function MapboxContainer() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
-  const [mapLoaded, setMapLoaded] = useState(false)
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return
@@ -42,8 +41,6 @@ export default function MapboxContainer() {
     // 지도 로드 완료 후
     map.current.on('load', () => {
       if (!map.current) return
-
-      setMapLoaded(true)
 
       // 파렛트 마커 추가
       addPalletMarkers()
