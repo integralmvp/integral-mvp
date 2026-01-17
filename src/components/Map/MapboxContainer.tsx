@@ -2,7 +2,8 @@
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../data/mockData'
-import MainlandMinimapWithLegend from '../Widgets/MainlandMinimapWithLegend'
+import MainlandMinimap from '../Widgets/MainlandMinimap'
+import Legend from '../Widgets/Legend'
 
 // Mapbox Access Token (환경 변수에서 가져옴)
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || ''
@@ -294,9 +295,14 @@ export default function MapboxContainer() {
       {/* 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* 미니맵 + 범례 (지도 내 좌측 상단) */}
+      {/* 미니맵 - 지도 내부 좌측 상단 */}
       <div className="absolute top-4 left-4 z-10">
-        <MainlandMinimapWithLegend inboundRoutes={2} outboundRoutes={2} />
+        <MainlandMinimap inboundRoutes={2} outboundRoutes={2} />
+      </div>
+
+      {/* 범례 - 지도 내부 상단 중앙 */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+        <Legend />
       </div>
     </div>
   )

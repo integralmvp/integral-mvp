@@ -13,7 +13,7 @@ interface PopularProductsProps {
 
 export default function PopularProducts({ products }: PopularProductsProps) {
   return (
-    <div className="absolute left-6 top-36 z-20 w-64">
+    <div className="absolute left-6 top-36 z-20 w-64 mb-6">
       {/* 타이틀 */}
       <h2 className="text-white text-sm font-semibold tracking-wide">
         실시간 인기 상품
