@@ -15,16 +15,6 @@ export default function Legend() {
               fill="#ff6b35"
               style={{ filter: 'drop-shadow(0 0 3px rgba(255, 107, 53, 0.8))' }}
             />
-            <line x1="5" y1="3" x2="5" y2="9" stroke="#b3ffe6" strokeWidth="1.5" />
-            <line x1="8" y1="3" x2="8" y2="9" stroke="#b3ffe6" strokeWidth="1.5" />
-            <line
-              x1="11"
-              y1="3"
-              x2="11"
-              y2="9"
-              stroke="#b3ffe6"
-              strokeWidth="1.5"
-            />
           </svg>
           <span>공간</span>
         </div>
