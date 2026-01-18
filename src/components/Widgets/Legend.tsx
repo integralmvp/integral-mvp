@@ -12,7 +12,7 @@ export default function Legend() {
               width="14"
               height="10"
               rx="2"
-              fill="#00ff88"
+              fill="#ff6b35"
               style={{ filter: 'drop-shadow(0 0 3px rgba(255, 107, 53, 0.8))' }}
             />
             <line x1="5" y1="3" x2="5" y2="9" stroke="#b3ffe6" strokeWidth="1.5" />
