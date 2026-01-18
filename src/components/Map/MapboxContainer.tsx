@@ -132,7 +132,7 @@ export default function MapboxContainer() {
           transition: transform 0.2s ease;
           transform-origin: center center;
         " class="pallet-marker-inner">
-          <svg width="${size}" height="${size}" viewBox="0 0 32 28" style="filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.8));">
+          <svg width="${size}" height="${size}" viewBox="0 0 32 28" style="filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.8));">
             <!-- 아이소메트릭 3D 파렛트 (녹색) -->
             <!-- 상판 -->
             <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#00ff88" stroke="#00ffaa" stroke-width="0.5"/>
