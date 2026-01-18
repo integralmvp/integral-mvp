@@ -135,7 +135,7 @@ export default function MapboxContainer() {
           <svg width="${size}" height="${size}" viewBox="0 0 32 28" style="filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.8));">
             <!-- 아이소메트릭 3D 파렛트 (주황) -->
             <!-- 상판 -->
-            <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#00ffaa" stroke-width="0.5"/>
+            <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" stroke-width="0.5"/>
             <!-- 좌측면 -->
             <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" stroke-width="0.5"/>
             <!-- 우측면 -->
