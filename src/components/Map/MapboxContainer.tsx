@@ -93,7 +93,7 @@ export default function MapboxContainer() {
     // 범례 위치 설정 (타이틀과 간격 확보 위해 아래로 이동)
     if (legendRef.current) {
       legendRef.current.style.left = `${legendPos.x}px`
-      legendRef.current.style.top = `${legendPos.y - 120}px`
+      legendRef.current.style.top = `${legendPos.y - 80}px`
       legendRef.current.style.transform = 'translateX(-50%)'
     }
   }
