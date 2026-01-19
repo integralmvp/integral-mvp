@@ -162,19 +162,33 @@ export default function MapboxContainer() {
         if (innerDiv) innerDiv.style.transform = 'scale(1)'
       })
 
-      // 마커 추가
-      new mapboxgl.Marker({ element: el, anchor: 'center' })
+      // 마커/팝업을 변수로 만들고, 클릭 대신 호버에서 열고 닫기
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([storage.location.lng, storage.location.lat])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 }).setHTML(`
-            <div class="p-2 bg-slate-900 text-white rounded">
-              <h3 class="font-bold">${storage.location.name}</h3>
-              <p class="text-sm">${storage.storageType} | ${storage.capacity}</p>
-              <p class="text-sm font-bold text-orange-400">₩${storage.price.toLocaleString()}/${storage.priceUnit}</p>
-            </div>
-          `)
-        )
+      
+      const popup = new mapboxgl.Popup({
+        offset: 25,
+        closeButton: false,     // 호버용: 닫기 버튼 제거(선택)
+        closeOnClick: false,    // 호버용: 지도 클릭 시 자동 닫힘 방지(선택)
+      })
+        .setHTML(`
+          <div class="p-2 bg-slate-900 text-white rounded">
+            <h3 class="font-bold">${storage.location.name}</h3>
+            <p class="text-sm">${storage.storageType} | ${storage.capacity}</p>
+            <p class="text-sm font-bold text-orange-400">₩${storage.price.toLocaleString()}/${storage.priceUnit}</p>
+          </div>
+        `)
         .addTo(map.current!)
+
+      // 호버 시 팝업 열기/닫기
+      el.addEventListener('mouseenter', () => {
+        // 호버 시에도 팝업이 정확히 마커 위치를 따라가도록(선택)
+        popup.setLngLat(marker.getLngLat()).addTo(map.current!)
+      })
+
+      el.addEventListener('mouseleave', () => {
+        popup.remove()
+      })
     })
   }
 
