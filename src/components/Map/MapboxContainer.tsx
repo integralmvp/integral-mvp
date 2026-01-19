@@ -49,8 +49,13 @@ export default function MapboxContainer() {
       // 파렛트 마커 추가
       addPalletMarkers()
 
-      // 곡선 경로 추가
-      addCurvedRoutes()
+      // 화살표 이미지 등록
+      addArrowImages()
+
+      // 곡선 경로 추가 (화살표 이미지 로드 후)
+      setTimeout(() => {
+        addCurvedRoutes()
+      }, 100)
 
       // 미니맵/범례 위치 업데이트
       updateOverlayPositions()
@@ -115,9 +120,9 @@ export default function MapboxContainer() {
       const capacity = parseInt(storage.capacity.match(/\d+/)?.[0] || '0')
 
       // 크기 결정
-      let size = 32
-      if (capacity > 30) size = 48
-      else if (capacity > 15) size = 40
+      let size = 10
+      if (capacity > 30) size = 14
+      else if (capacity > 15) size = 12
 
       // 아이소메트릭 파렛트 아이콘 생성
       const el = document.createElement('div')
@@ -180,6 +185,72 @@ export default function MapboxContainer() {
       end[0] - start[0]
     ) * (180 / Math.PI)
     return angle
+  }
+
+  // 각도 정규화
+  const normalizeAngle = (deg: number): number => {
+    const a = deg % 360
+    return a < 0 ? a + 360 : a
+  }
+
+
+  // 화살표 이미지 등록
+  const addArrowImages = () => {
+    if (!map.current) return
+
+    // 시안 화살표 (도내)
+    const cyanArrow = new Image(24, 24)
+    cyanArrow.onload = () => map.current!.addImage('arrow-cyan', cyanArrow)
+    cyanArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="glow-cyan">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#00bfff" stroke="#ffffff" stroke-width="0.5" filter="url(#glow-cyan)"/>
+      </svg>
+    `)}`
+
+    // 녹색 화살표 (입도)
+    const greenArrow = new Image(24, 24)
+    greenArrow.onload = () => map.current!.addImage('arrow-green', greenArrow)
+    greenArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="glow-green">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#00ff88" stroke="#ffffff" stroke-width="0.5" filter="url(#glow-green)"/>
+      </svg>
+    `)}`
+
+    // 마젠타 화살표 (출도)
+    const magentaArrow = new Image(24, 24)
+    magentaArrow.onload = () => map.current!.addImage('arrow-magenta', magentaArrow)
+    magentaArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="glow-magenta">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#ff00ff" stroke="#ffffff" stroke-width="0.5" filter="url(#glow-magenta)"/>
+      </svg>
+    `)}`
   }
 
   // 야광 곡선 경로 추가 (4레이어 글로우)
@@ -292,37 +363,48 @@ export default function MapboxContainer() {
         },
       })
 
-      // 화살표 추가 (DOM 마커 - 파렛트 위에 표시)
+      // 화살표 추가 (Symbol Layer)
       const lastPoint = curvePoints[curvePoints.length - 1]
       const secondLastPoint = curvePoints[curvePoints.length - 2]
 
+      // Mapbox symbol layer용 회전각 계산
+      const calculateIconRotate = (start: number[], end: number[]): number => {
+        const angle = calculateBearing(start, end) // 0=동, 90=북
+        // Mapbox: 0=북, 90=동 로 맞추기
+        return normalizeAngle(- angle)
+      }
+
       // 방향 계산
-      const bearing = calculateBearing(secondLastPoint, lastPoint)
+      const bearing = calculateIconRotate(secondLastPoint, lastPoint)
 
-      // 화살표 마커 생성 (크고 명확하게)
-      const arrowEl = document.createElement('div')
-      arrowEl.style.width = '32px'
-      arrowEl.style.height = '32px'
-      arrowEl.style.pointerEvents = 'none'
-      arrowEl.style.zIndex = '1000'  // 파렛트보다 높은 z-index
-      arrowEl.innerHTML = `
-        <svg width="32" height="32" viewBox="0 0 32 32" style="transform: rotate(${bearing}deg);">
-          <defs>
-            <filter id="arrow-glow-${route.id}">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          <path d="M 6,14 L 22,16 L 6,18 Z" fill="${color}" stroke="#ffffff" stroke-width="1" filter="url(#arrow-glow-${route.id})"/>
-        </svg>
-      `
+      // 화살표 레이어 (도착지에 심볼 배치)
+      map.current!.addSource(`${routeId}-arrow`, {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {
+            bearing: bearing
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: lastPoint
+          }
+        }
+      })
 
-      new mapboxgl.Marker({ element: arrowEl, anchor: 'center' })
-        .setLngLat(lastPoint as [number, number])
-        .addTo(map.current!)
+      map.current!.addLayer({
+        id: `${routeId}-arrow-layer`,
+        type: 'symbol',
+        source: `${routeId}-arrow`,
+        layout: {
+          'icon-image': 'arrow-cyan',
+          'icon-size': 0.8,
+          'icon-rotate': ['get', 'bearing'],
+          'icon-rotation-alignment': 'map',
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        }
+      })
     })
   }
 
