@@ -11,7 +11,7 @@ export default function ServicePanel() {
       <div className="w-full h-px bg-white/50 mt-2 mb-3"></div>
 
       {/* 컨텐츠 (투명한 배경) */}
-      <div className="bg-[rgba(10,10,30,0.2)] backdrop-blur-md rounded-lg p-4 space-y-4">
+      <div className="bg-[rgba(64,73,91,0.2)] backdrop-blur-md rounded-lg p-4 space-y-4">
         {/* 보관하기 버튼 */}
         <button
           className="w-full p-5 rounded-xl text-center transition-all duration-300
