@@ -371,7 +371,7 @@ export default function MapboxContainer() {
       const calculateIconRotate = (start: number[], end: number[]): number => {
         const angle = calculateBearing(start, end) // 0=동, 90=북
         // Mapbox: 0=북, 90=동 로 맞추기
-        return normalizeAngle(90 - angle)
+        return normalizeAngle(- angle)
       }
 
       // 방향 계산
