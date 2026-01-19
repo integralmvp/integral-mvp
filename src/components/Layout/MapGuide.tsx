@@ -1,7 +1,7 @@
 // 하단 지도 가이드 문구
 export default function MapGuide() {
   return (
-    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 p-3 bg-[rgba(31,74,184,0.8)] text-center z-20 pointer-events-none">
+    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 p-3 bg-[rgba(31,74,184,0.7)] text-center z-20 pointer-events-none">
       <h1
         className="text-l font-bold text-white tracking-wide"
         style={{
