@@ -24,7 +24,7 @@ export default function PopularProducts({ products }: PopularProductsProps) {
 
       {/* 컨텐츠 (투명 배경 + 스크롤) - 4개 완전히 보이도록 높이 조정 */}
       <div
-        className="bg-[rgba(120,120,120,0.4)] backdrop-blur-sm rounded-lg p-3 space-y-2 max-h-[220px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
+        className="bg-[rgba(64,73,91,0.2)] backdrop-blur-sm rounded-lg p-3 space-y-2 max-h-[220px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30"
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255, 255, 255, 0.2) transparent'
