@@ -14,7 +14,7 @@ export default function MainlandMinimapWithLegend({
         {/* 미니맵 + 범례 (수평 배치) */}
         <div className="flex items-center gap-3">
           {/* 미니맵 */}
-          <div className="bg-[rgba(10,10,30,0.2)] backdrop-blur-sm rounded-lg p-2">
+          <div className="bg-[rgba(64,73,91,0.2)] backdrop-blur-sm rounded-lg p-2">
             <svg viewBox="0 0 140 100" className="w-36 h-auto">
               {/* 한반도 윤곽 */}
               <path
