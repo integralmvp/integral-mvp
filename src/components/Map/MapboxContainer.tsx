@@ -367,15 +367,15 @@ export default function MapboxContainer() {
       const lastPoint = curvePoints[curvePoints.length - 1]
       const secondLastPoint = curvePoints[curvePoints.length - 2]
 
-      // 방향 계산
-      const bearing = calculateIconRotate(secondLastPoint, lastPoint)
-
       // Mapbox symbol layer용 회전각 계산
       const calculateIconRotate = (start: number[], end: number[]): number => {
         const angle = calculateBearing(start, end) // 0=동, 90=북
         // Mapbox: 0=북, 90=동 로 맞추기
         return normalizeAngle(90 - angle)
       }
+
+      // 방향 계산
+      const bearing = calculateIconRotate(secondLastPoint, lastPoint)
 
       // 화살표 레이어 (도착지에 심볼 배치)
       map.current!.addSource(`${routeId}-arrow`, {
