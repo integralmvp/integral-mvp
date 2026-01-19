@@ -120,9 +120,9 @@ export default function MapboxContainer() {
       const capacity = parseInt(storage.capacity.match(/\d+/)?.[0] || '0')
 
       // 크기 결정
-      let size = 32
-      if (capacity > 30) size = 48
-      else if (capacity > 15) size = 40
+      let size = 18
+      if (capacity > 30) size = 22
+      else if (capacity > 15) size = 20
 
       // 아이소메트릭 파렛트 아이콘 생성
       const el = document.createElement('div')
