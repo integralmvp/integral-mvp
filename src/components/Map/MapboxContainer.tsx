@@ -120,9 +120,9 @@ export default function MapboxContainer() {
       const capacity = parseInt(storage.capacity.match(/\d+/)?.[0] || '0')
 
       // 크기 결정
-      let size = 18
-      if (capacity > 30) size = 22
-      else if (capacity > 15) size = 20
+      let size = 10
+      if (capacity > 30) size = 14
+      else if (capacity > 15) size = 12
 
       // 아이소메트릭 파렛트 아이콘 생성
       const el = document.createElement('div')
@@ -186,6 +186,13 @@ export default function MapboxContainer() {
     ) * (180 / Math.PI)
     return angle
   }
+
+  // 각도 정규화
+  const normalizeAngle = (deg: number): number => {
+    const a = deg % 360
+    return a < 0 ? a + 360 : a
+  }
+
 
   // 화살표 이미지 등록
   const addArrowImages = () => {
@@ -361,7 +368,14 @@ export default function MapboxContainer() {
       const secondLastPoint = curvePoints[curvePoints.length - 2]
 
       // 방향 계산
-      const bearing = calculateBearing(secondLastPoint, lastPoint)
+      const bearing = calculateIconRotate(secondLastPoint, lastPoint)
+
+      // Mapbox symbol layer용 회전각 계산
+      const calculateIconRotate = (start: number[], end: number[]): number => {
+        const angle = calculateBearing(start, end) // 0=동, 90=북
+        // Mapbox: 0=북, 90=동 로 맞추기
+        return normalizeAngle(90 - angle)
+      }
 
       // 화살표 레이어 (도착지에 심볼 배치)
       map.current!.addSource(`${routeId}-arrow`, {
