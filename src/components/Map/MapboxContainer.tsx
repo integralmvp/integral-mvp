@@ -165,6 +165,7 @@ export default function MapboxContainer() {
       // 마커/팝업을 변수로 만들고, 클릭 대신 호버에서 열고 닫기
       const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([storage.location.lng, storage.location.lat])
+        .addTo(map.current!)
       
       const popup = new mapboxgl.Popup({
         offset: 25,
@@ -178,7 +179,6 @@ export default function MapboxContainer() {
             <p class="text-sm font-bold text-orange-400">₩${storage.price.toLocaleString()}/${storage.priceUnit}</p>
           </div>
         `)
-        .addTo(map.current!)
 
       // 호버 시 팝업 열기/닫기
       el.addEventListener('mouseenter', () => {
