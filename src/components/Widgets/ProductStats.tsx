@@ -27,7 +27,7 @@ export default function ProductStats({
       <div className="w-full h-px bg-white/50 mt-2 mb-3"></div>
 
       {/* 컨텐츠 */}
-      <div className="bg-[rgba(10,10,30,0.2)] backdrop-blur-sm rounded-lg p-4 space-y-4">
+      <div className="bg-[rgba(64,73,91,0.2)] backdrop-blur-sm rounded-lg p-4 space-y-4">
         {/* 공간 상품 */}
         <div>
           <div className="flex items-center justify-between text-sm mb-1">
