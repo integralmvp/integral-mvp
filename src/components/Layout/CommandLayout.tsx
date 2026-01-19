@@ -6,6 +6,7 @@ import SpaceBackground from '../Background/SpaceBackground'
 import PopularProducts from '../Widgets/PopularProducts'
 import ProductStats from '../Widgets/ProductStats'
 import ServicePanel from '../Widgets/ServicePanel'
+import MapGuide from './MapGuide'
 
 export default function CommandLayout() {
   // 목업 인기 상품 데이터 (임시)
@@ -109,6 +110,9 @@ export default function CommandLayout() {
 
         {/* 우측 위젯 - 서비스 선택 */}
         <ServicePanel />
+
+        {/* 하단 지도 안내 문구 */}
+        <MapGuide />
       </div>
     </div>
   )
