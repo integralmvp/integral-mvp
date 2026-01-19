@@ -1,7 +1,7 @@
 // 지도 범례 (가로 배치)
 export default function Legend() {
   return (
-    <div className="bg-[rgba(10,10,30,0.2)] backdrop-blur-sm rounded-lg px-4 py-2">
+    <div className="bg-[rgba(64,73,91,0.2)] backdrop-blur-sm rounded-lg px-4 py-2">
       <div className="flex items-center gap-4 text-white/80 text-xs">
         {/* 공간상품 */}
         <div className="flex items-center gap-1.5">
