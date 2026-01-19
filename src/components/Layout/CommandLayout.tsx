@@ -111,7 +111,7 @@ export default function CommandLayout() {
         {/* 우측 위젯 - 서비스 선택 */}
         <ServicePanel />
 
-        {/* 하단 지도 안내 문구 */}
+        {/* 하단 지도 가이드 문구 */}
         <MapGuide />
       </div>
     </div>
