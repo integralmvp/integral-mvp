@@ -301,12 +301,12 @@ export default function MapboxContainer() {
 
       // 화살표 마커 생성 (크고 명확하게)
       const arrowEl = document.createElement('div')
-      arrowEl.style.width = '32px'
-      arrowEl.style.height = '32px'
+      arrowEl.style.width = '16px'
+      arrowEl.style.height = '16px'
       arrowEl.style.pointerEvents = 'none'
       arrowEl.style.zIndex = '1000'  // 파렛트보다 높은 z-index
       arrowEl.innerHTML = `
-        <svg width="32" height="32" viewBox="0 0 32 32" style="transform: rotate(${bearing}deg);">
+        <svg width="16" height="16" viewBox="0 0 24 24" style="transform: rotate(${bearing}deg);">
           <defs>
             <filter id="arrow-glow-${route.id}">
               <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -316,7 +316,7 @@ export default function MapboxContainer() {
               </feMerge>
             </filter>
           </defs>
-          <path d="M 6,14 L 22,16 L 6,18 Z" fill="${color}" stroke="#ffffff" stroke-width="1" filter="url(#arrow-glow-${route.id})"/>
+          <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="${color}" stroke="#ffffff" stroke-width="1" filter="url(#arrow-glow-${route.id})"/>
         </svg>
       `
 
