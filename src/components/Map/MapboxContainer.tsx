@@ -171,6 +171,7 @@ export default function MapboxContainer() {
         offset: 25,
         closeButton: false,     // 호버용: 닫기 버튼 제거(선택)
         closeOnClick: false,    // 호버용: 지도 클릭 시 자동 닫힘 방지(선택)
+        className: 'storage-hover-popup',
       })
         .setHTML(`
           <div class="p-2 bg-slate-900 text-white rounded">
@@ -439,6 +440,13 @@ export default function MapboxContainer() {
 
   return (
     <div className="relative w-full h-full">
+      {/* Mapbox Popup z-index: 이 컴포넌트에서만 적용 */}
+      <style>{`
+        .storage-hover-popup.mapboxgl-popup {
+          z-index: 60;
+        }
+      `}</style>
+      
       {/* 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
 
