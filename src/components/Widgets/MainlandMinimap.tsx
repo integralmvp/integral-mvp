@@ -9,7 +9,7 @@ export default function MainlandMinimap({
   outboundRoutes = 2
 }: MainlandMinimapProps) {
   return (
-    <div className="bg-[rgba(10,10,30,0.2)] backdrop-blur-sm rounded-lg p-2">
+    <div className="bg-[rgba(64,73,91,0.2)] backdrop-blur-sm rounded-lg p-2">
       <svg viewBox="0 0 140 100" className="w-36 h-auto">
         {/* 한반도 윤곽 */}
         <path
