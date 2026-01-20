@@ -31,7 +31,7 @@ export default function MapboxContainer() {
     // 지도 초기화
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'https://api.mapbox.com/styles/v1/integralv0/cmkmnu1ow00td01sv6szm75sp.html?title=true&access_token=pk.eyJ1IjoiaW50ZWdyYWx2MCIsImEiOiJjbWtoMGt1bjUwZWZmM2Vvc2FxMDRjYXd1In0.XUBAnv79Twc34t-9Aaq_0A#2.0/37.750000/-92.250000/0', // 커스텀1
+      style: 'mapbox://styles/integralv0/cmkmp0jn900ih01sl888i3w9w', // 커스텀1
       center: [126.5312, 33.4996], // 제주도 중심
       zoom: 9,
       minZoom: 7,
