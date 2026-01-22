@@ -510,7 +510,7 @@ export default function MapboxContainer() {
       <div ref={mapContainer} className="w-full h-full" />
 
       {/* 우측 상단 위젯 영역 */}
-      <div className="absolute top-4 right-4 left-[45%] z-10 flex flex-col gap-3">
+      <div className="absolute top-4 right-4 left-[47%] z-10 flex flex-col gap-3">
         {/* 헤더 위젯 */}
         <HeaderWidget />
 
@@ -566,7 +566,9 @@ function HeaderWidget() {
             <svg width="12" height="9" viewBox="0 0 16 12">
               <rect x="1" y="1" width="14" height="10" rx="2" fill="#ff6b35"/>
             </svg>
-            <span>공간</span>
+            <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+              공간
+            </span>
           </div>
 
           {/* 도내 */}
@@ -574,7 +576,9 @@ function HeaderWidget() {
             <svg width="16" height="6" viewBox="0 0 20 10">
               <path d="M 2,5 L 18,5" fill="none" stroke="#3b82f6" strokeWidth="2"/>
             </svg>
-            <span>도내경로</span>
+            <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+              도내경로
+            </span>
           </div>
 
           {/* 입도 */}
@@ -582,7 +586,9 @@ function HeaderWidget() {
             <svg width="16" height="6" viewBox="0 0 20 10">
               <path d="M 2,5 L 18,5" fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="3,2"/>
             </svg>
-            <span>입도경로</span>
+            <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+              입도경로
+            </span>
           </div>
 
           {/* 출도 */}
@@ -590,7 +596,9 @@ function HeaderWidget() {
             <svg width="16" height="6" viewBox="0 0 20 10">
               <path d="M 2,5 L 18,5" fill="none" stroke="#a855f7" strokeWidth="2" strokeDasharray="3,2"/>
             </svg>
-            <span>출도경로</span>
+            <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+              출도경로
+            </span>
           </div>
         </div>
       </div>
