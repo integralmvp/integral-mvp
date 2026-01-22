@@ -1,4 +1,4 @@
-// 투명 헤더 - 로고 / LIVE만 선 구분
+// 심플 헤더 - 로고 / LIVE
 import { useEffect, useState } from 'react'
 
 export default function Header() {
@@ -17,36 +17,32 @@ export default function Header() {
   })
 
   return (
-    <>
-      {/* 로고 영역 - 좌상단 */}
-      <div className="absolute top-4 left-6 z-30">
-        <div
-          className="border-t border-b border-white/50 py-2 px-1 cursor-pointer hover:bg-white/10 transition-colors"
-          onClick={() => window.location.reload()}
-        >
-          <span className="text-white text-2xl font-black tracking-tight">
-            INTEGRAL
-          </span>
-        </div>
+    <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+      {/* 로고 */}
+      <div
+        className="cursor-pointer hover:opacity-70 transition-opacity"
+        onClick={() => window.location.reload()}
+      >
+        <span className="text-slate-900 text-2xl font-black tracking-tight">
+          INTEGRAL
+        </span>
       </div>
 
-      {/* LIVE 영역 - 우상단 */}
-      <div className="absolute top-4 right-6 z-30">
-        <div className="border-t border-b border-white/50 py-2 px-1 text-right">
-          <div className="flex items-center justify-end gap-2">
-            <span
-              className="w-2 h-2 bg-green-400 rounded-full animate-pulse"
-              style={{
-                boxShadow: '0 0 10px #00ff88'
-              }}
-            ></span>
-            <span className="text-white font-mono text-lg">
-              LIVE {formattedTime}
-            </span>
-          </div>
-          <div className="text-white/60 text-sm">실시간 관제 중</div>
-        </div>
+      {/* LIVE 표시 */}
+      <div className="flex items-center gap-2">
+        <span
+          className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+          style={{
+            boxShadow: '0 0 8px rgba(34, 197, 94, 0.6)'
+          }}
+        ></span>
+        <span className="text-slate-900 font-mono text-lg font-semibold">
+          LIVE
+        </span>
+        <span className="text-slate-600 font-mono text-sm">
+          {formattedTime}
+        </span>
       </div>
-    </>
+    </header>
   )
 }
