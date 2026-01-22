@@ -339,6 +339,50 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
 // ============ 유니트 로드 모듈 옵션 ============
 export const UNIT_LOAD_MODULES = ['소형', '대형', '특수'] as const
 
+// ============ 포장박스 모듈 (PR3-2) ============
+export interface PackageBoxModule {
+  id: string
+  name: '소형' | '중형' | '대형'
+  width: number  // cm
+  depth: number  // cm
+  height: number // cm
+  description: string
+}
+
+export const PACKAGE_BOX_MODULES: PackageBoxModule[] = [
+  {
+    id: 'box-small',
+    name: '소형',
+    width: 25,
+    depth: 18,
+    height: 12,
+    description: '의류, 소형 잡화'
+  },
+  {
+    id: 'box-medium',
+    name: '중형',
+    width: 35,
+    depth: 25,
+    height: 20,
+    description: '생활용품, 식품'
+  },
+  {
+    id: 'box-large',
+    name: '대형',
+    width: 50,
+    depth: 40,
+    height: 30,
+    description: '가전, 대형 물품'
+  }
+]
+
+// 파렛트 기준 (1100mm × 1100mm)
+export const PALLET_SIZE = {
+  width: 110,  // cm
+  depth: 110,  // cm
+  stackHeight: 180  // cm (적재 가능 높이)
+}
+
 // ============ 취급 특이사항 옵션 ============
 export const HANDLING_OPTIONS = [
   '파손주의',
