@@ -15,7 +15,8 @@ export default function ServiceConsole() {
     <div
       className="h-full flex flex-col overflow-hidden rounded-2xl shadow-2xl"
       style={{
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: 'rgba(255, 255, 255, 0.3)',
+        backdropFilter: 'blur(8px)'
       }}
     >
       {/* 타이틀 */}

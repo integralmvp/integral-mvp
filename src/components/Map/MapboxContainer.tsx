@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../data/mockData'
-import Legend from '../Widgets/Legend'
 
 // Mapbox Access Token (환경 변수에서 가져옴)
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || ''
@@ -34,13 +33,13 @@ export default function MapboxContainer() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11', // 라이트 스타일
-      center: [127.2, 33.4996], // 제주도가 우측에 오도록 경도 조정
+      center: [127.8, 33.4996], // 제주도가 우측 섹션 중앙에 오도록 더 우측으로
       zoom: 9,
       minZoom: 7,
       maxZoom: 15,
       maxBounds: [
         [124.5, 32.5], // 남서쪽
-        [128.5, 35.5], // 북동쪽
+        [129.5, 35.5], // 북동쪽 (더 넓게)
       ],
     })
 
@@ -71,17 +70,23 @@ export default function MapboxContainer() {
       miniMap.current = new mapboxgl.Map({
         container: miniMapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
-        center: [127.0, 35.0], // 한반도 중심
-        zoom: 5, // 육지+제주 모두 보이게
+        center: [127.0, 36.0], // 한반도 중심 (더 북쪽으로)
+        zoom: 4.5, // 더 줌아웃 (육지+제주 전부 보이게)
         interactive: false, // 상호작용 비활성화
+        attributionControl: false, // 어트리뷰션 제거
       })
 
       // 미니맵 로드 완료 후
       miniMap.current.on('load', () => {
         if (!miniMap.current) return
 
+        // 미니맵에 화살표 이미지 등록
+        addMiniMapArrowImages()
+
         // 미니맵에 입도/출도 경로 추가
-        addMiniMapRoutes()
+        setTimeout(() => {
+          addMiniMapRoutes()
+        }, 100)
       })
     }
 
@@ -326,7 +331,30 @@ export default function MapboxContainer() {
     })
   }
 
-  // 미니맵에 입도/출도 경로 추가
+  // 미니맵용 화살표 이미지 등록
+  const addMiniMapArrowImages = () => {
+    if (!miniMap.current) return
+
+    // 녹색 화살표 (입도)
+    const greenArrow = new Image(16, 16)
+    greenArrow.onload = () => miniMap.current!.addImage('mini-arrow-green', greenArrow)
+    greenArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#10b981" stroke="#047857" stroke-width="0.5"/>
+      </svg>
+    `)}`
+
+    // 보라 화살표 (출도)
+    const purpleArrow = new Image(16, 16)
+    purpleArrow.onload = () => miniMap.current!.addImage('mini-arrow-purple', purpleArrow)
+    purpleArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+      <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#a855f7" stroke="#7c3aed" stroke-width="0.5"/>
+      </svg>
+    `)}`
+  }
+
+  // 미니맵에 입도/출도 경로 추가 (화살표 포함)
   const addMiniMapRoutes = () => {
     if (!miniMap.current) return
 
@@ -334,14 +362,14 @@ export default function MapboxContainer() {
     const inboundRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'SEA' && r.direction === 'INBOUND')
     const outboundRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'SEA' && r.direction === 'OUTBOUND')
 
-    // 입도 경로 추가 (녹색 화살표)
+    // 입도 경로 추가 (녹색)
     inboundRoutes.forEach((route, idx) => {
       const start = [route.origin.lng, route.origin.lat]
       const end = [route.destination.lng, route.destination.lat]
 
-      // 직선 경로
+      // 점선 라인
       miniMap.current!.addLayer({
-        id: `minimap-inbound-${idx}`,
+        id: `minimap-inbound-line-${idx}`,
         type: 'line',
         source: {
           type: 'geojson',
@@ -357,16 +385,41 @@ export default function MapboxContainer() {
           'line-dasharray': [3, 2],
         },
       })
+
+      // 화살표 (도착지)
+      const bearing = calculateBearing(start, end)
+      miniMap.current!.addSource(`minimap-inbound-arrow-${idx}`, {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: { bearing: -bearing },
+          geometry: { type: 'Point', coordinates: end }
+        }
+      })
+
+      miniMap.current!.addLayer({
+        id: `minimap-inbound-arrow-${idx}`,
+        type: 'symbol',
+        source: `minimap-inbound-arrow-${idx}`,
+        layout: {
+          'icon-image': 'mini-arrow-green',
+          'icon-size': 0.6,
+          'icon-rotate': ['get', 'bearing'],
+          'icon-rotation-alignment': 'map',
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        }
+      })
     })
 
-    // 출도 경로 추가 (보라색 화살표)
+    // 출도 경로 추가 (보라색)
     outboundRoutes.forEach((route, idx) => {
       const start = [route.origin.lng, route.origin.lat]
       const end = [route.destination.lng, route.destination.lat]
 
-      // 직선 경로
+      // 점선 라인
       miniMap.current!.addLayer({
-        id: `minimap-outbound-${idx}`,
+        id: `minimap-outbound-line-${idx}`,
         type: 'line',
         source: {
           type: 'geojson',
@@ -381,6 +434,31 @@ export default function MapboxContainer() {
           'line-width': 2,
           'line-dasharray': [3, 2],
         },
+      })
+
+      // 화살표 (도착지)
+      const bearing = calculateBearing(start, end)
+      miniMap.current!.addSource(`minimap-outbound-arrow-${idx}`, {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: { bearing: -bearing },
+          geometry: { type: 'Point', coordinates: end }
+        }
+      })
+
+      miniMap.current!.addLayer({
+        id: `minimap-outbound-arrow-${idx}`,
+        type: 'symbol',
+        source: `minimap-outbound-arrow-${idx}`,
+        layout: {
+          'icon-image': 'mini-arrow-purple',
+          'icon-size': 0.6,
+          'icon-rotate': ['get', 'bearing'],
+          'icon-rotation-alignment': 'map',
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        }
       })
     })
   }
@@ -419,32 +497,24 @@ export default function MapboxContainer() {
 
       {/* 우측 상단 위젯 영역 */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
-        {/* LIVE 시계 */}
-        <LiveClock />
+        {/* 헤더 위젯 */}
+        <HeaderWidget />
 
         {/* 미니맵 */}
         <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden">
           <div
             ref={miniMapContainer}
             className="minimap-container"
-            style={{ width: '200px', height: '150px' }}
+            style={{ width: '280px', height: '200px' }}
           />
-          <div className="px-2 py-1 text-center bg-white/95">
-            <p className="text-slate-600 text-xs font-semibold tracking-wide">
-              MAINLAND
-            </p>
-          </div>
         </div>
-
-        {/* 범례 */}
-        <Legend />
       </div>
     </div>
   )
 }
 
-// LIVE 시계 컴포넌트
-function LiveClock() {
+// 헤더 위젯 컴포넌트 (모니터링 문구 + 시각 + 범례)
+function HeaderWidget() {
   const [currentTime, setCurrentTime] = useState(new Date())
 
   useEffect(() => {
@@ -460,20 +530,49 @@ function LiveClock() {
   })
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg px-4 py-2">
-      <div className="flex items-center gap-2">
-        <span
-          className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
-          style={{
-            boxShadow: '0 0 8px rgba(34, 197, 94, 0.6)'
-          }}
-        ></span>
-        <span className="text-slate-900 font-mono text-base font-semibold">
-          LIVE
-        </span>
-        <span className="text-slate-600 font-mono text-sm">
-          {formattedTime}
-        </span>
+    <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg px-4 py-3">
+      <div className="flex items-center justify-between gap-6">
+        {/* 좌측: 모니터링 문구 + 시각 */}
+        <div className="flex items-center gap-3">
+          <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+            서비스 현황 실시간 모니터링
+          </span>
+          <span className="text-slate-400">|</span>
+          <span className="text-slate-600 font-mono text-sm font-medium">
+            {formattedTime}
+          </span>
+        </div>
+
+        {/* 우측: 범례 아이콘들 */}
+        <div className="flex items-center gap-3">
+          {/* 공간 */}
+          <div className="flex items-center gap-1">
+            <svg width="12" height="9" viewBox="0 0 16 12">
+              <rect x="1" y="1" width="14" height="10" rx="2" fill="#ff6b35"/>
+            </svg>
+          </div>
+
+          {/* 도내 */}
+          <div className="flex items-center gap-1">
+            <svg width="16" height="6" viewBox="0 0 20 10">
+              <path d="M 2,5 L 18,5" fill="none" stroke="#3b82f6" strokeWidth="2"/>
+            </svg>
+          </div>
+
+          {/* 입도 */}
+          <div className="flex items-center gap-1">
+            <svg width="16" height="6" viewBox="0 0 20 10">
+              <path d="M 2,5 L 18,5" fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="3,2"/>
+            </svg>
+          </div>
+
+          {/* 출도 */}
+          <div className="flex items-center gap-1">
+            <svg width="16" height="6" viewBox="0 0 20 10">
+              <path d="M 2,5 L 18,5" fill="none" stroke="#a855f7" strokeWidth="2" strokeDasharray="3,2"/>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
   )
