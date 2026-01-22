@@ -13,7 +13,7 @@ export default function ServiceConsole() {
 
   return (
     <div
-      className="w-[35%] border-r border-slate-200 flex flex-col overflow-hidden"
+      className="h-full flex flex-col overflow-hidden rounded-2xl shadow-2xl"
       style={{
         background: 'rgba(255, 255, 255, 0.3)',
         backdropFilter: 'blur(8px)'
