@@ -518,7 +518,7 @@ export default function MapboxContainer() {
         <div className="flex justify-end">
           <div
             className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden"
-            style={{ width: '200px', height: '150px' }}
+            style={{ width: '200px', height: '170px' }}
           >
           
             <div ref={miniMapContainer} className="w-full h-full" />
