@@ -522,6 +522,7 @@ export default function MapboxContainer() {
           
           <div ref={miniMapContainer} className="w-full h-full" />
         </div>
+      </div>
     </div>
   )
 }
