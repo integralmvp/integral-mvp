@@ -82,7 +82,7 @@ export default function MapboxContainer() {
         container: miniMapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
         center: [127.0, 36.0], // 한반도 중심 (더 북쪽으로)
-        zoom: 4.5, // 더 줌아웃 (육지+제주 전부 보이게)
+        zoom: 5, // 더 줌아웃 (육지+제주 전부 보이게)
         interactive: false, // 상호작용 비활성화
         attributionControl: false, // 어트리뷰션 제거
       })
@@ -510,7 +510,7 @@ export default function MapboxContainer() {
       <div ref={mapContainer} className="w-full h-full" />
 
       {/* 우측 상단 위젯 영역 */}
-      <div className="absolute top-4 right-4 left-[47%] z-10 flex flex-col gap-3">
+      <div className="absolute top-4 right-4 left-[46%] z-10 flex flex-col gap-3">
         {/* 헤더 위젯 */}
         <HeaderWidget />
 
