@@ -12,7 +12,13 @@ export default function ServiceConsole() {
   }
 
   return (
-    <div className="w-[35%] bg-white/95 backdrop-blur border-r border-slate-200 flex flex-col overflow-hidden">
+    <div
+      className="w-[35%] border-r border-slate-200 flex flex-col overflow-hidden"
+      style={{
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(8px)'
+      }}
+    >
       {/* 타이틀 */}
       <div className="p-6 border-b border-slate-200">
         <h1 className="text-2xl font-bold text-slate-900">내 손 안의 작은 물류 허브</h1>

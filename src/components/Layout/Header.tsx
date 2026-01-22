@@ -17,7 +17,7 @@ export default function Header() {
   })
 
   return (
-    <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+    <header className="bg-white px-6 py-4 flex items-center justify-between">
       {/* 로고 */}
       <div
         className="cursor-pointer hover:opacity-70 transition-opacity"

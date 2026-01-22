@@ -1,8 +1,7 @@
-// Mapbox 지도 컨테이너
+// Mapbox 지도 컨테이너 (이중 맵: 메인 + 미니맵)
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../data/mockData'
-import MainlandMinimap from '../Widgets/MainlandMinimap'
 import Legend from '../Widgets/Legend'
 
 // Mapbox Access Token (환경 변수에서 가져옴)
@@ -13,8 +12,13 @@ if (MAPBOX_TOKEN) {
 }
 
 export default function MapboxContainer() {
+  // 메인 지도 refs
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
+
+  // 미니맵 refs
+  const miniMapContainer = useRef<HTMLDivElement>(null)
+  const miniMap = useRef<mapboxgl.Map | null>(null)
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return
@@ -26,7 +30,7 @@ export default function MapboxContainer() {
       return
     }
 
-    // 지도 초기화
+    // === 메인 지도 초기화 ===
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11', // 라이트 스타일
@@ -40,7 +44,7 @@ export default function MapboxContainer() {
       ],
     })
 
-    // 지도 로드 완료 후
+    // 메인 지도 로드 완료 후
     map.current.on('load', () => {
       if (!map.current) return
 
@@ -62,8 +66,28 @@ export default function MapboxContainer() {
       'bottom-right'
     )
 
+    // === 미니맵 초기화 ===
+    if (miniMapContainer.current) {
+      miniMap.current = new mapboxgl.Map({
+        container: miniMapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [127.0, 35.0], // 한반도 중심
+        zoom: 5, // 육지+제주 모두 보이게
+        interactive: false, // 상호작용 비활성화
+      })
+
+      // 미니맵 로드 완료 후
+      miniMap.current.on('load', () => {
+        if (!miniMap.current) return
+
+        // 미니맵에 입도/출도 경로 추가
+        addMiniMapRoutes()
+      })
+    }
+
     return () => {
       map.current?.remove()
+      miniMap.current?.remove()
     }
   }, [])
 
@@ -302,6 +326,65 @@ export default function MapboxContainer() {
     })
   }
 
+  // 미니맵에 입도/출도 경로 추가
+  const addMiniMapRoutes = () => {
+    if (!miniMap.current) return
+
+    // 입도/출도 경로 필터링 (SEA 경로 중 direction으로 구분)
+    const inboundRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'SEA' && r.direction === 'INBOUND')
+    const outboundRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'SEA' && r.direction === 'OUTBOUND')
+
+    // 입도 경로 추가 (녹색 화살표)
+    inboundRoutes.forEach((route, idx) => {
+      const start = [route.origin.lng, route.origin.lat]
+      const end = [route.destination.lng, route.destination.lat]
+
+      // 직선 경로
+      miniMap.current!.addLayer({
+        id: `minimap-inbound-${idx}`,
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates: [start, end] },
+          },
+        },
+        paint: {
+          'line-color': '#10b981', // 녹색
+          'line-width': 2,
+          'line-dasharray': [3, 2],
+        },
+      })
+    })
+
+    // 출도 경로 추가 (보라색 화살표)
+    outboundRoutes.forEach((route, idx) => {
+      const start = [route.origin.lng, route.origin.lat]
+      const end = [route.destination.lng, route.destination.lat]
+
+      // 직선 경로
+      miniMap.current!.addLayer({
+        id: `minimap-outbound-${idx}`,
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates: [start, end] },
+          },
+        },
+        paint: {
+          'line-color': '#a855f7', // 보라색
+          'line-width': 2,
+          'line-dasharray': [3, 2],
+        },
+      })
+    })
+  }
+
   // Mapbox Token이 없으면 안내 메시지 표시
   if (!MAPBOX_TOKEN) {
     return (
@@ -319,19 +402,33 @@ export default function MapboxContainer() {
 
   return (
     <div className="relative w-full h-full">
-      {/* Mapbox Popup z-index: 이 컴포넌트에서만 적용 */}
+      {/* Mapbox Popup z-index */}
       <style>{`
         .storage-hover-popup.mapboxgl-popup {
           z-index: 60;
         }
+        /* 미니맵 컨트롤 숨기기 */
+        .minimap-container .mapboxgl-ctrl-attrib,
+        .minimap-container .mapboxgl-ctrl-logo {
+          display: none;
+        }
       `}</style>
-      
-      {/* 지도 */}
+
+      {/* 메인 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* 미니맵 - 플로팅 (좌상단) */}
-      <div className="absolute top-4 left-4 z-10">
-        <MainlandMinimap inboundRoutes={2} outboundRoutes={2} />
+      {/* 미니맵 - 플로팅 (좌상단, 200x150px) */}
+      <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden">
+        <div
+          ref={miniMapContainer}
+          className="minimap-container"
+          style={{ width: '200px', height: '150px' }}
+        />
+        <div className="px-2 py-1 text-center bg-white/95">
+          <p className="text-slate-600 text-xs font-semibold tracking-wide">
+            MAINLAND
+          </p>
+        </div>
       </div>
 
       {/* 범례 - 플로팅 (우상단) */}
