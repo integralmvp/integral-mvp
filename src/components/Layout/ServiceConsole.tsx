@@ -15,14 +15,13 @@ export default function ServiceConsole() {
     <div
       className="h-full flex flex-col overflow-hidden rounded-2xl shadow-2xl"
       style={{
-        background: 'rgba(255, 255, 255, 0.3)',
-        backdropFilter: 'blur(8px)'
+        background: 'rgba(255, 255, 255, 0.8)'
       }}
     >
       {/* 타이틀 */}
       <div className="p-6 border-b border-slate-200">
         <h1 className="text-2xl font-bold text-slate-900">내 손 안의 작은 물류 허브</h1>
-        <p className="text-sm text-slate-600 mt-1">공간과 경로를 상품화하다</p>
+        <p className="text-sm text-slate-600 mt-1">비어있는 공간과 경로를 원하는 조건으로 검색하고 결제까지! 신개념 물류 오픈마켓</p>
       </div>
 
       {/* 탭 */}
@@ -66,22 +65,22 @@ export default function ServiceConsole() {
           <>
             <AccordionField
               id="storage-area"
-              label="가용면적"
-              placeholder="예: 30평"
+              label="수요면적"
+              placeholder="화물량을 보관 시 필요한 면적으로 환산합니다."
               expanded={expandedField === 'storage-area'}
               onToggle={() => handleFieldClick('storage-area')}
             />
             <AccordionField
               id="storage-product"
-              label="품종"
-              placeholder="예: 감귤, 당근, 고구마"
+              label="품목"
+              placeholder="화물의 내용물 품목을 선택합니다."
               expanded={expandedField === 'storage-product'}
               onToggle={() => handleFieldClick('storage-product')}
             />
             <AccordionField
               id="storage-period"
               label="보관기간"
-              placeholder="예: 2024-02-01 ~ 2024-02-28"
+              placeholder="보관을 원하시는 기간을 선택합니다."
               expanded={expandedField === 'storage-period'}
               onToggle={() => handleFieldClick('storage-period')}
             />
@@ -93,22 +92,22 @@ export default function ServiceConsole() {
           <>
             <AccordionField
               id="transport-area"
-              label="가용면적"
-              placeholder="예: 5톤 트럭 (20P)"
+              label="수요면적"
+              placeholder="화물량을 운송 시 필요한 면적으로 환산합니다."
               expanded={expandedField === 'transport-area'}
               onToggle={() => handleFieldClick('transport-area')}
             />
             <AccordionField
               id="transport-product"
-              label="품종"
-              placeholder="예: 감귤, 당근, 고구마"
+              label="품목"
+              placeholder="화물의 내용물 품목을 선택합니다."
               expanded={expandedField === 'transport-product'}
               onToggle={() => handleFieldClick('transport-product')}
             />
             <AccordionField
               id="transport-date"
               label="운송날짜"
-              placeholder="예: 2024-02-15"
+              placeholder="운송을 원하시는 날짜를 선택합니다."
               expanded={expandedField === 'transport-date'}
               onToggle={() => handleFieldClick('transport-date')}
             />
@@ -120,43 +119,43 @@ export default function ServiceConsole() {
           <>
             <AccordionField
               id="both-order"
-              label="순서 선택"
-              placeholder="보관 먼저 or 운송 먼저"
+              label="순서"
+              placeholder="보관 후 운송 또는 운송 후 보관"
               expanded={expandedField === 'both-order'}
               onToggle={() => handleFieldClick('both-order')}
             />
             <AccordionField
               id="both-storage-area"
-              label="보관 가용면적"
-              placeholder="예: 30평"
+              label="보관 수요면적"
+              placeholder="화물량을 보관 시 필요한 면적으로 환산합니다."
               expanded={expandedField === 'both-storage-area'}
               onToggle={() => handleFieldClick('both-storage-area')}
             />
             <AccordionField
               id="both-transport-area"
-              label="운송 가용면적"
-              placeholder="예: 5톤 트럭"
+              label="운송 수요면적"
+              placeholder="화물량을 운송 시 필요한 면적으로 환산합니다."
               expanded={expandedField === 'both-transport-area'}
               onToggle={() => handleFieldClick('both-transport-area')}
             />
             <AccordionField
               id="both-product"
-              label="품종"
-              placeholder="예: 감귤, 당근, 고구마"
+              label="품목"
+              placeholder="화물량의 내용물 품목을 선택합니다."
               expanded={expandedField === 'both-product'}
               onToggle={() => handleFieldClick('both-product')}
             />
             <AccordionField
               id="both-period"
               label="보관기간"
-              placeholder="예: 2024-02-01 ~ 2024-02-28"
+              placeholder="보관을 원하시는 기간을 선택합니다."
               expanded={expandedField === 'both-period'}
               onToggle={() => handleFieldClick('both-period')}
             />
             <AccordionField
               id="both-date"
               label="운송날짜"
-              placeholder="예: 2024-02-15"
+              placeholder="운송을 원하시는 날짜를 선택합니다."
               expanded={expandedField === 'both-date'}
               onToggle={() => handleFieldClick('both-date')}
             />

@@ -13,8 +13,8 @@ export default function CommandLayout() {
       {/* 좌측 45%: 블러 오버레이 */}
       <div className="absolute inset-y-0 left-0 w-[45%] z-10 flex flex-col"
         style={{
-          backdropFilter: 'blur(12px)',
-          background: 'rgba(255, 255, 255, 0.15)'
+          backdropFilter: 'blur(5px)',
+          background: 'rgba(255,255,255,0.6)'
         }}
       >
         {/* 상단: 로고 영역 */}
@@ -23,7 +23,7 @@ export default function CommandLayout() {
             className="cursor-pointer hover:opacity-70 transition-opacity inline-block"
             onClick={() => window.location.reload()}
           >
-            <span className="text-white text-3xl font-black tracking-tight drop-shadow-lg">
+            <span className="text-black text-3xl font-black tracking-tight drop-shadow-lg">
               INTEGRAL
             </span>
           </div>

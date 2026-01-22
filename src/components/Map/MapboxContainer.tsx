@@ -32,7 +32,7 @@ export default function MapboxContainer() {
     // === 메인 지도 초기화 ===
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11', // 라이트 스타일
+      style: 'mapbox://styles/integralv0/cmkppsvoe003e01stgyts0nxy', // 라이트 스타일
       center: [126.5312, 33.4996], // 제주도 중심
       zoom: 9,
       minZoom: 7,
@@ -80,7 +80,7 @@ export default function MapboxContainer() {
     if (miniMapContainer.current) {
       miniMap.current = new mapboxgl.Map({
         container: miniMapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: 'mapbox://styles/integralv0/cmkppsvoe003e01stgyts0nxy',
         center: [127.0, 36.0], // 한반도 중심 (더 북쪽으로)
         zoom: 4, // 더 줌아웃 (육지+제주 전부 보이게)
         interactive: false, // 상호작용 비활성화
