@@ -82,7 +82,7 @@ export default function MapboxContainer() {
         container: miniMapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
         center: [127.0, 36.0], // 한반도 중심 (더 북쪽으로)
-        zoom: 5, // 더 줌아웃 (육지+제주 전부 보이게)
+        zoom: 4, // 더 줌아웃 (육지+제주 전부 보이게)
         interactive: false, // 상호작용 비활성화
         attributionControl: false, // 어트리뷰션 제거
       })
