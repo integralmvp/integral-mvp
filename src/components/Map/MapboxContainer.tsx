@@ -31,7 +31,7 @@ export default function MapboxContainer() {
     // 지도 초기화
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/integralv0/cmkmq2m8i00ij01sl41ut7ydz', // 커스텀3
+      style: 'mapbox://styles/integralv0/cmkmnu1ow00td01sv6szm75sp', // 커스텀4
       center: [126.5312, 33.4996], // 제주도 중심
       zoom: 9,
       minZoom: 7,
