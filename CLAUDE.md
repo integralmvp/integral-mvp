@@ -21,7 +21,7 @@
 
 1. **직관성 우선** - 별도 설명 없이 화면만으로 서비스 이해 가능
 2. **지도 중심 UI** - 모든 가치는 지도에서 시각적으로 전달
-3. **싱글 페이지 구조** - 별도 라우팅 없이 스크롤/모달로 모든 정보 접근
+3. **싱글 페이지 구조** - 별도 라우팅 없이 모달로 모든 정보 접근
 4. **더미 데이터 기반** - 백엔드 없음, 모든 데이터는 mockData에서 관리
 5. **룰 기반 로직** - 복잡한 알고리즘 대신 단순 조건문 기반
 
@@ -31,8 +31,8 @@
 
 - **프레임워크**: Vite + React + TypeScript
 - **스타일링**: Tailwind CSS
-- **지도**: Mapbox GL JS (dark-v11 스타일)
-- **폰트**: Pretendard (메인), Inter (숫자), JetBrains Mono (LIVE)
+- **지도**: Mapbox GL JS (light-v11 스타일)
+- **폰트**: Pretendard (메인), Inter (숫자)
 
 ### 환경변수
 ```env
@@ -46,31 +46,33 @@ VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
 ```
 src/
 ├── components/
-│   ├── Background/
-│   │   └── SpaceBackground.tsx           # 우주 배경 + 별 애니메이션
 │   ├── Layout/
-│   │   ├── Header.tsx                    # 투명 헤더 (로고/LIVE)
-│   │   ├── CenterTitle.tsx               # 글로우 타이틀
-│   │   └── CommandLayout.tsx             # 전체 레이아웃
+│   │   ├── CommandLayout.tsx          # 전체 레이아웃 (지도 배경 + 좌측 블러)
+│   │   └── ServiceConsole.tsx         # 서비스 콘솔 (탭 + 아코디언 폼)
 │   ├── Map/
-│   │   └── MapboxContainer.tsx           # Mapbox 지도 + 경로/마커
-│   └── Widgets/
-│       ├── PopularProducts.tsx           # 실시간 인기 상품
-│       ├── ProductStats.tsx              # 보유 상품 현황 (막대 그래프)
-│       ├── ServicePanel.tsx              # 서비스 선택 버튼
-│       ├── MainlandMinimap.tsx           # 육지 미니맵
-│       ├── MainlandMinimapWithLegend.tsx # 미니맵 + 범례 (통합)
-│       └── Legend.tsx                    # 지도 범례
-├── styles/
-│   ├── fonts.css                         # 폰트 설정
-│   └── space-background.css              # 별 애니메이션 CSS
+│   │   └── MapboxContainer.tsx        # Mapbox 지도 (메인 + 미니맵)
+│   ├── common/                        # 공통 컴포넌트 (PR3 사용 예정)
+│   │   ├── Badge.tsx
+│   │   ├── Modal.tsx
+│   │   ├── ProductCard.tsx
+│   │   └── Toast.tsx
+│   ├── deal/                          # 거래 모달 (PR3 사용 예정)
+│   │   ├── DealModal.tsx
+│   │   ├── CargoConditionForm.tsx
+│   │   ├── ProductSummary.tsx
+│   │   ├── CostEstimate.tsx
+│   │   └── RegulationMatchResult.tsx
+│   ├── routes/                        # 경로 카드 (PR3 사용 예정)
+│   │   └── RouteProductCard.tsx
+│   └── storages/                      # 공간 카드 (PR3 사용 예정)
+│       └── StorageProductCard.tsx
 ├── types/
-│   └── models.ts                         # 데이터 모델 타입 정의
+│   └── models.ts                      # 데이터 모델 타입 정의
 ├── data/
-│   └── mockData.ts                       # 더미 데이터 (8개 경로, 8개 공간)
+│   └── mockData.ts                    # 더미 데이터
 └── utils/
-    ├── regulationEngine.ts               # 규정 매칭 룰 엔진
-    └── costCalculator.ts                 # 비용 계산 유틸리티
+    ├── regulationEngine.ts            # 규정 매칭 룰 엔진 (PR3)
+    └── costCalculator.ts              # 비용 계산 유틸리티 (PR3)
 ```
 
 ---
@@ -82,145 +84,141 @@ src/
 - Tailwind CSS 설정
 - 기본 레이아웃 골격
 
-### PR2-2: UI 전면 개편 + Mapbox 도입
-- **관제 센터 스타일 UI**
-  - 다크 테마 (slate-900/800 그라데이션)
-  - 3칸 레이아웃 (좌측 콘솔 | 지도 | 우측 콘솔)
-  - 반투명 배경 + backdrop-blur 효과
-- **Mapbox GL JS 도입**
-  - Kakao Maps 완전 대체
-  - 제주도 중심 + 바운드 제한
-- **헤더 (CommandHeader)**
-  - 로고: INTEGRAL (좌측)
-  - 타이틀: "내 손 안의 작은 물류 허브" (중앙)
-  - LIVE 표시 + 펄스 애니메이션 (우측)
-- **좌측 콘솔 (LeftConsole)**
-  - 실시간 인기 상품 (순위 뱃지, 가격 K단위)
-  - 보유 상품 현황 (152 파렛트, 6 경로)
-- **우측 콘솔 (RightConsole)**
-  - 보관하기 버튼 (파랑 그라데이션)
-  - 운송하기 버튼 (초록 그라데이션)
-  - 슬로건 표시
-- **지도 요소**
-  - 파렛트 아이콘 마커 (크기 비례, 주황색 SVG)
-  - 3레이어 입체 곡선 화살표 (베지어 커브)
-  - 지도 범례 바
-- **육지 미니맵**
-  - 한반도 SVG
-  - 3개 항만 (인천, 목포, 부산)
-  - 입출도 화살표
+### PR2-4: UI 전면 개편 ✅ 완료
+**레이아웃 구조:**
+- 전체 화면 Mapbox 지도 배경
+- 좌측 45%: 블러 오버레이 (backdrop-filter: blur(12px))
+- 로고: 좌측 상단 (INTEGRAL, 흰색)
+- 서비스 콘솔: 좌측 하단 위젯
 
-### PR2-3: 다크 테마 + 야광 효과 ✅ 완료
-- **우주 배경 + 별 애니메이션**
-  - 3레이어 별 효과 (#0a0a1a 배경)
-  - CSS 키프레임 애니메이션
-  - SpaceBackground.tsx + space-background.css
-- **투명 헤더 재설계**
-  - 로고/LIVE만 선 구분 (border-t/b)
-  - 로고 클릭 시 페이지 새로고침
-  - 절대 위치 배치 (pointer-events 최적화)
-- **글로우 타이틀**
-  - "내 손 안의 작은 물류 허브" 지도 위 중앙 배치
-  - 3레이어 text-shadow 글로우 효과
-  - CenterTitle.tsx 컴포넌트
-- **아이소메트릭 3D 파렛트 마커**
-  - 녹색 아이소메트릭 SVG (내부 구조선 포함)
-  - 크기 비례 (용량에 따라 32/40/48px)
-  - 호버 시 scale(1.2) 효과 (inner div 사용)
-  - z-index 최적화로 가시성 확보
-  - **최종 색상: 주황색 (#ff6b35)** 사용자 수정 반영
-- **4레이어 글로우 곡선 경로**
-  - 레이어 1: 바깥 글로우 (line-blur: 8, opacity: 0.2)
-  - 레이어 2: 안쪽 글로우 (line-blur: 4, opacity: 0.4)
-  - 레이어 3: 메인 라인 (width: 3, opacity: 1)
-  - 레이어 4: 하이라이트 (width: 1, white, opacity: 0.6)
-  - 베지어 곡선 (위로 볼록, 50개 포인트)
-- **경로 화살촉**
-  - DOM 마커로 구현 (32px, z-index: 1000)
-  - 방향 계산 (bearing) 및 회전
-  - SVG 글로우 필터 (stdDeviation: 3)
-  - 파렛트 위에 표시되도록 레이어 순서 최적화
-  - **Mapbox Symbol Layer 사용** 사용자 수정 반영
-- **위젯 리디자인**
-  - 타이틀 + 수평 구분선 (h-px bg-white/50)
-  - 반투명 배경 (rgba(10,10,30,0.2))
-  - backdrop-blur-sm 효과
-  - PopularProducts, ProductStats, ServicePanel
-- **실시간 인기 상품**
-  - 4개 아이템만 노출 (max-h-[220px])
-  - 스크롤 가능 (scrollbar-thin)
-  - 순위 뱃지 + 글로우 효과
-  - 가격 표기: ₩[숫자]K/P 형식
-- **보유 상품 현황 막대 그래프**
-  - 공간/경로 각각 막대 그래프
-  - 그라데이션 (orange/cyan)
-  - 글로우 박스 섀도우
-  - 사용중 라벨 (타이틀과 바 사이 배치)
-  - 퍼센트 + 수량 표시
-- **서비스 버튼 문구**
-  - "비어있는 공간을 구매하세요"
-  - "비어있는 경로를 구매하세요"
-  - 네온 호버 효과 (boxShadow 0 → 20px)
-- **미니맵/범례 동적 배치**
-  - 제주도 좌표 기준 (`map.project()` 사용)
-  - 지도 이동/줌 시 자동 업데이트
-  - 미니맵: 제주 북서쪽 기준 (좌측 상단)
-  - 범례: 제주 중앙 상단 기준
-  - 타이틀과 적절한 간격 확보
-- **목업 데이터 확장**
-  - 경로 상품: 6개 → 8개 (도내 4, 입도 2, 출도 2)
-  - 공간 상품: 6개 → 8개 (제주시, 서귀포, 성산, 애월, 한림, 조천)
-  - 모든 좌표 제주도 범위 내 정확히 배치
-- **공간 상품 팝업 카드** 사용자 추가 구현
-  - 파렛트 마커 클릭 시 팝업 카드 표시
-  - 위치/용량/가격/특징 정보 표시
-  - 호버에서 클릭으로 변경 (우선순위 적용)
+**서비스 콘솔 (ServiceConsole):**
+- 3개 탭: 보관 | 운송 | 보관+운송
+- 에어비앤비식 아코디언 폼
+- 각 탭별 맞춤형 입력 필드
+- 검색 버튼 (탭별 색상 변경)
+- 반투명 배경: rgba(255, 255, 255, 0.3) + blur(8px)
+
+**지도 (MapboxContainer):**
+- **메인 지도**
+  - 라이트 스타일 (light-v11)
+  - 제주도 중심 [126.5312, 33.4996]
+  - centerOffset으로 우측 배치 (좌측 블러 영역 보정)
+  - 아이소메트릭 3D 파렛트 마커 (주황색 #ff6b35)
+  - 베지어 곡선 경로 (파란색 실선)
+- **미니맵 (이중 맵)**
+  - 한반도 전체 + 제주 (zoom 4.5)
+  - 크기: 280x200px
+  - 입도/출도 경로 + 화살표
+  - interactive: false
+- **헤더 위젯**
+  - "서비스 현황 실시간 모니터링" + 현재 시각
+  - 범례 아이콘 (◆공간 ━도내 ┄입도 ┄출도)
+  - 우측 상단 플로팅
+
+**기술적 구현:**
+- centerOffset 사용: 좌측 45% 블러 영역 보정
+- 이중 Mapbox 인스턴스 (메인 + 미니맵)
+- 미니맵 경로 화살표 (bearing 계산 + symbol layer)
+- 파렛트 마커 호버 팝업 (호버 전용)
+
+**삭제된 요소:**
+- 우주 배경 (SpaceBackground)
+- 다크 테마 위젯들 (PopularProducts, ProductStats)
+- 별도 헤더 컴포넌트 (Header, CommandHeader)
+- SVG 기반 미니맵 (MainlandMinimap)
+- 네온 글로우 효과
 
 ---
 
-## 🎯 다음 작업
+## 🎯 다음 작업 (PR 로드맵)
 
-### PR3 예정: 상품 리스트 + 거래 모달
-- 경로/공간 상품 리스트
-- 상세 모달 (RouteDetailModal, StorageDetailModal)
-- 거래 모달 (DealModal) - 핵심 기능
-- 규정 매칭 로직 연결
-- 비용 계산 연결
+### PR3: 서비스 콘솔 기능 구현
+#### PR3-1: 아코디언 폼 + 탭 전환
+- 탭 전환 로직 완성
+- 아코디언 expand/collapse 애니메이션
+- 탭별 필드 동적 렌더링
 
-### PR4 예정: 경로 통합 + CTA + 마무리
-- 경로 통합 배지
-- 공간-경로 연결 UI
-- 사용자 CTA 섹션
+#### PR3-2: 보관면적 선택 (모듈/면적 → 파렛트 환산)
+**단위 선택:** 포장박스 모듈 | 면적
+
+**포장박스 모듈:**
+- 소형/중형/대형 선택 (가로×세로 시각화)
+- 박스 개수 입력
+- 파렛트 환산: 적재높이 180cm 기준
+- 시각화 이미지 + 안내문구
+
+**면적 단위:**
+- 면적(㎡) 입력
+- 파렛트 환산 로직
+- 규격: 1100×1100mm 기준
+
+**파렛트 환산 표시:**
+- 결과 표시: "약 X개 파렛트"
+- 시각화 이미지
+- 안내문구: "1파렛트 = 1.1m × 1.1m"
+
+#### PR3-3: 품목 드롭다운 + 캘린더
+- **품목 드롭다운**
+  - 택배사 취급품목 목록
+  - 검색 기능
+  - 다중 선택 가능
+- **캘린더 (보관기간)**
+  - 시작일 ~ 종료일 선택
+  - 기간 표시
+- **캘린더 (운송날짜)**
+  - 단일 날짜 선택
+
+#### PR3-4: 보관+운송 순서 로직
+- 순서 선택: 보관 먼저 | 운송 먼저
+- 입력 필드 동적 재배치
+- 플로우 시각화
+
+### PR4: 검색 매칭 + 지도 연동
+- 검색 버튼 클릭 → 매칭 결과 표시
+- 지도에 매칭된 상품 하이라이트
+- 필터링 로직
+- 상품 카드 리스트
+- 거래 모달 연결
+
+### PR5: 거래 모달 + 규정 매칭
+- DealModal 구현
+- 규정 매칭 엔진 연결
+- 비용 계산 로직
+- 거래 완료 토스트
+
+### PR6: 마무리 + 최적화
 - 반응형 디자인
-- 데모 시나리오 최적화
+- 애니메이션 최적화
+- 데모 시나리오 완성
+- 성능 최적화
 
 ---
 
 ## 🎨 디자인 시스템
 
-### 색상
+### 색상 (라이트 테마)
 | 요소 | 색상 |
 |------|------|
-| 배경 | #0a0a1a (우주 배경) |
-| 위젯 배경 | rgba(10,10,30,0.2) + backdrop-blur |
+| 지도 배경 | Mapbox light-v11 |
+| 블러 오버레이 | rgba(14, 165, 233, 0.15) + blur(12px) |
+| 서비스 콘솔 | rgba(255, 255, 255, 0.3) + blur(8px) |
 | 공간 상품 마커 | #ff6b35 (주황색) |
-| 도내 경로 | #00bfff (시안, 실선) |
-| 입도 경로 | #00ff88 (녹색, 점선) |
-| 출도 경로 | #ff00ff (마젠타, 점선) |
-| 텍스트 글로우 | 3레이어 text-shadow |
+| 도내 경로 | #3b82f6 (파란색, 실선) |
+| 입도 경로 | #10b981 (녹색, 점선) |
+| 출도 경로 | #a855f7 (보라색, 점선) |
 
 ### 버튼
 | 버튼 | 스타일 |
 |------|--------|
 | 보관하기 | blue-500 → blue-600 그라데이션 |
 | 운송하기 | emerald-500 → emerald-600 그라데이션 |
+| 보관+운송 | purple-500 → purple-600 그라데이션 |
 
-### 상태 표현
-| 상태 | 색상 |
-|------|------|
-| 가능 | 녹색 |
-| 주의 | 노란색 |
-| 불가 | 빨간색 |
+### 위젯 스타일
+- 배경: white/90 + backdrop-blur-sm
+- 테두리: border-slate-300
+- 그림자: shadow-lg
+- 둥근 모서리: rounded-lg
 
 ---
 
@@ -238,10 +236,9 @@ src/
 ### ✅ 허용되는 범위
 1. 더미 데이터 기반 모든 UI
 2. 모달 기반 상세 페이지
-3. 앵커 기반 섹션 스크롤
-4. 룰 기반 규정 매칭
-5. 더미 비용 계산
-6. 성공 토스트 피드백
+3. 룰 기반 규정 매칭
+4. 더미 비용 계산
+5. 성공 토스트 피드백
 
 ---
 
@@ -273,8 +270,11 @@ src/
   origin: { name, lat, lng };
   destination: { name, lat, lng };
   vehicleType: string;
+  cargoTypes: CargoType[];
   price: number;
   priceUnit: string;
+  routeScope: RouteScope;      // "INTRA_JEJU" | "SEA"
+  direction?: Direction;        // "INBOUND" | "OUTBOUND"
 }
 ```
 
@@ -283,17 +283,18 @@ src/
 {
   id: string;
   location: { name, lat, lng, region };
-  storageType: StorageType;
+  storageType: StorageType;    // "상온" | "냉장" | "냉동"
   capacity: string;
   price: number;
   priceUnit: string;
+  features: string[];
 }
 ```
 
 ### 더미 데이터 개수
 - 경로 상품: 8개 (도내 4개, 입도 2개, 출도 2개)
-- 공간 상품: 8개 (제주시 2개, 서귀포 2개, 성산/애월/한림/조천 각 1개)
-- 유니트 로드 모듈: 3개 (소형, 대형, 특수)
+- 공간 상품: 8개
+- 유니트 로드 모듈: 3개 (소형, 중형, 대형)
 - 취급 특이사항: 6개
 - 규정 룰: 5개
 
@@ -301,18 +302,19 @@ src/
 
 ## 🎯 우선순위
 
-### P0 (필수)
-- 지도 + 마커 + 경로 시각화
+### P0 (필수 - PR3/4)
+- 서비스 콘솔 기능 완성
+- 보관면적 → 파렛트 환산
+- 검색 매칭 로직
 - 상품 카드/리스트
+
+### P1 (권장 - PR5)
 - 거래 모달
 - 규정 매칭/비용 계산
-
-### P1 (권장)
 - 호버 효과/툴팁
-- 통합가능 배지
-- 사용자 CTA
 
-### P2 (선택)
+### P2 (선택 - PR6)
+- 반응형 디자인
 - 부드러운 애니메이션
 - 추가 시각 효과
 
@@ -321,37 +323,49 @@ src/
 ## 🔄 Git 브랜치
 
 - `main`: 프로덕션 (PR 머지 후)
-- `claude/dark-theme-glow-effects-47w9e`: PR2-3 브랜치 (완료, 머지됨)
+- PR2-4 완료: UI 전면 개편 (머지 완료)
 
 ---
 
 ## 📝 기술적 구현 세부사항
 
-### Mapbox 좌표 기반 위젯 배치
-- `map.project([lng, lat])` 사용하여 지도 좌표를 화면 픽셀로 변환
-- 지도 이동/줌 이벤트에 반응하여 위치 자동 업데이트
-- 제주도 북서쪽 (126.15, 33.55) 기준 미니맵 배치
-- 제주도 중앙 상단 (126.55, 33.55) 기준 범례 배치
+### centerOffset을 활용한 지도 배치
+```tsx
+// 좌측 45% 블러 영역만큼 오른쪽으로 offset
+const container = map.current.getContainer()
+const width = container.clientWidth
+const offsetX = (width * 0.45) / 2
 
-### 베지어 곡선 경로 생성
+map.current.easeTo({
+  center: [126.5312, 33.4996],  // 제주도 중심 그대로
+  offset: [offsetX, 0],         // x만 오른쪽으로 이동
+  duration: 0,
+})
+```
+
+### 이중 맵 구현 (메인 + 미니맵)
+- 두 개의 독립적인 Mapbox 인스턴스
+- 메인: 제주도 중심, zoom 9, interactive
+- 미니맵: 한반도 전체, zoom 4.5, interactive: false
+- 미니맵에 입도/출도 경로 + 화살표 표시
+
+### 미니맵 경로 화살표
+- bearing 계산: `Math.atan2(dy, dx) * (180 / Math.PI)`
+- Mapbox symbol layer 사용
+- 화살표 이미지: SVG data URI
+- icon-rotate: bearing 기반 회전
+
+### 베지어 곡선 경로
 - 시작점/끝점 + 중간 제어점으로 2차 베지어 곡선 생성
 - 50개 포인트로 부드러운 곡선 표현
-- 중간 제어점: 위로 볼록하게 (midLat + 0.08)
-- 4레이어 렌더링으로 입체감 표현
+- 중간 제어점: 위로 볼록 (midLat + 0.08)
 
-### 파렛트 마커 호버 버그 해결
+### 파렛트 마커 호버
 - Mapbox Marker의 `position: absolute` 유지 필수
-- `position: relative` 설정 시 좌표 계산 오류 발생
-- 호버 효과는 inner div에만 적용하여 해결
-- z-index로 화살촉 > 파렛트 레이어 순서 유지
-
-### 성능 최적화
-- 별 애니메이션: CSS 키프레임 사용 (GPU 가속)
-- 경로 레이어: Mapbox native layer (WebGL)
-- 화살촉: DOM 마커 (파렛트 위 표시 필요)
-- 위젯 투명도: backdrop-blur로 깊이감 표현
+- 호버 효과는 inner div에만 적용
+- 팝업: closeButton: false, closeOnClick: false
 
 ---
 
 **작성일**: 2025.01.14
-**최종 수정**: 2025.01.22 (PR2-3 완료 반영)
+**최종 수정**: 2025.01.22 (PR2-4 완료 + 파일 정리)
