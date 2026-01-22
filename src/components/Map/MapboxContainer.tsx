@@ -91,6 +91,9 @@ export default function MapboxContainer() {
       miniMap.current.on('load', () => {
         if (!miniMap.current) return
 
+        // 컨테이너 크기 재계산
+        miniMap.current.resize()
+
         // 미니맵에 화살표 이미지 등록
         addMiniMapArrowImages()
 
@@ -512,14 +515,13 @@ export default function MapboxContainer() {
         <HeaderWidget />
 
         {/* 미니맵 */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden">
-          <div
-            ref={miniMapContainer}
-            className="minimap-container"
-            style={{ width: '280px', height: '200px' }}
-          />
+        <div
+          className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden"
+          style={{ width: '200px', height: '150px' }}
+        >
+          
+          <div ref={miniMapContainer} className="w-full h-full" />
         </div>
-      </div>
     </div>
   )
 }
