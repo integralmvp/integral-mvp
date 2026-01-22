@@ -33,19 +33,30 @@ export default function MapboxContainer() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11', // 라이트 스타일
-      center: [127.8, 33.4996], // 제주도가 우측 섹션 중앙에 오도록 더 우측으로
+      center: [126.5312, 33.4996], // 제주도 중심
       zoom: 9,
       minZoom: 7,
       maxZoom: 15,
       maxBounds: [
         [124.5, 32.5], // 남서쪽
-        [129.5, 35.5], // 북동쪽 (더 넓게)
+        [129.5, 35.5], // 북동쪽
       ],
     })
 
     // 메인 지도 로드 완료 후
     map.current.on('load', () => {
       if (!map.current) return
+
+      // 좌측 45% 블러 영역만큼 오른쪽으로 offset
+      const container = map.current.getContainer()
+      const width = container.clientWidth
+      const offsetX = (width * 0.45) / 2
+
+      map.current.easeTo({
+        center: [126.5312, 33.4996], // 제주도 중심 그대로
+        offset: [offsetX, 0], // x만 오른쪽으로 이동
+        duration: 0, // 애니메이션 없음
+      })
 
       // 파렛트 마커 추가
       addPalletMarkers()
