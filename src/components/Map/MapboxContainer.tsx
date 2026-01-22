@@ -1,5 +1,5 @@
 // Mapbox 지도 컨테이너 (이중 맵: 메인 + 미니맵)
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../data/mockData'
 import Legend from '../Widgets/Legend'
@@ -34,7 +34,7 @@ export default function MapboxContainer() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11', // 라이트 스타일
-      center: [126.5312, 33.4996], // 제주도 중심
+      center: [127.2, 33.4996], // 제주도가 우측에 오도록 경도 조정
       zoom: 9,
       minZoom: 7,
       maxZoom: 15,
@@ -417,23 +417,63 @@ export default function MapboxContainer() {
       {/* 메인 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* 미니맵 - 플로팅 (좌상단, 200x150px) */}
-      <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden">
-        <div
-          ref={miniMapContainer}
-          className="minimap-container"
-          style={{ width: '200px', height: '150px' }}
-        />
-        <div className="px-2 py-1 text-center bg-white/95">
-          <p className="text-slate-600 text-xs font-semibold tracking-wide">
-            MAINLAND
-          </p>
-        </div>
-      </div>
+      {/* 우측 상단 위젯 영역 */}
+      <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
+        {/* LIVE 시계 */}
+        <LiveClock />
 
-      {/* 범례 - 플로팅 (우상단) */}
-      <div className="absolute top-4 right-4 z-10">
+        {/* 미니맵 */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden">
+          <div
+            ref={miniMapContainer}
+            className="minimap-container"
+            style={{ width: '200px', height: '150px' }}
+          />
+          <div className="px-2 py-1 text-center bg-white/95">
+            <p className="text-slate-600 text-xs font-semibold tracking-wide">
+              MAINLAND
+            </p>
+          </div>
+        </div>
+
+        {/* 범례 */}
         <Legend />
+      </div>
+    </div>
+  )
+}
+
+// LIVE 시계 컴포넌트
+function LiveClock() {
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const formattedTime = currentTime.toLocaleTimeString('ko-KR', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+
+  return (
+    <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg px-4 py-2">
+      <div className="flex items-center gap-2">
+        <span
+          className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+          style={{
+            boxShadow: '0 0 8px rgba(34, 197, 94, 0.6)'
+          }}
+        ></span>
+        <span className="text-slate-900 font-mono text-base font-semibold">
+          LIVE
+        </span>
+        <span className="text-slate-600 font-mono text-sm">
+          {formattedTime}
+        </span>
       </div>
     </div>
   )
