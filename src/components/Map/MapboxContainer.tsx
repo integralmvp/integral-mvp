@@ -1,8 +1,7 @@
-// Mapbox 지도 컨테이너
+// Mapbox 지도 컨테이너 (이중 맵: 메인 + 미니맵)
 import { useEffect, useRef } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../data/mockData'
-import MainlandMinimap from '../Widgets/MainlandMinimap'
 import Legend from '../Widgets/Legend'
 
 // Mapbox Access Token (환경 변수에서 가져옴)
@@ -13,10 +12,13 @@ if (MAPBOX_TOKEN) {
 }
 
 export default function MapboxContainer() {
+  // 메인 지도 refs
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
-  const minimapRef = useRef<HTMLDivElement>(null)
-  const legendRef = useRef<HTMLDivElement>(null)
+
+  // 미니맵 refs
+  const miniMapContainer = useRef<HTMLDivElement>(null)
+  const miniMap = useRef<mapboxgl.Map | null>(null)
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return
@@ -28,10 +30,10 @@ export default function MapboxContainer() {
       return
     }
 
-    // 지도 초기화
+    // === 메인 지도 초기화 ===
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11', // 다크 스타일
+      style: 'mapbox://styles/mapbox/light-v11', // 라이트 스타일
       center: [126.5312, 33.4996], // 제주도 중심
       zoom: 9,
       minZoom: 7,
@@ -42,7 +44,7 @@ export default function MapboxContainer() {
       ],
     })
 
-    // 지도 로드 완료 후
+    // 메인 지도 로드 완료 후
     map.current.on('load', () => {
       if (!map.current) return
 
@@ -56,14 +58,7 @@ export default function MapboxContainer() {
       setTimeout(() => {
         addCurvedRoutes()
       }, 100)
-
-      // 미니맵/범례 위치 업데이트
-      updateOverlayPositions()
     })
-
-    // 지도 이동/줌 시 미니맵/범례 위치 업데이트
-    map.current.on('move', updateOverlayPositions)
-    map.current.on('zoom', updateOverlayPositions)
 
     // 네비게이션 컨트롤
     map.current.addControl(
@@ -71,37 +66,31 @@ export default function MapboxContainer() {
       'bottom-right'
     )
 
+    // === 미니맵 초기화 ===
+    if (miniMapContainer.current) {
+      miniMap.current = new mapboxgl.Map({
+        container: miniMapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [127.0, 35.0], // 한반도 중심
+        zoom: 5, // 육지+제주 모두 보이게
+        interactive: false, // 상호작용 비활성화
+      })
+
+      // 미니맵 로드 완료 후
+      miniMap.current.on('load', () => {
+        if (!miniMap.current) return
+
+        // 미니맵에 입도/출도 경로 추가
+        addMiniMapRoutes()
+      })
+    }
+
     return () => {
       map.current?.remove()
+      miniMap.current?.remove()
     }
   }, [])
 
-  // 미니맵/범례 위치 업데이트 (제주도 좌표 기준)
-  const updateOverlayPositions = () => {
-    if (!map.current) return
-
-    // 제주도 북서쪽 좌표 (미니맵 기준점)
-    const jejuNorthWest: [number, number] = [126.15, 33.55]
-    // 제주도 중앙 상단 좌표 (범례 기준점)
-    const jejuNorthCenter: [number, number] = [126.55, 33.55]
-
-    // 좌표를 화면 픽셀로 변환
-    const minimapPos = map.current.project(jejuNorthWest)
-    const legendPos = map.current.project(jejuNorthCenter)
-
-    // 미니맵 위치 설정 (타이틀과 간격 확보 위해 아래로 이동)
-    if (minimapRef.current) {
-      minimapRef.current.style.left = `${minimapPos.x - 70}px`
-      minimapRef.current.style.top = `${minimapPos.y - 130}px`
-    }
-
-    // 범례 위치 설정 (타이틀과 간격 확보 위해 아래로 이동)
-    if (legendRef.current) {
-      legendRef.current.style.left = `${legendPos.x}px`
-      legendRef.current.style.top = `${legendPos.y - 80}px`
-      legendRef.current.style.transform = 'translateX(-50%)'
-    }
-  }
 
   // 아이소메트릭 파렛트 마커 추가
   const addPalletMarkers = () => {
@@ -174,10 +163,10 @@ export default function MapboxContainer() {
         className: 'storage-hover-popup',
       })
         .setHTML(`
-          <div class="p-2 bg-slate-900 text-white rounded">
-            <h3 class="font-bold">${storage.location.name}</h3>
-            <p class="text-sm">${storage.storageType} | ${storage.capacity}</p>
-            <p class="text-sm font-bold text-orange-400">₩${storage.price.toLocaleString()}/${storage.priceUnit}</p>
+          <div class="p-3 bg-white border border-slate-300 text-slate-900 rounded-lg shadow-lg">
+            <h3 class="font-bold text-sm">${storage.location.name}</h3>
+            <p class="text-xs text-slate-600 mt-1">${storage.storageType} | ${storage.capacity}</p>
+            <p class="text-sm font-bold text-orange-600 mt-2">₩${storage.price.toLocaleString()}/${storage.priceUnit}</p>
           </div>
         `)
 
@@ -213,21 +202,12 @@ export default function MapboxContainer() {
   const addArrowImages = () => {
     if (!map.current) return
 
-    // 시안 화살표 (도내)
-    const cyanArrow = new Image(24, 24)
-    cyanArrow.onload = () => map.current!.addImage('arrow-cyan', cyanArrow)
-    cyanArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+    // 파란 화살표 (도내)
+    const blueArrow = new Image(24, 24)
+    blueArrow.onload = () => map.current!.addImage('arrow-cyan', blueArrow)
+    blueArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
       <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="glow-cyan">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#00bfff" stroke="#ffffff" stroke-width="0.5" filter="url(#glow-cyan)"/>
+        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#3b82f6" stroke="#1e40af" stroke-width="0.5"/>
       </svg>
     `)}`
 
@@ -236,34 +216,16 @@ export default function MapboxContainer() {
     greenArrow.onload = () => map.current!.addImage('arrow-green', greenArrow)
     greenArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
       <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="glow-green">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#00ff88" stroke="#ffffff" stroke-width="0.5" filter="url(#glow-green)"/>
+        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#10b981" stroke="#047857" stroke-width="0.5"/>
       </svg>
     `)}`
 
-    // 마젠타 화살표 (출도)
-    const magentaArrow = new Image(24, 24)
-    magentaArrow.onload = () => map.current!.addImage('arrow-magenta', magentaArrow)
-    magentaArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
+    // 보라 화살표 (출도)
+    const purpleArrow = new Image(24, 24)
+    purpleArrow.onload = () => map.current!.addImage('arrow-magenta', purpleArrow)
+    purpleArrow.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`
       <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="glow-magenta">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#ff00ff" stroke="#ffffff" stroke-width="0.5" filter="url(#glow-magenta)"/>
+        <path d="M0,4 L20,12 L0,20 L6,12 Z" fill="#a855f7" stroke="#7c3aed" stroke-width="0.5"/>
       </svg>
     `)}`
   }
@@ -298,49 +260,9 @@ export default function MapboxContainer() {
       }
 
       const routeId = `route-${route.id}`
-      const color = '#00bfff' // 네온 시안
+      const color = '#3b82f6' // 파란색
 
-      // 레이어 1: 글로우 (바깥쪽)
-      map.current!.addLayer({
-        id: `${routeId}-glow-outer`,
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: { type: 'LineString', coordinates: curvePoints },
-          },
-        },
-        paint: {
-          'line-color': color,
-          'line-width': 12,
-          'line-opacity': 0.2,
-          'line-blur': 8,
-        },
-      })
-
-      // 레이어 2: 글로우 (안쪽)
-      map.current!.addLayer({
-        id: `${routeId}-glow-inner`,
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: { type: 'LineString', coordinates: curvePoints },
-          },
-        },
-        paint: {
-          'line-color': color,
-          'line-width': 6,
-          'line-opacity': 0.4,
-          'line-blur': 4,
-        },
-      })
-
-      // 레이어 3: 메인 라인
+      // 메인 라인
       map.current!.addLayer({
         id: `${routeId}-main`,
         type: 'line',
@@ -355,26 +277,7 @@ export default function MapboxContainer() {
         paint: {
           'line-color': color,
           'line-width': 3,
-          'line-opacity': 1,
-        },
-      })
-
-      // 레이어 4: 하이라이트 (밝은 중심선)
-      map.current!.addLayer({
-        id: `${routeId}-highlight`,
-        type: 'line',
-        source: {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: { type: 'LineString', coordinates: curvePoints },
-          },
-        },
-        paint: {
-          'line-color': '#ffffff',
-          'line-width': 1,
-          'line-opacity': 0.6,
+          'line-opacity': 0.8,
         },
       })
 
@@ -423,6 +326,65 @@ export default function MapboxContainer() {
     })
   }
 
+  // 미니맵에 입도/출도 경로 추가
+  const addMiniMapRoutes = () => {
+    if (!miniMap.current) return
+
+    // 입도/출도 경로 필터링 (SEA 경로 중 direction으로 구분)
+    const inboundRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'SEA' && r.direction === 'INBOUND')
+    const outboundRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'SEA' && r.direction === 'OUTBOUND')
+
+    // 입도 경로 추가 (녹색 화살표)
+    inboundRoutes.forEach((route, idx) => {
+      const start = [route.origin.lng, route.origin.lat]
+      const end = [route.destination.lng, route.destination.lat]
+
+      // 직선 경로
+      miniMap.current!.addLayer({
+        id: `minimap-inbound-${idx}`,
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates: [start, end] },
+          },
+        },
+        paint: {
+          'line-color': '#10b981', // 녹색
+          'line-width': 2,
+          'line-dasharray': [3, 2],
+        },
+      })
+    })
+
+    // 출도 경로 추가 (보라색 화살표)
+    outboundRoutes.forEach((route, idx) => {
+      const start = [route.origin.lng, route.origin.lat]
+      const end = [route.destination.lng, route.destination.lat]
+
+      // 직선 경로
+      miniMap.current!.addLayer({
+        id: `minimap-outbound-${idx}`,
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates: [start, end] },
+          },
+        },
+        paint: {
+          'line-color': '#a855f7', // 보라색
+          'line-width': 2,
+          'line-dasharray': [3, 2],
+        },
+      })
+    })
+  }
+
   // Mapbox Token이 없으면 안내 메시지 표시
   if (!MAPBOX_TOKEN) {
     return (
@@ -440,31 +402,37 @@ export default function MapboxContainer() {
 
   return (
     <div className="relative w-full h-full">
-      {/* Mapbox Popup z-index: 이 컴포넌트에서만 적용 */}
+      {/* Mapbox Popup z-index */}
       <style>{`
         .storage-hover-popup.mapboxgl-popup {
           z-index: 60;
         }
+        /* 미니맵 컨트롤 숨기기 */
+        .minimap-container .mapboxgl-ctrl-attrib,
+        .minimap-container .mapboxgl-ctrl-logo {
+          display: none;
+        }
       `}</style>
-      
-      {/* 지도 */}
+
+      {/* 메인 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* 미니맵 - 제주도 좌표 기준 동적 배치 */}
-      <div
-        ref={minimapRef}
-        className="absolute z-10 pointer-events-auto"
-        style={{ position: 'absolute' }}
-      >
-        <MainlandMinimap inboundRoutes={2} outboundRoutes={2} />
+      {/* 미니맵 - 플로팅 (좌상단, 200x150px) */}
+      <div className="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden">
+        <div
+          ref={miniMapContainer}
+          className="minimap-container"
+          style={{ width: '200px', height: '150px' }}
+        />
+        <div className="px-2 py-1 text-center bg-white/95">
+          <p className="text-slate-600 text-xs font-semibold tracking-wide">
+            MAINLAND
+          </p>
+        </div>
       </div>
 
-      {/* 범례 - 제주도 좌표 기준 동적 배치 */}
-      <div
-        ref={legendRef}
-        className="absolute z-10"
-        style={{ position: 'absolute' }}
-      >
+      {/* 범례 - 플로팅 (우상단) */}
+      <div className="absolute top-4 right-4 z-10">
         <Legend />
       </div>
     </div>
