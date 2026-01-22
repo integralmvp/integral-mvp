@@ -82,7 +82,7 @@ export default function MapboxContainer() {
         container: miniMapContainer.current,
         style: 'mapbox://styles/mapbox/light-v11',
         center: [127.0, 36.0], // 한반도 중심 (더 북쪽으로)
-        zoom: 4.5, // 더 줌아웃 (육지+제주 전부 보이게)
+        zoom: 4, // 더 줌아웃 (육지+제주 전부 보이게)
         interactive: false, // 상호작용 비활성화
         attributionControl: false, // 어트리뷰션 제거
       })
@@ -90,6 +90,9 @@ export default function MapboxContainer() {
       // 미니맵 로드 완료 후
       miniMap.current.on('load', () => {
         if (!miniMap.current) return
+
+        // 컨테이너 크기 재계산
+        miniMap.current.resize()
 
         // 미니맵에 화살표 이미지 등록
         addMiniMapArrowImages()
@@ -507,17 +510,19 @@ export default function MapboxContainer() {
       <div ref={mapContainer} className="w-full h-full" />
 
       {/* 우측 상단 위젯 영역 */}
-      <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
+      <div className="absolute top-4 right-4 left-[46%] z-10 flex flex-col gap-3">
         {/* 헤더 위젯 */}
         <HeaderWidget />
 
         {/* 미니맵 */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden">
+        <div className="flex justify-end">
           <div
-            ref={miniMapContainer}
-            className="minimap-container"
-            style={{ width: '280px', height: '200px' }}
-          />
+            className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden"
+            style={{ width: '200px', height: '170px' }}
+          >
+          
+            <div ref={miniMapContainer} className="w-full h-full" />
+          </div>
         </div>
       </div>
     </div>
@@ -542,7 +547,7 @@ function HeaderWidget() {
 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg px-4 py-3">
-      <div className="flex items-center justify-between gap-6">
+      <div className="flex items-center gap-6">
         {/* 좌측: 모니터링 문구 + 시각 */}
         <div className="flex items-center gap-3">
           <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
@@ -555,12 +560,15 @@ function HeaderWidget() {
         </div>
 
         {/* 우측: 범례 아이콘들 */}
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3">
           {/* 공간 */}
           <div className="flex items-center gap-1">
             <svg width="12" height="9" viewBox="0 0 16 12">
               <rect x="1" y="1" width="14" height="10" rx="2" fill="#ff6b35"/>
             </svg>
+            <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+              공간
+            </span>
           </div>
 
           {/* 도내 */}
@@ -568,6 +576,9 @@ function HeaderWidget() {
             <svg width="16" height="6" viewBox="0 0 20 10">
               <path d="M 2,5 L 18,5" fill="none" stroke="#3b82f6" strokeWidth="2"/>
             </svg>
+            <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+              도내경로
+            </span>
           </div>
 
           {/* 입도 */}
@@ -575,6 +586,9 @@ function HeaderWidget() {
             <svg width="16" height="6" viewBox="0 0 20 10">
               <path d="M 2,5 L 18,5" fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="3,2"/>
             </svg>
+            <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+              입도경로
+            </span>
           </div>
 
           {/* 출도 */}
@@ -582,6 +596,9 @@ function HeaderWidget() {
             <svg width="16" height="6" viewBox="0 0 20 10">
               <path d="M 2,5 L 18,5" fill="none" stroke="#a855f7" strokeWidth="2" strokeDasharray="3,2"/>
             </svg>
+            <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+              출도경로
+            </span>
           </div>
         </div>
       </div>

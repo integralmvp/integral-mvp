@@ -14,7 +14,7 @@ export default function CommandLayout() {
       <div className="absolute inset-y-0 left-0 w-[45%] z-10 flex flex-col"
         style={{
           backdropFilter: 'blur(12px)',
-          background: 'rgba(14, 165, 233, 0.15)' // 연한 하늘색 틴트
+          background: 'rgba(255, 255, 255, 0.15)'
         }}
       >
         {/* 상단: 로고 영역 */}
