@@ -15,7 +15,7 @@ export default function ServiceConsole() {
     <div
       className="w-[35%] border-r border-slate-200 flex flex-col overflow-hidden"
       style={{
-        background: 'rgba(255, 255, 255, 0.92)',
+        background: 'rgba(255, 255, 255, 0.3)',
         backdropFilter: 'blur(8px)'
       }}
     >
