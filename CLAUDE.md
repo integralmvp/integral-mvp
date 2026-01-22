@@ -31,7 +31,7 @@
 
 - **프레임워크**: Vite + React + TypeScript
 - **스타일링**: Tailwind CSS
-- **지도**: Mapbox GL JS (light-v11 스타일)
+- **지도**: Mapbox GL JS (dark-v11 스타일)
 - **폰트**: Pretendard (메인), Inter (숫자), JetBrains Mono (LIVE)
 
 ### 환경변수
@@ -46,23 +46,31 @@ VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
 ```
 src/
 ├── components/
+│   ├── Background/
+│   │   └── SpaceBackground.tsx           # 우주 배경 + 별 애니메이션
 │   ├── Layout/
-│   │   ├── CommandHeader.tsx    # 헤더 (로고/타이틀/LIVE)
-│   │   ├── CommandLayout.tsx    # 전체 레이아웃 (3칸 구조)
-│   │   ├── LeftConsole.tsx      # 좌측 콘솔 (인기상품/현황)
-│   │   └── RightConsole.tsx     # 우측 콘솔 (서비스 버튼)
-│   └── Map/
-│       ├── MapboxContainer.tsx  # Mapbox 지도 컨테이너
-│       └── MainlandMinimap.tsx  # 육지 미니맵
+│   │   ├── Header.tsx                    # 투명 헤더 (로고/LIVE)
+│   │   ├── CenterTitle.tsx               # 글로우 타이틀
+│   │   └── CommandLayout.tsx             # 전체 레이아웃
+│   ├── Map/
+│   │   └── MapboxContainer.tsx           # Mapbox 지도 + 경로/마커
+│   └── Widgets/
+│       ├── PopularProducts.tsx           # 실시간 인기 상품
+│       ├── ProductStats.tsx              # 보유 상품 현황 (막대 그래프)
+│       ├── ServicePanel.tsx              # 서비스 선택 버튼
+│       ├── MainlandMinimap.tsx           # 육지 미니맵
+│       ├── MainlandMinimapWithLegend.tsx # 미니맵 + 범례 (통합)
+│       └── Legend.tsx                    # 지도 범례
 ├── styles/
-│   └── fonts.css                # 폰트 설정
+│   ├── fonts.css                         # 폰트 설정
+│   └── space-background.css              # 별 애니메이션 CSS
 ├── types/
-│   └── models.ts                # 데이터 모델 타입 정의
+│   └── models.ts                         # 데이터 모델 타입 정의
 ├── data/
-│   └── mockData.ts              # 더미 데이터
+│   └── mockData.ts                       # 더미 데이터 (8개 경로, 8개 공간)
 └── utils/
-    ├── regulationEngine.ts      # 규정 매칭 룰 엔진
-    └── costCalculator.ts        # 비용 계산 유틸리티
+    ├── regulationEngine.ts               # 규정 매칭 룰 엔진
+    └── costCalculator.ts                 # 비용 계산 유틸리티
 ```
 
 ---
@@ -102,19 +110,75 @@ src/
   - 3개 항만 (인천, 목포, 부산)
   - 입출도 화살표
 
+### PR2-3: 다크 테마 + 야광 효과 ✅ 완료
+- **우주 배경 + 별 애니메이션**
+  - 3레이어 별 효과 (#0a0a1a 배경)
+  - CSS 키프레임 애니메이션
+  - SpaceBackground.tsx + space-background.css
+- **투명 헤더 재설계**
+  - 로고/LIVE만 선 구분 (border-t/b)
+  - 로고 클릭 시 페이지 새로고침
+  - 절대 위치 배치 (pointer-events 최적화)
+- **글로우 타이틀**
+  - "내 손 안의 작은 물류 허브" 지도 위 중앙 배치
+  - 3레이어 text-shadow 글로우 효과
+  - CenterTitle.tsx 컴포넌트
+- **아이소메트릭 3D 파렛트 마커**
+  - 녹색 아이소메트릭 SVG (내부 구조선 포함)
+  - 크기 비례 (용량에 따라 32/40/48px)
+  - 호버 시 scale(1.2) 효과 (inner div 사용)
+  - z-index 최적화로 가시성 확보
+  - **최종 색상: 주황색 (#ff6b35)** 사용자 수정 반영
+- **4레이어 글로우 곡선 경로**
+  - 레이어 1: 바깥 글로우 (line-blur: 8, opacity: 0.2)
+  - 레이어 2: 안쪽 글로우 (line-blur: 4, opacity: 0.4)
+  - 레이어 3: 메인 라인 (width: 3, opacity: 1)
+  - 레이어 4: 하이라이트 (width: 1, white, opacity: 0.6)
+  - 베지어 곡선 (위로 볼록, 50개 포인트)
+- **경로 화살촉**
+  - DOM 마커로 구현 (32px, z-index: 1000)
+  - 방향 계산 (bearing) 및 회전
+  - SVG 글로우 필터 (stdDeviation: 3)
+  - 파렛트 위에 표시되도록 레이어 순서 최적화
+  - **Mapbox Symbol Layer 사용** 사용자 수정 반영
+- **위젯 리디자인**
+  - 타이틀 + 수평 구분선 (h-px bg-white/50)
+  - 반투명 배경 (rgba(10,10,30,0.2))
+  - backdrop-blur-sm 효과
+  - PopularProducts, ProductStats, ServicePanel
+- **실시간 인기 상품**
+  - 4개 아이템만 노출 (max-h-[220px])
+  - 스크롤 가능 (scrollbar-thin)
+  - 순위 뱃지 + 글로우 효과
+  - 가격 표기: ₩[숫자]K/P 형식
+- **보유 상품 현황 막대 그래프**
+  - 공간/경로 각각 막대 그래프
+  - 그라데이션 (orange/cyan)
+  - 글로우 박스 섀도우
+  - 사용중 라벨 (타이틀과 바 사이 배치)
+  - 퍼센트 + 수량 표시
+- **서비스 버튼 문구**
+  - "비어있는 공간을 구매하세요"
+  - "비어있는 경로를 구매하세요"
+  - 네온 호버 효과 (boxShadow 0 → 20px)
+- **미니맵/범례 동적 배치**
+  - 제주도 좌표 기준 (`map.project()` 사용)
+  - 지도 이동/줌 시 자동 업데이트
+  - 미니맵: 제주 북서쪽 기준 (좌측 상단)
+  - 범례: 제주 중앙 상단 기준
+  - 타이틀과 적절한 간격 확보
+- **목업 데이터 확장**
+  - 경로 상품: 6개 → 8개 (도내 4, 입도 2, 출도 2)
+  - 공간 상품: 6개 → 8개 (제주시, 서귀포, 성산, 애월, 한림, 조천)
+  - 모든 좌표 제주도 범위 내 정확히 배치
+- **공간 상품 팝업 카드** 사용자 추가 구현
+  - 파렛트 마커 클릭 시 팝업 카드 표시
+  - 위치/용량/가격/특징 정보 표시
+  - 호버에서 클릭으로 변경 (우선순위 적용)
+
 ---
 
 ## 🎯 다음 작업
-
-### PR2-3 예정: 다크 테마 + 야광 효과
-- 우주 배경 + 별 효과
-- 투명 헤더 (로고/LIVE만 선 구분)
-- 지도 위 글로우 타이틀
-- 아이소메트릭 3D 파렛트 마커
-- 야광 곡선 화살표 (4레이어 글로우)
-- 위젯 리디자인 (타이틀 + 구분선 + 컨텐츠)
-- 보유 현황 막대 그래프
-- 가격 표기 ₩/P 형식
 
 ### PR3 예정: 상품 리스트 + 거래 모달
 - 경로/공간 상품 리스트
@@ -137,12 +201,13 @@ src/
 ### 색상
 | 요소 | 색상 |
 |------|------|
-| 배경 | slate-900/800 그라데이션 |
-| 콘솔 배경 | slate-900/85 (반투명) |
-| 공간 상품 마커 | orange-500 |
-| 도내 경로 | blue-600 (실선) |
-| 입도 경로 | emerald-500 (점선) |
-| 출도 경로 | purple-500 (점선) |
+| 배경 | #0a0a1a (우주 배경) |
+| 위젯 배경 | rgba(10,10,30,0.2) + backdrop-blur |
+| 공간 상품 마커 | #ff6b35 (주황색) |
+| 도내 경로 | #00bfff (시안, 실선) |
+| 입도 경로 | #00ff88 (녹색, 점선) |
+| 출도 경로 | #ff00ff (마젠타, 점선) |
+| 텍스트 글로우 | 3레이어 text-shadow |
 
 ### 버튼
 | 버튼 | 스타일 |
@@ -226,8 +291,8 @@ src/
 ```
 
 ### 더미 데이터 개수
-- 경로 상품: 6개
-- 공간 상품: 6개
+- 경로 상품: 8개 (도내 4개, 입도 2개, 출도 2개)
+- 공간 상품: 8개 (제주시 2개, 서귀포 2개, 성산/애월/한림/조천 각 1개)
 - 유니트 로드 모듈: 3개 (소형, 대형, 특수)
 - 취급 특이사항: 6개
 - 규정 룰: 5개
@@ -256,9 +321,37 @@ src/
 ## 🔄 Git 브랜치
 
 - `main`: 프로덕션 (PR 머지 후)
-- `claude/implement-product-card-f3AKc`: 현재 개발 브랜치
+- `claude/dark-theme-glow-effects-47w9e`: PR2-3 브랜치 (완료, 머지됨)
+
+---
+
+## 📝 기술적 구현 세부사항
+
+### Mapbox 좌표 기반 위젯 배치
+- `map.project([lng, lat])` 사용하여 지도 좌표를 화면 픽셀로 변환
+- 지도 이동/줌 이벤트에 반응하여 위치 자동 업데이트
+- 제주도 북서쪽 (126.15, 33.55) 기준 미니맵 배치
+- 제주도 중앙 상단 (126.55, 33.55) 기준 범례 배치
+
+### 베지어 곡선 경로 생성
+- 시작점/끝점 + 중간 제어점으로 2차 베지어 곡선 생성
+- 50개 포인트로 부드러운 곡선 표현
+- 중간 제어점: 위로 볼록하게 (midLat + 0.08)
+- 4레이어 렌더링으로 입체감 표현
+
+### 파렛트 마커 호버 버그 해결
+- Mapbox Marker의 `position: absolute` 유지 필수
+- `position: relative` 설정 시 좌표 계산 오류 발생
+- 호버 효과는 inner div에만 적용하여 해결
+- z-index로 화살촉 > 파렛트 레이어 순서 유지
+
+### 성능 최적화
+- 별 애니메이션: CSS 키프레임 사용 (GPU 가속)
+- 경로 레이어: Mapbox native layer (WebGL)
+- 화살촉: DOM 마커 (파렛트 위 표시 필요)
+- 위젯 투명도: backdrop-blur로 깊이감 표현
 
 ---
 
 **작성일**: 2025.01.14
-**최종 수정**: 2025.01.17 (PR2-2 반영)
+**최종 수정**: 2025.01.22 (PR2-3 완료 반영)
