@@ -510,17 +510,19 @@ export default function MapboxContainer() {
       <div ref={mapContainer} className="w-full h-full" />
 
       {/* 우측 상단 위젯 영역 */}
-      <div className="absolute top-4 right-4 z-10 flex flex-col gap-3">
+      <div className="absolute top-4 right-4 left-[45%] z-10 flex flex-col gap-3">
         {/* 헤더 위젯 */}
         <HeaderWidget />
 
         {/* 미니맵 */}
-        <div
-          className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden"
-          style={{ width: '200px', height: '150px' }}
-        >
+        <div className="flex justify-end">
+          <div
+            className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden"
+            style={{ width: '200px', height: '150px' }}
+          >
           
-          <div ref={miniMapContainer} className="w-full h-full" />
+            <div ref={miniMapContainer} className="w-full h-full" />
+          </div>
         </div>
       </div>
     </div>
@@ -545,7 +547,7 @@ function HeaderWidget() {
 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg px-4 py-3">
-      <div className="flex items-center justify-between gap-6">
+      <div className="flex items-center gap-6">
         {/* 좌측: 모니터링 문구 + 시각 */}
         <div className="flex items-center gap-3">
           <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
@@ -558,7 +560,7 @@ function HeaderWidget() {
         </div>
 
         {/* 우측: 범례 아이콘들 */}
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3">
           {/* 공간 */}
           <div className="flex items-center gap-1">
             <svg width="12" height="9" viewBox="0 0 16 12">
