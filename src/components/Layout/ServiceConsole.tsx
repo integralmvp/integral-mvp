@@ -555,29 +555,6 @@ function AreaInputField({ fieldId, selection, onChange, onSelectPallets }: AreaI
             </div>
           )}
 
-          {/* UNCLASSIFIED 경고 */}
-          {selection.hasUnclassified && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-              <div className="flex items-start gap-2">
-                <span className="text-orange-600">⚠️</span>
-                <div className="flex-1">
-                  <p className="text-xs text-orange-800 font-medium">
-                    일부 박스는 표준 포장 모듈로 분류 불가
-                  </p>
-                  <p className="text-xs text-orange-700 mt-1">
-                    면적 단위로 계산을 권장합니다.
-                  </p>
-                  <button
-                    onClick={handleSwitchToArea}
-                    className="mt-2 px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors"
-                  >
-                    면적 단위로 전환
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* 박스 입력 리스트 */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -668,6 +645,29 @@ function AreaInputField({ fieldId, selection, onChange, onSelectPallets }: AreaI
             )}
           </div>
 
+          {/* UNCLASSIFIED 경고 - 박스 입력 창 바로 아래로 이동 */}
+          {selection.hasUnclassified && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <span className="text-orange-600">⚠️</span>
+                <div className="flex-1">
+                  <p className="text-xs text-orange-800 font-medium">
+                    일부 박스는 표준 포장 모듈로 분류 불가
+                  </p>
+                  <p className="text-xs text-orange-700 mt-1">
+                    면적 단위로 계산을 권장합니다.
+                  </p>
+                  <button
+                    onClick={handleSwitchToArea}
+                    className="mt-2 px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors"
+                  >
+                    면적 단위로 전환
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 분류 결과 */}
           {selection.classifiedBoxes && selection.classifiedBoxes.length > 0 && (
             <div className="border border-slate-200 rounded-lg p-3">
@@ -683,7 +683,7 @@ function AreaInputField({ fieldId, selection, onChange, onSelectPallets }: AreaI
                   return (
                     <div
                       key={moduleName}
-                      className={`flex-1 py-1.5 px-2 border rounded text-center ${
+                      className={`flex-1 py-1.5 px-2 border rounded text-center cursor-default ${
                         isSelected
                           ? 'border-blue-500 bg-blue-50 text-blue-900'
                           : 'border-slate-200 bg-slate-50 text-slate-400'
@@ -700,16 +700,16 @@ function AreaInputField({ fieldId, selection, onChange, onSelectPallets }: AreaI
           {/* 모듈별 요약 */}
           {selection.moduleAggregates && selection.moduleAggregates.length > 0 && (
             <div className="border border-slate-200 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
+              <div
+                className="flex items-center justify-between mb-2 cursor-pointer"
+                onClick={() => setShowModuleDetails(!showModuleDetails)}
+              >
                 <span className="text-xs font-semibold text-slate-700">
                   모듈별 적재량 요약
                 </span>
-                <button
-                  onClick={() => setShowModuleDetails(!showModuleDetails)}
-                  className="text-xs text-blue-600 hover:text-blue-800"
-                >
+                <span className="text-xs text-blue-600 hover:text-blue-800">
                   {showModuleDetails ? '접기' : '펼치기'}
-                </button>
+                </span>
               </div>
 
               {showModuleDetails && (
