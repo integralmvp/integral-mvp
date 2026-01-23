@@ -1,5 +1,5 @@
 // ============================================
-// 포장 모듈 자동 분류 유틸리티 (PR3-2 재재설계 - 최소 적합 모듈)
+// 포장 모듈 자동 분류 유틸리티 (PR3-2 재설계: 물류 표준화 방식)
 // ============================================
 
 import type { BoxInput, ClassifiedBox, ModuleAggregate, BoxSize } from '../types/models'
@@ -11,8 +11,8 @@ const MODULE_SPECS = {
   대형: { width: 650, depth: 450, label: '대형(4분할)' },
 } as const
 
-// 허용 오차
-const TOLERANCE = 1.10
+// 형상 허용 버퍼 (절대값)
+const BUFFER = 10 // mm
 
 // 팔레트 상수 (calcPallets와 동일)
 const PALLET_W = 1100 // mm
@@ -21,10 +21,10 @@ const PALLET_H_MAX = 1800 // mm
 const PALLET_VOLUME_CAP = PALLET_W * PALLET_D * PALLET_H_MAX // mm³
 
 /**
- * 박스가 특정 모듈에 맞는지 검사
+ * 박스가 특정 모듈에 맞는지 검사 (물류 표준화 방식)
+ * - 형상(가로·세로): 절대 기준(mm) + 10mm 버퍼 → 하드 리미트
+ * - 면적: 보조 기준 (버퍼 없음, 절대 기준)
  * - 90도 회전 허용
- * - 면적 + 형상 동시 판정
- * - 허용 오차 10%
  */
 function fitsModule(
   boxWidth: number,
@@ -35,19 +35,19 @@ function fitsModule(
   const boxArea = boxWidth * boxDepth
   const moduleArea = moduleWidth * moduleDepth
 
-  // 1) 면적 체크
-  if (boxArea > moduleArea * TOLERANCE) {
+  // 1) 면적 체크 (절대 기준, 버퍼 없음)
+  if (boxArea > moduleArea) {
     return false
   }
 
-  // 2) 형상 체크 (원래 방향 또는 90도 회전)
+  // 2) 형상 체크 (원래 방향 또는 90도 회전, 10mm 버퍼 허용)
   const fitsOriginal =
-    boxWidth <= moduleWidth * TOLERANCE &&
-    boxDepth <= moduleDepth * TOLERANCE
+    boxWidth <= moduleWidth + BUFFER &&
+    boxDepth <= moduleDepth + BUFFER
 
   const fitsRotated =
-    boxDepth <= moduleWidth * TOLERANCE &&
-    boxWidth <= moduleDepth * TOLERANCE
+    boxDepth <= moduleWidth + BUFFER &&
+    boxWidth <= moduleDepth + BUFFER
 
   return fitsOriginal || fitsRotated
 }
