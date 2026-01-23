@@ -131,6 +131,48 @@ export interface StorageAreaSelection {
   estimatedPallets?: number
 }
 
+// ============ PR3-2 재재설계: 박스 실측 입력 기반 자동 분류 ============
+
+// 박스 실측 입력 Row
+export interface BoxInput {
+  id: string
+  width: number   // mm
+  depth: number   // mm
+  height: number  // mm
+  count: number
+}
+
+// 분류 결과 (SMALL/MEDIUM/LARGE/UNCLASSIFIED)
+export type ModuleClassification = '소형' | '중형' | '대형' | 'UNCLASSIFIED'
+
+// 분류된 박스
+export interface ClassifiedBox extends BoxInput {
+  classification: ModuleClassification
+}
+
+// 모듈별 집계 결과
+export interface ModuleAggregate {
+  moduleName: BoxSize
+  countTotal: number
+  heightMax: number
+  volumeTotal: number
+  palletsStandalone: number  // 단독 적재 가정 파레트 수
+}
+
+// 박스 기반 면적 선택
+export interface BoxBasedAreaSelection {
+  inputType: 'box' | 'area'
+  // 박스 입력 시
+  boxes?: BoxInput[]
+  classifiedBoxes?: ClassifiedBox[]
+  moduleAggregates?: ModuleAggregate[]
+  hasUnclassified?: boolean
+  // 면적 입력 시
+  areaInSquareMeters?: number
+  // 최종 환산 결과
+  estimatedPallets?: number
+}
+
 // PR3에서 추가될 타입들:
 // - DealRequest/Response
 // - RegulationRule

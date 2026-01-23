@@ -1,42 +1,38 @@
-// 서비스 콘솔 - 탭 + 아코디언 폼 (PR3-2 재설계)
-import { useState } from 'react'
-import type { StorageAreaSelection, AreaInputType, BoxSize, ModuleInputs, ModuleInput } from '../../types/models'
-import { PACKAGE_BOX_MODULES } from '../../data/mockData'
+// 서비스 콘솔 - 탭 + 아코디언 폼 (PR3-2 재재설계: 박스 실측 → 자동 분류)
+import { useState, useEffect } from 'react'
+import type { BoxInput, BoxBasedAreaSelection, ModuleInputs } from '../../types/models'
+import { classifyBoxes, aggregateByModule, hasUnclassifiedBoxes } from '../../utils/boxClassifier'
 import { calcPallets, calculatePalletsFromArea } from '../../utils/palletCalculator'
 
 type ServiceType = 'storage' | 'transport' | 'both'
 
-// 높이 프리셋 (mm)
-const HEIGHT_PRESETS = [200, 300, 400, 600, 800, 1000, 1200]
+// 박스 ID 생성용
+let boxIdCounter = 0
 
 export default function ServiceConsole() {
   const [activeTab, setActiveTab] = useState<ServiceType>('storage')
   const [expandedField, setExpandedField] = useState<string | null>(null)
 
-  // 보관면적 선택 상태 (보관 탭)
-  const [storageArea, setStorageArea] = useState<StorageAreaSelection>({
-    inputType: 'module',
-    selectedModules: new Set(),
-    moduleInputs: {},
+  // 보관 탭 상태
+  const [storageArea, setStorageArea] = useState<BoxBasedAreaSelection>({
+    inputType: 'box',
+    boxes: [],
   })
 
-  // 운송면적 선택 상태 (운송 탭)
-  const [transportArea, setTransportArea] = useState<StorageAreaSelection>({
-    inputType: 'module',
-    selectedModules: new Set(),
-    moduleInputs: {},
+  // 운송 탭 상태
+  const [transportArea, setTransportArea] = useState<BoxBasedAreaSelection>({
+    inputType: 'box',
+    boxes: [],
   })
 
   // 보관+운송 탭 상태
-  const [bothStorageArea, setBothStorageArea] = useState<StorageAreaSelection>({
-    inputType: 'module',
-    selectedModules: new Set(),
-    moduleInputs: {},
+  const [bothStorageArea, setBothStorageArea] = useState<BoxBasedAreaSelection>({
+    inputType: 'box',
+    boxes: [],
   })
-  const [bothTransportArea, setBothTransportArea] = useState<StorageAreaSelection>({
-    inputType: 'module',
-    selectedModules: new Set(),
-    moduleInputs: {},
+  const [bothTransportArea, setBothTransportArea] = useState<BoxBasedAreaSelection>({
+    inputType: 'box',
+    boxes: [],
   })
 
   const handleFieldClick = (fieldId: string) => {
@@ -48,24 +44,12 @@ export default function ServiceConsole() {
     console.log('활성 탭:', activeTab)
 
     if (activeTab === 'storage') {
-      console.log('보관 수요면적:', {
-        ...storageArea,
-        selectedModules: Array.from(storageArea.selectedModules || []),
-      })
+      console.log('보관 수요면적:', storageArea)
     } else if (activeTab === 'transport') {
-      console.log('운송 수요면적:', {
-        ...transportArea,
-        selectedModules: Array.from(transportArea.selectedModules || []),
-      })
+      console.log('운송 수요면적:', transportArea)
     } else if (activeTab === 'both') {
-      console.log('보관 수요면적:', {
-        ...bothStorageArea,
-        selectedModules: Array.from(bothStorageArea.selectedModules || []),
-      })
-      console.log('운송 수요면적:', {
-        ...bothTransportArea,
-        selectedModules: Array.from(bothTransportArea.selectedModules || []),
-      })
+      console.log('보관 수요면적:', bothStorageArea)
+      console.log('운송 수요면적:', bothTransportArea)
     }
 
     console.log('=== 검색 완료 ===')
@@ -129,9 +113,9 @@ export default function ServiceConsole() {
               placeholder="화물량을 보관 시 필요한 면적으로 환산합니다."
               expanded={expandedField === 'storage-area'}
               onToggle={() => handleFieldClick('storage-area')}
-              summary={getStorageAreaSummary(storageArea)}
+              summary={getAreaSummary(storageArea)}
             >
-              <StorageAreaField
+              <AreaInputField
                 selection={storageArea}
                 onChange={setStorageArea}
               />
@@ -162,9 +146,9 @@ export default function ServiceConsole() {
               placeholder="화물량을 운송 시 필요한 면적으로 환산합니다."
               expanded={expandedField === 'transport-area'}
               onToggle={() => handleFieldClick('transport-area')}
-              summary={getStorageAreaSummary(transportArea)}
+              summary={getAreaSummary(transportArea)}
             >
-              <StorageAreaField
+              <AreaInputField
                 selection={transportArea}
                 onChange={setTransportArea}
               />
@@ -202,9 +186,9 @@ export default function ServiceConsole() {
               placeholder="화물량을 보관 시 필요한 면적으로 환산합니다."
               expanded={expandedField === 'both-storage-area'}
               onToggle={() => handleFieldClick('both-storage-area')}
-              summary={getStorageAreaSummary(bothStorageArea)}
+              summary={getAreaSummary(bothStorageArea)}
             >
-              <StorageAreaField
+              <AreaInputField
                 selection={bothStorageArea}
                 onChange={setBothStorageArea}
               />
@@ -215,9 +199,9 @@ export default function ServiceConsole() {
               placeholder="화물량을 운송 시 필요한 면적으로 환산합니다."
               expanded={expandedField === 'both-transport-area'}
               onToggle={() => handleFieldClick('both-transport-area')}
-              summary={getStorageAreaSummary(bothTransportArea)}
+              summary={getAreaSummary(bothTransportArea)}
             >
-              <StorageAreaField
+              <AreaInputField
                 selection={bothTransportArea}
                 onChange={setBothTransportArea}
               />
@@ -268,16 +252,12 @@ export default function ServiceConsole() {
 
 // ============ 헬퍼 함수 ============
 
-/**
- * 보관면적 선택 요약 문구 생성
- */
-function getStorageAreaSummary(selection: StorageAreaSelection): string | undefined {
-  if (selection.inputType === 'module' && selection.selectedModules && selection.selectedModules.size > 0) {
-    const modulesArray = Array.from(selection.selectedModules)
+function getAreaSummary(selection: BoxBasedAreaSelection): string | undefined {
+  if (selection.inputType === 'box' && selection.boxes && selection.boxes.length > 0) {
     if (selection.estimatedPallets !== undefined && selection.estimatedPallets > 0) {
-      return `${modulesArray.join(', ')} → 약 ${selection.estimatedPallets}P`
+      return `박스 ${selection.boxes.length}종 → 약 ${selection.estimatedPallets}P`
     }
-    return `${modulesArray.join(', ')} 선택됨`
+    return `박스 ${selection.boxes.length}종 입력됨`
   }
   if (selection.inputType === 'area' && selection.areaInSquareMeters && selection.estimatedPallets) {
     return `${selection.areaInSquareMeters}㎡ → 약 ${selection.estimatedPallets}P`
@@ -287,7 +267,6 @@ function getStorageAreaSummary(selection: StorageAreaSelection): string | undefi
 
 // ============ 컴포넌트 ============
 
-// 아코디언 필드 컴포넌트
 interface AccordionFieldProps {
   id: string
   label: string
@@ -338,66 +317,87 @@ function AccordionField({ label, placeholder, expanded, onToggle, summary, child
   )
 }
 
-// 보관면적 선택 필드
-interface StorageAreaFieldProps {
-  selection: StorageAreaSelection
-  onChange: (selection: StorageAreaSelection) => void
+// ============ 면적 입력 필드 (박스 기반 + 면적 fallback) ============
+
+interface AreaInputFieldProps {
+  selection: BoxBasedAreaSelection
+  onChange: (selection: BoxBasedAreaSelection) => void
 }
 
-function StorageAreaField({ selection, onChange }: StorageAreaFieldProps) {
-  const handleInputTypeChange = (inputType: AreaInputType) => {
+function AreaInputField({ selection, onChange }: AreaInputFieldProps) {
+  const [showModuleDetails, setShowModuleDetails] = useState(false)
+
+  // 박스 입력 변경 시 자동 분류 및 계산
+  useEffect(() => {
+    if (selection.inputType === 'box' && selection.boxes && selection.boxes.length > 0) {
+      // 자동 분류
+      const classifiedBoxes = classifyBoxes(selection.boxes)
+      const hasUnclassified = hasUnclassifiedBoxes(classifiedBoxes)
+
+      // 모듈별 집계
+      const moduleAggregates = aggregateByModule(classifiedBoxes)
+
+      // calcPallets 호출을 위한 inputs 구성
+      const inputs: ModuleInputs = {}
+      moduleAggregates.forEach(agg => {
+        inputs[agg.moduleName] = {
+          count: agg.countTotal,
+          height: agg.heightMax,
+        }
+      })
+
+      // 선택된 모듈 Set 구성
+      const selectedModules = new Set(moduleAggregates.map(agg => agg.moduleName))
+
+      // 최종 팔레트 계산 (기존 calcPallets 사용)
+      const result = calcPallets(selectedModules, inputs)
+
+      onChange({
+        ...selection,
+        classifiedBoxes,
+        moduleAggregates,
+        hasUnclassified,
+        estimatedPallets: result.pallets,
+      })
+    }
+  }, [selection.boxes])
+
+  const handleInputTypeChange = (inputType: 'box' | 'area') => {
     onChange({
       inputType,
-      selectedModules: new Set(),
-      moduleInputs: {},
+      boxes: inputType === 'box' ? [] : undefined,
+      areaInSquareMeters: inputType === 'area' ? 0 : undefined,
     })
   }
 
-  const handleModuleToggle = (moduleName: BoxSize) => {
-    const newSelectedModules = new Set<BoxSize>(selection.selectedModules || new Set<BoxSize>())
-    if (newSelectedModules.has(moduleName)) {
-      newSelectedModules.delete(moduleName)
-      // 모듈 선택 해제 시 입력값도 삭제
-      const newInputs = { ...selection.moduleInputs }
-      delete newInputs[moduleName]
-
-      // 팔레트 재계산
-      const result = calcPallets(newSelectedModules, newInputs)
-
-      onChange({
-        ...selection,
-        selectedModules: newSelectedModules,
-        moduleInputs: newInputs,
-        estimatedPallets: result.pallets,
-      })
-    } else {
-      newSelectedModules.add(moduleName)
-      onChange({
-        ...selection,
-        selectedModules: newSelectedModules,
-      })
+  const handleAddBox = () => {
+    const newBox: BoxInput = {
+      id: `box-${++boxIdCounter}`,
+      width: 0,
+      depth: 0,
+      height: 0,
+      count: 0,
     }
-  }
-
-  const handleModuleInputChange = (moduleName: BoxSize, field: 'count' | 'height', value: number) => {
-    const newInputs: ModuleInputs = { ...selection.moduleInputs }
-
-    if (!newInputs[moduleName]) {
-      newInputs[moduleName] = { count: 0, height: 0 }
-    }
-
-    newInputs[moduleName] = {
-      ...newInputs[moduleName],
-      [field]: value,
-    } as ModuleInput
-
-    // 팔레트 재계산
-    const result = calcPallets(selection.selectedModules || new Set(), newInputs)
 
     onChange({
       ...selection,
-      moduleInputs: newInputs,
-      estimatedPallets: result.pallets,
+      boxes: [...(selection.boxes || []), newBox],
+    })
+  }
+
+  const handleRemoveBox = (boxId: string) => {
+    onChange({
+      ...selection,
+      boxes: (selection.boxes || []).filter(b => b.id !== boxId),
+    })
+  }
+
+  const handleBoxChange = (boxId: string, field: keyof BoxInput, value: number) => {
+    onChange({
+      ...selection,
+      boxes: (selection.boxes || []).map(box =>
+        box.id === boxId ? { ...box, [field]: value } : box
+      ),
     })
   }
 
@@ -413,28 +413,35 @@ function StorageAreaField({ selection, onChange }: StorageAreaFieldProps) {
     })
   }
 
-  // 팔레트 계산 결과
-  const selectedModules = selection.selectedModules || new Set()
-  const moduleInputs = selection.moduleInputs || {}
-  const calcResult = selection.inputType === 'module' && selectedModules.size > 0
-    ? calcPallets(selectedModules, moduleInputs)
-    : null
+  const handleSwitchToArea = () => {
+    onChange({
+      inputType: 'area',
+      areaInSquareMeters: 0,
+    })
+  }
 
   return (
     <div className="space-y-4">
+      {/* 플로우 설명 */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+        <p className="text-xs text-blue-800">
+          📝 입력한 박스 → 표준 모듈로 자동 분류 → 모듈별 적재량을 합산해 파렛트로 환산합니다.
+        </p>
+      </div>
+
       {/* 단위 선택 */}
       <div>
         <label className="block text-xs font-medium text-slate-700 mb-2">단위 선택</label>
         <div className="flex gap-2">
           <button
-            onClick={() => handleInputTypeChange('module')}
+            onClick={() => handleInputTypeChange('box')}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-              selection.inputType === 'module'
+              selection.inputType === 'box'
                 ? 'bg-blue-500 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            포장박스 모듈
+            포장 단위
           </button>
           <button
             onClick={() => handleInputTypeChange('area')}
@@ -444,120 +451,208 @@ function StorageAreaField({ selection, onChange }: StorageAreaFieldProps) {
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            면적
+            면적 단위
           </button>
         </div>
       </div>
 
-      {/* 포장박스 모듈 선택 (다중 선택) */}
-      {selection.inputType === 'module' && (
+      {/* 포장 단위 입력 */}
+      {selection.inputType === 'box' && (
         <>
-          <div>
-            <label className="block text-xs font-medium text-slate-700 mb-2">
-              모듈 선택 (중복 선택 가능)
-            </label>
-            <div className="flex gap-2">
-              {PACKAGE_BOX_MODULES.map((module) => (
-                <button
-                  key={module.id}
-                  onClick={() => handleModuleToggle(module.name)}
-                  className={`flex-1 py-2 px-2 border rounded-lg text-center transition-all ${
-                    selectedModules.has(module.name)
-                      ? 'border-blue-500 bg-blue-50 text-blue-900'
-                      : 'border-slate-300 bg-white text-slate-700 hover:border-blue-300'
-                  }`}
-                >
-                  <div className="text-xs font-bold">{module.label}</div>
-                  <div className="text-[9px] text-slate-500 mt-0.5">
-                    {module.width}×{module.depth}mm
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 선택된 모듈별 상세 입력 */}
-          {selectedModules.size > 0 && (
-            <div className="border border-slate-200 rounded-lg p-3 space-y-3">
-              <div className="text-xs font-semibold text-slate-700 mb-2">
-                선택된 모듈 상세 입력
+          {/* UNCLASSIFIED 경고 */}
+          {selection.hasUnclassified && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <span className="text-orange-600">⚠️</span>
+                <div className="flex-1">
+                  <p className="text-xs text-orange-800 font-medium">
+                    일부 박스는 표준 포장 모듈로 분류 불가
+                  </p>
+                  <p className="text-xs text-orange-700 mt-1">
+                    면적 단위로 계산을 권장합니다.
+                  </p>
+                  <button
+                    onClick={handleSwitchToArea}
+                    className="mt-2 px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors"
+                  >
+                    면적 단위로 전환
+                  </button>
+                </div>
               </div>
-
-              {Array.from(selectedModules).map((moduleName) => {
-                const module = PACKAGE_BOX_MODULES.find(m => m.name === moduleName)
-                if (!module) return null
-
-                const input = moduleInputs[moduleName] || { count: 0, height: 0 }
-
-                return (
-                  <div key={module.id} className="bg-slate-50 rounded-lg p-3 space-y-2">
-                    <div className="text-xs font-bold text-slate-800">
-                      {module.label}
-                    </div>
-
-                    {/* 박스 개수 */}
-                    <div>
-                      <label className="block text-[10px] font-medium text-slate-600 mb-1">
-                        박스 개수
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={input.count || ''}
-                        onChange={(e) => handleModuleInputChange(moduleName, 'count', Number(e.target.value))}
-                        placeholder="개수"
-                        className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    {/* 박스 높이 */}
-                    <div>
-                      <label className="block text-[10px] font-medium text-slate-600 mb-1">
-                        박스 높이 (mm)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={input.height || ''}
-                        onChange={(e) => handleModuleInputChange(moduleName, 'height', Number(e.target.value))}
-                        placeholder="높이(mm)"
-                        className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-
-                      {/* 높이 프리셋 버튼 */}
-                      <div className="flex gap-1 mt-1.5 flex-wrap">
-                        {HEIGHT_PRESETS.map((preset) => (
-                          <button
-                            key={preset}
-                            onClick={() => handleModuleInputChange(moduleName, 'height', preset)}
-                            className="px-2 py-0.5 bg-slate-200 hover:bg-slate-300 rounded text-[9px] text-slate-700 transition-colors"
-                          >
-                            {preset}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
             </div>
           )}
 
-          {/* 환산 결과 */}
-          {calcResult && calcResult.pallets > 0 && (
+          {/* 박스 입력 리스트 */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-medium text-slate-700">
+                박스 정보 입력
+              </label>
+              <button
+                onClick={handleAddBox}
+                className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors"
+              >
+                + 박스 종류 추가
+              </button>
+            </div>
+
+            {selection.boxes && selection.boxes.length > 0 ? (
+              <div className="space-y-2">
+                {selection.boxes.map((box, index) => (
+                  <div key={box.id} className="bg-slate-50 rounded-lg p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-700">
+                        박스 {index + 1}
+                      </span>
+                      <button
+                        onClick={() => handleRemoveBox(box.id)}
+                        className="text-xs text-red-600 hover:text-red-800"
+                      >
+                        삭제
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-slate-600 mb-1">
+                          가로(mm)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={box.width || ''}
+                          onChange={(e) => handleBoxChange(box.id, 'width', Number(e.target.value))}
+                          className="w-full px-2 py-1 border border-slate-300 rounded text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-600 mb-1">
+                          세로(mm)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={box.depth || ''}
+                          onChange={(e) => handleBoxChange(box.id, 'depth', Number(e.target.value))}
+                          className="w-full px-2 py-1 border border-slate-300 rounded text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-600 mb-1">
+                          높이(mm)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={box.height || ''}
+                          onChange={(e) => handleBoxChange(box.id, 'height', Number(e.target.value))}
+                          className="w-full px-2 py-1 border border-slate-300 rounded text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-slate-600 mb-1">
+                          개수
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={box.count || ''}
+                          onChange={(e) => handleBoxChange(box.id, 'count', Number(e.target.value))}
+                          className="w-full px-2 py-1 border border-slate-300 rounded text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-slate-400 text-center py-4 border border-dashed border-slate-300 rounded">
+                "+ 박스 종류 추가" 버튼을 눌러 박스 정보를 입력하세요
+              </div>
+            )}
+          </div>
+
+          {/* 분류 결과 */}
+          {selection.classifiedBoxes && selection.classifiedBoxes.length > 0 && (
+            <div className="border border-slate-200 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-slate-700">
+                  표준 포장 모듈 자동 분류 결과
+                </span>
+              </div>
+
+              <div className="flex gap-1.5">
+                {['소형', '중형', '대형'].map(moduleName => {
+                  const isSelected = selection.moduleAggregates?.some(agg => agg.moduleName === moduleName)
+                  return (
+                    <div
+                      key={moduleName}
+                      className={`flex-1 py-1.5 px-2 border rounded text-center ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50 text-blue-900'
+                          : 'border-slate-200 bg-slate-50 text-slate-400'
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{moduleName}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 모듈별 요약 */}
+          {selection.moduleAggregates && selection.moduleAggregates.length > 0 && (
+            <div className="border border-slate-200 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-slate-700">
+                  모듈별 적재량 요약
+                </span>
+                <button
+                  onClick={() => setShowModuleDetails(!showModuleDetails)}
+                  className="text-xs text-blue-600 hover:text-blue-800"
+                >
+                  {showModuleDetails ? '접기' : '펼치기'}
+                </button>
+              </div>
+
+              {showModuleDetails && (
+                <div className="space-y-2">
+                  {selection.moduleAggregates.map(agg => (
+                    <div key={agg.moduleName} className="bg-slate-50 rounded p-2">
+                      <div className="text-xs font-bold text-slate-800 mb-1">
+                        {agg.moduleName}
+                      </div>
+                      <div className="text-[10px] text-slate-600 space-y-0.5">
+                        <div>• 높이 최대 {agg.heightMax}mm</div>
+                        <div>• 총 {agg.countTotal}박스</div>
+                        <div>
+                          • 약 {agg.palletsStandalone} 파렛트
+                          <span className="text-slate-500 ml-1">(단독 적재 가정)</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 최종 총 파렛트 */}
+          {selection.estimatedPallets !== undefined && selection.estimatedPallets > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <div className="flex items-center gap-3">
                 <div className="text-3xl">📦</div>
                 <div className="flex-1">
                   <div className="text-sm font-bold text-blue-900">
-                    약 {calcResult.pallets}개 파렛트
+                    총 필요 공간: 약 {selection.estimatedPallets}개 파렛트
                   </div>
                   <div className="text-xs text-blue-700 mt-0.5">
                     1파렛트 = 1.1m × 1.1m, 최대 적재 높이 1.8m 기준
                   </div>
 
                   {/* 혼합 적재 보정 배지 */}
-                  {selectedModules.size > 1 && (
+                  {selection.moduleAggregates && selection.moduleAggregates.length > 1 && (
                     <div className="mt-1.5">
                       <span className="inline-block px-2 py-0.5 bg-orange-100 text-orange-800 text-[10px] font-medium rounded">
                         혼합 적재 보정 +10% 적용
@@ -566,23 +661,12 @@ function StorageAreaField({ selection, onChange }: StorageAreaFieldProps) {
                   )}
                 </div>
               </div>
-
-              {/* 경고 메시지 */}
-              {calcResult.warnings && calcResult.warnings.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-blue-200">
-                  {calcResult.warnings.map((warning, idx) => (
-                    <div key={idx} className="text-[10px] text-orange-700 mt-1">
-                      ⚠️ {warning}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
         </>
       )}
 
-      {/* 면적 입력 */}
+      {/* 면적 단위 입력 */}
       {selection.inputType === 'area' && (
         <>
           <div>
@@ -598,7 +682,6 @@ function StorageAreaField({ selection, onChange }: StorageAreaFieldProps) {
             />
           </div>
 
-          {/* 환산 결과 */}
           {selection.estimatedPallets !== undefined && selection.estimatedPallets > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <div className="flex items-center gap-3">
