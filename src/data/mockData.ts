@@ -339,40 +339,36 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
 // ============ 유니트 로드 모듈 옵션 ============
 export const UNIT_LOAD_MODULES = ['소형', '대형', '특수'] as const
 
-// ============ 포장박스 모듈 (PR3-2) ============
+// ============ 포장박스 모듈 (PR3-2 재설계 - 바닥 규격 mm) ============
 export interface PackageBoxModule {
   id: string
   name: '소형' | '중형' | '대형'
-  width: number  // cm
-  depth: number  // cm
-  height: number // cm
-  description: string
+  width: number  // mm (바닥 가로)
+  depth: number  // mm (바닥 세로)
+  label: string
 }
 
 export const PACKAGE_BOX_MODULES: PackageBoxModule[] = [
   {
     id: 'box-small',
     name: '소형',
-    width: 25,
-    depth: 18,
-    height: 12,
-    description: '의류, 소형 잡화'
+    width: 550,
+    depth: 275,
+    label: '소형(8분할)'
   },
   {
     id: 'box-medium',
     name: '중형',
-    width: 35,
-    depth: 25,
-    height: 20,
-    description: '생활용품, 식품'
+    width: 550,
+    depth: 366,
+    label: '중형(6분할)'
   },
   {
     id: 'box-large',
     name: '대형',
-    width: 50,
-    depth: 40,
-    height: 30,
-    description: '가전, 대형 물품'
+    width: 650,
+    depth: 450,
+    label: '대형(4분할)'
   }
 ]
 
