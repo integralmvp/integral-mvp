@@ -738,7 +738,21 @@ function AreaInputField({ fieldId, selection, onChange, onSelectPallets }: AreaI
           {selection.estimatedPallets !== undefined && selection.estimatedPallets > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-3">
               <div className="flex items-center gap-3">
-                <div className="text-3xl">📦</div>
+                <div className="flex-shrink-0">
+                  <svg width="40" height="35" viewBox="0 0 32 28" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.8))' }}>
+                    {/* 아이소메트릭 3D 파렛트 (주황) */}
+                    {/* 상판 */}
+                    <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" strokeWidth="0.5"/>
+                    {/* 좌측면 */}
+                    <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
+                    {/* 우측면 */}
+                    <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
+                    {/* 하단 다리 */}
+                    <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#993d1f"/>
+                    <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#993d1f"/>
+                    <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#993d1f"/>
+                  </svg>
+                </div>
                 <div className="flex-1">
                   <div className="text-sm font-bold text-blue-900">
                     총 필요 공간: {selection.estimatedPallets} 파렛트
@@ -789,7 +803,21 @@ function AreaInputField({ fieldId, selection, onChange, onSelectPallets }: AreaI
           {selection.estimatedPallets !== undefined && selection.estimatedPallets > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-3">
               <div className="flex items-center gap-3">
-                <div className="text-3xl">📦</div>
+                <div className="flex-shrink-0">
+                  <svg width="40" height="35" viewBox="0 0 32 28" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.8))' }}>
+                    {/* 아이소메트릭 3D 파렛트 (주황) */}
+                    {/* 상판 */}
+                    <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" strokeWidth="0.5"/>
+                    {/* 좌측면 */}
+                    <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
+                    {/* 우측면 */}
+                    <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
+                    {/* 하단 다리 */}
+                    <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#993d1f"/>
+                    <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#993d1f"/>
+                    <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#993d1f"/>
+                  </svg>
+                </div>
                 <div className="flex-1">
                   <div className="text-sm font-bold text-blue-900">
                     {selection.estimatedPallets} 파렛트
