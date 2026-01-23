@@ -2,28 +2,23 @@
 
 ## 📋 프로젝트 개요
 
-### 기본 정보
-- **프로젝트명**: INTEGRAL
-- **목적**: 제주 물류 공유 플랫폼 - 공간과 경로를 상품화하는 공유 물류 서비스
-- **버전**: MVP v3.0 (설득용 시연 목적)
+**제주 물류 공유 플랫폼** - 공간과 경로를 상품화하는 공유 물류 서비스
 
-### ⚠️ 중요: MVP의 본질
-> **이 프로젝트는 설득용 시연 목적이며, 실제 운영 목적이 아닙니다.**
->
-> - 투자자/이해관계자에게 3-5분 내 서비스 가치를 전달하는 것이 목표
-> - 실제 거래 기능 없음 (모든 것이 더미 데이터 기반)
-> - 백엔드/데이터베이스 없음
-> - "이 서비스가 작동한다면 어떻게 보일까?"를 시각화하는 프로토타입
+### ⚠️ MVP의 본질
+> **설득용 시연 프로토타입 (실제 운영 목적 아님)**
+> - 투자자/이해관계자에게 3-5분 내 서비스 가치 전달
+> - 더미 데이터 기반 (백엔드/DB 없음)
+> - "이 서비스가 작동한다면 어떻게 보일까?" 시각화
 
 ---
 
 ## 🎯 핵심 설계 원칙
 
-1. **직관성 우선** - 별도 설명 없이 화면만으로 서비스 이해 가능
+1. **직관성 우선** - 별도 설명 없이 화면만으로 이해 가능
 2. **지도 중심 UI** - 모든 가치는 지도에서 시각적으로 전달
-3. **싱글 페이지 구조** - 별도 라우팅 없이 모달로 모든 정보 접근
-4. **더미 데이터 기반** - 백엔드 없음, 모든 데이터는 mockData에서 관리
-5. **룰 기반 로직** - 복잡한 알고리즘 대신 단순 조건문 기반
+3. **싱글 페이지 구조** - 별도 라우팅 없이 모달로 정보 접근
+4. **더미 데이터 기반** - mockData.ts에서 모든 데이터 관리
+5. **룰 기반 로직** - 복잡한 알고리즘 대신 단순 조건문
 
 ---
 
@@ -31,341 +26,278 @@
 
 - **프레임워크**: Vite + React + TypeScript
 - **스타일링**: Tailwind CSS
-- **지도**: Mapbox GL JS (light-v11 스타일)
+- **지도**: Mapbox GL JS (light-v11)
 - **폰트**: Pretendard (메인), Inter (숫자)
-
-### 환경변수
-```env
-VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
-```
-
----
-
-## 📁 프로젝트 구조
-
-```
-src/
-├── components/
-│   ├── Layout/
-│   │   ├── CommandLayout.tsx          # 전체 레이아웃 (지도 배경 + 좌측 블러)
-│   │   └── ServiceConsole.tsx         # 서비스 콘솔 (탭 + 아코디언 폼)
-│   ├── Map/
-│   │   └── MapboxContainer.tsx        # Mapbox 지도 (메인 + 미니맵)
-│   ├── common/                        # 공통 컴포넌트 (PR3 사용 예정)
-│   │   ├── Badge.tsx
-│   │   ├── Modal.tsx
-│   │   ├── ProductCard.tsx
-│   │   └── Toast.tsx
-│   ├── deal/                          # 거래 모달 (PR3 사용 예정)
-│   │   ├── DealModal.tsx
-│   │   ├── CargoConditionForm.tsx
-│   │   ├── ProductSummary.tsx
-│   │   ├── CostEstimate.tsx
-│   │   └── RegulationMatchResult.tsx
-│   ├── routes/                        # 경로 카드 (PR3 사용 예정)
-│   │   └── RouteProductCard.tsx
-│   └── storages/                      # 공간 카드 (PR3 사용 예정)
-│       └── StorageProductCard.tsx
-├── types/
-│   └── models.ts                      # 데이터 모델 타입 정의
-├── data/
-│   └── mockData.ts                    # 더미 데이터
-└── utils/
-    ├── regulationEngine.ts            # 규정 매칭 룰 엔진 (PR3)
-    └── costCalculator.ts              # 비용 계산 유틸리티 (PR3)
-```
 
 ---
 
 ## ✅ 완료된 작업
 
 ### PR1: 프로젝트 초기 설정
-- Vite + React + TypeScript 구축
-- Tailwind CSS 설정
-- 기본 레이아웃 골격
+Vite + React + TypeScript + Tailwind CSS 구축
 
-### PR2-4: UI 전면 개편 ✅ 완료
-**레이아웃 구조:**
+### PR2-4: UI 전면 개편
+**레이아웃:**
 - 전체 화면 Mapbox 지도 배경
-- 좌측 45%: 블러 오버레이 (backdrop-filter: blur(12px))
-- 로고: 좌측 상단 (INTEGRAL, 흰색)
-- 서비스 콘솔: 좌측 하단 위젯
+- 좌측 45% 블러 오버레이 (`backdrop-filter: blur(12px)`)
+- 좌측 상단: INTEGRAL 로고
+- 좌측 하단: 서비스 콘솔 위젯
 
-**서비스 콘솔 (ServiceConsole):**
+**서비스 콘솔:**
 - 3개 탭: 보관 | 운송 | 보관+운송
-- 에어비앤비식 아코디언 폼
-- 각 탭별 맞춤형 입력 필드
-- 검색 버튼 (탭별 색상 변경)
-- 반투명 배경: rgba(255, 255, 255, 0.3) + blur(8px)
+- 아코디언 폼 (에어비앤비식)
+- 탭별 맞춤형 입력 필드
+- 탭별 색상 버튼 (blue/emerald/purple)
 
-**지도 (MapboxContainer):**
-- **메인 지도**
-  - 라이트 스타일 (light-v11)
-  - 제주도 중심 [126.5312, 33.4996]
-  - centerOffset으로 우측 배치 (좌측 블러 영역 보정)
-  - 아이소메트릭 3D 파렛트 마커 (주황색 #ff6b35)
-  - 베지어 곡선 경로 (파란색 실선)
-- **미니맵 (이중 맵)**
-  - 한반도 전체 + 제주 (zoom 4.5)
-  - 크기: 280x200px
-  - 입도/출도 경로 + 화살표
-  - interactive: false
-- **헤더 위젯**
-  - "서비스 현황 실시간 모니터링" + 현재 시각
-  - 범례 아이콘 (◆공간 ━도내 ┄입도 ┄출도)
-  - 우측 상단 플로팅
+**지도:**
+- 메인: 제주도 중심, centerOffset으로 우측 배치
+- 미니맵: 한반도 전체 + 입출도 경로 화살표
+- 마커: 아이소메트릭 3D 파렛트 (주황 #ff6b35)
+- 경로: 베지어 곡선 (도내 파란 실선, 입도 녹색 점선, 출도 보라 점선)
 
-**기술적 구현:**
-- centerOffset 사용: 좌측 45% 블러 영역 보정
-- 이중 Mapbox 인스턴스 (메인 + 미니맵)
-- 미니맵 경로 화살표 (bearing 계산 + symbol layer)
-- 파렛트 마커 호버 팝업 (호버 전용)
+### PR3-2: 보관면적 선택 (포장 모듈 분류 + 파렛트 환산) ✅
 
-**삭제된 요소:**
-- 우주 배경 (SpaceBackground)
-- 다크 테마 위젯들 (PopularProducts, ProductStats)
-- 별도 헤더 컴포넌트 (Header, CommandHeader)
-- SVG 기반 미니맵 (MainlandMinimap)
-- 네온 글로우 효과
+#### 1) 포장 모듈 자동 분류 (`utils/boxClassifier.ts`)
+
+**목적:** 사용자가 입력한 박스 실측값을 물류 표준 모듈로 자동 분류
+
+**표준 모듈 규격:**
+- 소형 (8분할): 550mm × 275mm
+- 중형 (6분할): 550mm × 366mm
+- 대형 (4분할): 650mm × 450mm
+
+**분류 로직 (물류 표준화 방식):**
+```
+1. 면적 체크 (절대 기준, 버퍼 없음)
+   - 박스 면적 > 모듈 면적 → fits 실패
+
+2. 형상 체크 (10mm 버퍼 허용, 90도 회전 가능)
+   - 원래 방향: 박스 가로 ≤ 모듈 가로 + 10mm AND 박스 세로 ≤ 모듈 세로 + 10mm
+   - 회전 방향: 박스 세로 ≤ 모듈 가로 + 10mm AND 박스 가로 ≤ 모듈 세로 + 10mm
+   - 둘 중 하나라도 통과하면 fits 성공
+
+3. 최소 적합 모듈 선택
+   - fits 되는 모든 모듈 중 면적이 가장 작은 모듈 선택
+   - fits 되는 모듈이 없으면 → UNCLASSIFIED
+```
+
+**모듈별 집계:**
+- 분류된 박스들을 모듈별로 그룹핑
+- 각 모듈별: 총 개수, 최대 높이, 총 체적, 단독 파렛트 수 계산
+
+#### 2) 파렛트 환산 (`utils/palletCalculator.ts`)
+
+**목적:** 체적 기반 파렛트 환산 (물류 표준화 방식)
+
+**파렛트 규격:**
+- 1100mm × 1100mm (가로 × 세로)
+- 최대 적재 높이: 1800mm
+
+**환산 로직:**
+```
+1. 각 모듈별 체적 계산
+   - 박스 체적 = 모듈 가로 × 모듈 세로 × min(박스 높이, 1800mm)
+   - 모듈별 총 체적 = 박스 체적 × 박스 개수
+
+2. 이론 최소 파렛트 수 (체적 기반)
+   - 총 체적 = 모든 모듈의 체적 합산
+   - 파렛트 용량 = 1100mm × 1100mm × 1800mm
+   - 이론 파렛트 수 = ceil(총 체적 / 파렛트 용량)
+
+3. 혼합 적재 보정계수 적용
+   - 단일 모듈: 1.0 (보정 없음)
+   - 혼합 모듈 (2종 이상): 1.1 (+10% 보정)
+   - 최종 파렛트 수 = ceil(이론 파렛트 수 × 보정계수)
+```
+
+**면적 기반 환산 (fallback):**
+- 입력: 면적(㎡)
+- 파렛트 1개 = 1.1m × 1.1m = 1.21㎡
+- 필요 파렛트 = ceil(면적 / 1.21)
+
+#### 3) UI 플로우 (`components/Layout/ServiceConsole.tsx`)
+
+**입력 방식:**
+- 포장 단위 (기본): 박스 실측 입력 → 자동 분류 → 파렛트 환산
+- 면적 단위 (fallback): 면적(㎡) 직접 입력
+
+**포장 단위 플로우:**
+```
+1. 박스 종류 추가 (가로/세로/높이/개수 입력)
+2. 자동 분류 → 표준 모듈 배지 표시 (소형/중형/대형)
+3. 모듈별 적재량 요약 (펼치기/접기)
+4. 최종 파렛트 결과 표시 (3D 아이콘 + 안내문구)
+5. "N 파렛트를 선택하시겠습니까?" CTA 버튼
+6. 선택 확정 → 다음 아코디언 자동 펼침
+```
+
+**예외 처리:**
+- UNCLASSIFIED 박스 → 경고 + "면적 단위로 전환" 버튼
+- 검증 실패 (면적/파렛트 계산) → 에러 메시지 표시
 
 ---
 
 ## 🎯 다음 작업 (PR 로드맵)
 
-### PR3: 서비스 콘솔 기능 구현
-#### PR3-1: 아코디언 폼 + 탭 전환
-- 탭 전환 로직 완성
-- 아코디언 expand/collapse 애니메이션
-- 탭별 필드 동적 렌더링
+### PR3-3: 품목 드롭다운 + 캘린더
+- 품목 드롭다운 (택배사 취급품목, 검색, 다중 선택)
+- 캘린더: 보관기간 (시작일~종료일), 운송날짜 (단일)
 
-#### PR3-2: 보관면적 선택 (모듈/면적 → 파렛트 환산)
-**단위 선택:** 포장박스 모듈 | 면적
-
-**포장박스 모듈:**
-- 소형/중형/대형 선택 (가로×세로 시각화)
-- 박스 개수 입력
-- 파렛트 환산: 적재높이 180cm 기준
-- 시각화 이미지 + 안내문구
-
-**면적 단위:**
-- 면적(㎡) 입력
-- 파렛트 환산 로직
-- 규격: 1100×1100mm 기준
-
-**파렛트 환산 표시:**
-- 결과 표시: "약 X개 파렛트"
-- 시각화 이미지
-- 안내문구: "1파렛트 = 1.1m × 1.1m"
-
-#### PR3-3: 품목 드롭다운 + 캘린더
-- **품목 드롭다운**
-  - 택배사 취급품목 목록
-  - 검색 기능
-  - 다중 선택 가능
-- **캘린더 (보관기간)**
-  - 시작일 ~ 종료일 선택
-  - 기간 표시
-- **캘린더 (운송날짜)**
-  - 단일 날짜 선택
-
-#### PR3-4: 보관+운송 순서 로직
-- 순서 선택: 보관 먼저 | 운송 먼저
+### PR3-4: 보관+운송 순서 로직
+- 순서 선택 (보관 먼저 | 운송 먼저)
 - 입력 필드 동적 재배치
-- 플로우 시각화
 
 ### PR4: 검색 매칭 + 지도 연동
-- 검색 버튼 클릭 → 매칭 결과 표시
-- 지도에 매칭된 상품 하이라이트
-- 필터링 로직
-- 상품 카드 리스트
-- 거래 모달 연결
+- 검색 → 매칭 결과 표시
+- 지도 하이라이트 + 상품 카드 리스트
 
 ### PR5: 거래 모달 + 규정 매칭
 - DealModal 구현
-- 규정 매칭 엔진 연결
-- 비용 계산 로직
-- 거래 완료 토스트
+- 규정 매칭 엔진 + 비용 계산
 
 ### PR6: 마무리 + 최적화
-- 반응형 디자인
-- 애니메이션 최적화
-- 데모 시나리오 완성
-- 성능 최적화
+- 반응형 디자인 + 애니메이션
 
 ---
 
-## 🎨 디자인 시스템
+## 📊 핵심 로직 & 데이터 모델
 
-### 색상 (라이트 테마)
-| 요소 | 색상 |
-|------|------|
-| 지도 배경 | Mapbox light-v11 |
-| 블러 오버레이 | rgba(14, 165, 233, 0.15) + blur(12px) |
-| 서비스 콘솔 | rgba(255, 255, 255, 0.3) + blur(8px) |
-| 공간 상품 마커 | #ff6b35 (주황색) |
-| 도내 경로 | #3b82f6 (파란색, 실선) |
-| 입도 경로 | #10b981 (녹색, 점선) |
-| 출도 경로 | #a855f7 (보라색, 점선) |
+### 포장 모듈 분류 알고리즘
 
-### 버튼
-| 버튼 | 스타일 |
-|------|--------|
-| 보관하기 | blue-500 → blue-600 그라데이션 |
-| 운송하기 | emerald-500 → emerald-600 그라데이션 |
-| 보관+운송 | purple-500 → purple-600 그라데이션 |
+**핵심 함수:** `classifyBox(box: BoxInput) → ClassifiedBox`
 
-### 위젯 스타일
-- 배경: white/90 + backdrop-blur-sm
-- 테두리: border-slate-300
-- 그림자: shadow-lg
-- 둥근 모서리: rounded-lg
+```typescript
+// 1. 면적 체크
+if (박스면적 > 모듈면적) return false
 
----
+// 2. 형상 체크 (10mm 버퍼, 90도 회전)
+fitsOriginal = (박스가로 ≤ 모듈가로+10) AND (박스세로 ≤ 모듈세로+10)
+fitsRotated = (박스세로 ≤ 모듈가로+10) AND (박스가로 ≤ 모듈세로+10)
+if (!fitsOriginal AND !fitsRotated) return false
 
-## 🚫 제약사항 및 금지사항
+// 3. fits 되는 모든 모듈 중 면적 최소 선택
+candidates.sort((a, b) => a.area - b.area)
+return candidates[0]
+```
 
-### ❌ 절대 구현하지 말 것
-1. **로그인/회원가입 시스템** - MVP 범위 초과
-2. **실제 결제 시스템** - 더미 데이터 기반 시연용
-3. **백엔드 서버** - 프론트엔드 더미 데이터만
-4. **데이터베이스** - mockData.ts로 충분
-5. **별도 페이지 라우팅** - 싱글 페이지 구조 유지
-6. **실시간 데이터 연동** - 더미 데이터 기반
-7. **실제 거래 실행** - 더미 ID 생성 + 토스트만
+### 파렛트 환산 알고리즘
 
-### ✅ 허용되는 범위
-1. 더미 데이터 기반 모든 UI
-2. 모달 기반 상세 페이지
-3. 룰 기반 규정 매칭
-4. 더미 비용 계산
-5. 성공 토스트 피드백
+**핵심 함수:** `calcPallets(selectedModules, inputs) → PalletCalculationResult`
 
----
+```typescript
+// 1. 체적 계산
+totalVolume = 0
+for (module in selectedModules) {
+  boxVolume = module.width × module.depth × min(height, 1800)
+  totalVolume += count × boxVolume
+}
 
-## 📝 코딩 스타일
+// 2. 이론 파렛트 수
+palletVolumeCap = 1100 × 1100 × 1800
+palletsRaw = ceil(totalVolume / palletVolumeCap)
 
-### 컴포넌트
-- 기능별로 분리 (과도한 추상화 지양)
-- Props 타입은 인터페이스로 명시
-- 재사용 가능한 컴포넌트는 `common/`에
+// 3. 혼합 보정
+mixFactor = (selectedModules.size === 1) ? 1.0 : 1.1
+pallets = ceil(palletsRaw × mixFactor)
+```
 
-### 타입 정의
-- 모든 타입은 `types/models.ts`에 집중
-- `export interface` 사용
-- 타입 이름은 PascalCase
+### 데이터 모델
 
-### 스타일링
-- Tailwind 유틸리티 클래스 우선
-- 커스텀 CSS 최소화
-- 일관된 색상 팔레트 유지
+**BoxInput** (사용자 입력):
+```typescript
+{ id, width, depth, height, count }
+```
 
----
+**ClassifiedBox** (분류 결과):
+```typescript
+{ ...BoxInput, classification: '소형' | '중형' | '대형' | 'UNCLASSIFIED' }
+```
 
-## 📊 데이터 모델 (핵심)
-
-### 경로 상품 (RouteProduct)
+**ModuleAggregate** (모듈별 집계):
 ```typescript
 {
-  id: string;
-  origin: { name, lat, lng };
-  destination: { name, lat, lng };
-  vehicleType: string;
-  cargoTypes: CargoType[];
-  price: number;
-  priceUnit: string;
-  routeScope: RouteScope;      // "INTRA_JEJU" | "SEA"
-  direction?: Direction;        // "INBOUND" | "OUTBOUND"
+  moduleName: BoxSize
+  countTotal: number          // 총 박스 개수
+  heightMax: number           // 최대 높이
+  volumeTotal: number         // 총 체적 (mm³)
+  palletsStandalone: number   // 단독 파렛트 수
 }
 ```
 
-### 공간 상품 (StorageProduct)
+**PalletCalculationResult**:
 ```typescript
 {
-  id: string;
-  location: { name, lat, lng, region };
-  storageType: StorageType;    // "상온" | "냉장" | "냉동"
-  capacity: string;
-  price: number;
-  priceUnit: string;
-  features: string[];
+  palletsRaw: number      // 보정 전
+  mixFactor: number       // 보정계수 (1.0 or 1.1)
+  pallets: number         // 최종 파렛트 수
+  totalVolume: number     // 총 체적
+  warnings: string[]      // 경고 메시지
 }
 ```
 
-### 더미 데이터 개수
-- 경로 상품: 8개 (도내 4개, 입도 2개, 출도 2개)
+### 더미 데이터 (mockData.ts)
+
+**표준 모듈:**
+- 소형: 550 × 275mm
+- 중형: 550 × 366mm
+- 대형: 650 × 450mm
+
+**상품:**
+- 경로 상품: 8개 (도내 4, 입도 2, 출도 2)
 - 공간 상품: 8개
-- 유니트 로드 모듈: 3개 (소형, 중형, 대형)
 - 취급 특이사항: 6개
 - 규정 룰: 5개
 
 ---
 
-## 🎯 우선순위
+## 🚫 제약사항
 
-### P0 (필수 - PR3/4)
-- 서비스 콘솔 기능 완성
-- 보관면적 → 파렛트 환산
-- 검색 매칭 로직
-- 상품 카드/리스트
+### ❌ 절대 구현 금지
+1. 로그인/회원가입 시스템
+2. 실제 결제 시스템
+3. 백엔드 서버 / 데이터베이스
+4. 별도 페이지 라우팅
+5. 실시간 데이터 연동
+6. 실제 거래 실행
 
-### P1 (권장 - PR5)
-- 거래 모달
-- 규정 매칭/비용 계산
-- 호버 효과/툴팁
-
-### P2 (선택 - PR6)
-- 반응형 디자인
-- 부드러운 애니메이션
-- 추가 시각 효과
-
----
-
-## 🔄 Git 브랜치
-
-- `main`: 프로덕션 (PR 머지 후)
-- PR2-4 완료: UI 전면 개편 (머지 완료)
+### ✅ 허용 범위
+1. 더미 데이터 기반 UI
+2. 모달 기반 상세 페이지
+3. 룰 기반 규정 매칭 (if-else)
+4. 더미 비용 계산
+5. 토스트 피드백
 
 ---
 
-## 📝 기술적 구현 세부사항
+## 🎨 디자인 시스템
 
-### centerOffset을 활용한 지도 배치
-```tsx
-// 좌측 45% 블러 영역만큼 오른쪽으로 offset
-const container = map.current.getContainer()
-const width = container.clientWidth
-const offsetX = (width * 0.45) / 2
+### 색상
+- 지도: Mapbox light-v11
+- 블러: `rgba(14, 165, 233, 0.15) + blur(12px)`
+- 콘솔: `rgba(255, 255, 255, 0.8)`
+- 마커: `#ff6b35` (주황)
+- 경로: 도내 `#3b82f6`, 입도 `#10b981`, 출도 `#a855f7`
 
-map.current.easeTo({
-  center: [126.5312, 33.4996],  // 제주도 중심 그대로
-  offset: [offsetX, 0],         // x만 오른쪽으로 이동
-  duration: 0,
-})
-```
+### 버튼
+- 보관: `blue-500 → blue-600`
+- 운송: `emerald-500 → emerald-600`
+- 보관+운송: `purple-500 → purple-600`
 
-### 이중 맵 구현 (메인 + 미니맵)
-- 두 개의 독립적인 Mapbox 인스턴스
-- 메인: 제주도 중심, zoom 9, interactive
-- 미니맵: 한반도 전체, zoom 4.5, interactive: false
-- 미니맵에 입도/출도 경로 + 화살표 표시
+### 위젯 스타일
+- 배경: `white/90 + backdrop-blur-sm`
+- 테두리: `border-slate-300`
+- 그림자: `shadow-lg`
+- 둥근 모서리: `rounded-lg`
 
-### 미니맵 경로 화살표
-- bearing 계산: `Math.atan2(dy, dx) * (180 / Math.PI)`
-- Mapbox symbol layer 사용
-- 화살표 이미지: SVG data URI
-- icon-rotate: bearing 기반 회전
+---
 
-### 베지어 곡선 경로
-- 시작점/끝점 + 중간 제어점으로 2차 베지어 곡선 생성
-- 50개 포인트로 부드러운 곡선 표현
-- 중간 제어점: 위로 볼록 (midLat + 0.08)
+## 📝 코딩 스타일
 
-### 파렛트 마커 호버
-- Mapbox Marker의 `position: absolute` 유지 필수
-- 호버 효과는 inner div에만 적용
-- 팝업: closeButton: false, closeOnClick: false
+- 컴포넌트: 기능별 분리 (과도한 추상화 지양)
+- 타입: `types/models.ts`에 집중
+- 스타일링: Tailwind 우선
 
 ---
 
 **작성일**: 2025.01.14
-**최종 수정**: 2025.01.22 (PR2-4 완료 + 파일 정리)
+**최종 수정**: 2025.01.23 (PR3-2 완료 - 포장 모듈 분류 + 파렛트 환산)
