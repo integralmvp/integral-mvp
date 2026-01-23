@@ -103,15 +103,28 @@ export interface CostEstimate {
   breakdown: { label: string; amount: number }[];
 }
 
-// ============ PR3-2: 보관면적 선택 타입 ============
+// ============ PR3-2: 보관면적 선택 타입 (재설계 - 다중 선택) ============
 export type AreaInputType = 'module' | 'area'
 export type BoxSize = '소형' | '중형' | '대형'
 
+// 각 모듈별 입력값
+export interface ModuleInput {
+  count: number   // 박스 개수
+  height: number  // 박스 높이(mm)
+}
+
+// 모든 모듈 입력값
+export interface ModuleInputs {
+  소형?: ModuleInput
+  중형?: ModuleInput
+  대형?: ModuleInput
+}
+
 export interface StorageAreaSelection {
   inputType: AreaInputType
-  // 포장박스 모듈 선택 시
-  boxSize?: BoxSize
-  boxCount?: number
+  // 포장박스 모듈 선택 시 (다중 선택 지원)
+  selectedModules?: Set<BoxSize>
+  moduleInputs?: ModuleInputs
   // 면적 선택 시
   areaInSquareMeters?: number
   // 환산 결과
