@@ -1,5 +1,5 @@
 // ============================================
-// 포장 모듈 자동 분류 유틸리티 (PR3-2 재재설계)
+// 포장 모듈 자동 분류 유틸리티 (PR3-2 재재설계 - 최소 적합 모듈)
 // ============================================
 
 import type { BoxInput, ClassifiedBox, ModuleAggregate, BoxSize } from '../types/models'
@@ -53,26 +53,46 @@ function fitsModule(
 }
 
 /**
- * 박스 자동 분류 (상위 귀속 원칙)
+ * 박스 자동 분류 (최소 적합 모듈 방식)
+ * - fits 되는 모든 모듈 중 가장 작은 모듈 선택
  */
 export function classifyBox(box: BoxInput): ClassifiedBox {
   const { width, depth } = box
 
-  // 상위부터 검사: 대형 → 중형 → 소형
-  if (fitsModule(width, depth, MODULE_SPECS.대형.width, MODULE_SPECS.대형.depth)) {
-    return { ...box, classification: '대형' }
+  // fits 되는 모든 모듈 찾기
+  const candidates: Array<{ name: BoxSize; area: number }> = []
+
+  if (fitsModule(width, depth, MODULE_SPECS.소형.width, MODULE_SPECS.소형.depth)) {
+    candidates.push({
+      name: '소형',
+      area: MODULE_SPECS.소형.width * MODULE_SPECS.소형.depth
+    })
   }
 
   if (fitsModule(width, depth, MODULE_SPECS.중형.width, MODULE_SPECS.중형.depth)) {
-    return { ...box, classification: '중형' }
+    candidates.push({
+      name: '중형',
+      area: MODULE_SPECS.중형.width * MODULE_SPECS.중형.depth
+    })
   }
 
-  if (fitsModule(width, depth, MODULE_SPECS.소형.width, MODULE_SPECS.소형.depth)) {
-    return { ...box, classification: '소형' }
+  if (fitsModule(width, depth, MODULE_SPECS.대형.width, MODULE_SPECS.대형.depth)) {
+    candidates.push({
+      name: '대형',
+      area: MODULE_SPECS.대형.width * MODULE_SPECS.대형.depth
+    })
   }
 
   // 분류 불가
-  return { ...box, classification: 'UNCLASSIFIED' }
+  if (candidates.length === 0) {
+    return { ...box, classification: 'UNCLASSIFIED' }
+  }
+
+  // 면적이 가장 작은 모듈 선택
+  candidates.sort((a, b) => a.area - b.area)
+  const selectedModule = candidates[0].name
+
+  return { ...box, classification: selectedModule }
 }
 
 /**
@@ -141,4 +161,101 @@ export function aggregateByModule(classifiedBoxes: ClassifiedBox[]): ModuleAggre
  */
 export function hasUnclassifiedBoxes(classifiedBoxes: ClassifiedBox[]): boolean {
   return classifiedBoxes.some(box => box.classification === 'UNCLASSIFIED')
+}
+
+// ============ 내부 검증 로직 (개발/디버그용) ============
+
+export interface ValidationResult {
+  passed: boolean
+  errors: string[]
+}
+
+/**
+ * 테스트 케이스 실행
+ */
+export function runClassificationTests(): ValidationResult {
+  const errors: string[] = []
+
+  // TEST 1: 300×200 박스 → 소형
+  const test1 = classifyBox({ id: 't1', width: 300, depth: 200, height: 100, count: 1 })
+  if (test1.classification !== '소형') {
+    errors.push(`TEST 1 실패: 300×200 → ${test1.classification} (예상: 소형)`)
+  }
+
+  // TEST 2: 540×360 박스 → 중형
+  const test2 = classifyBox({ id: 't2', width: 540, depth: 360, height: 100, count: 1 })
+  if (test2.classification !== '중형') {
+    errors.push(`TEST 2 실패: 540×360 → ${test2.classification} (예상: 중형)`)
+  }
+
+  // TEST 3: 640×440 박스 → 대형
+  const test3 = classifyBox({ id: 't3', width: 640, depth: 440, height: 100, count: 1 })
+  if (test3.classification !== '대형') {
+    errors.push(`TEST 3 실패: 640×440 → ${test3.classification} (예상: 대형)`)
+  }
+
+  // TEST 4: 모든 모듈 초과 → UNCLASSIFIED
+  const test4 = classifyBox({ id: 't4', width: 800, depth: 600, height: 100, count: 1 })
+  if (test4.classification !== 'UNCLASSIFIED') {
+    errors.push(`TEST 4 실패: 800×600 → ${test4.classification} (예상: UNCLASSIFIED)`)
+  }
+
+  return {
+    passed: errors.length === 0,
+    errors
+  }
+}
+
+/**
+ * 분류 결과 검증
+ */
+export function validateClassification(classifiedBoxes: ClassifiedBox[]): ValidationResult {
+  const errors: string[] = []
+
+  classifiedBoxes.forEach(box => {
+    if (box.classification === 'UNCLASSIFIED') return
+
+    const moduleSpec = MODULE_SPECS[box.classification]
+    const boxArea = box.width * box.depth
+    const moduleArea = moduleSpec.width * moduleSpec.depth
+
+    // 분류된 모듈 면적 >= 실제 박스 면적
+    if (moduleArea < boxArea) {
+      errors.push(
+        `검증 실패: ${box.classification} 모듈(${moduleArea}mm²) < 박스(${boxArea}mm²)`
+      )
+    }
+  })
+
+  return {
+    passed: errors.length === 0,
+    errors
+  }
+}
+
+/**
+ * 팔레트 환산 결과 검증
+ */
+export function validatePalletCalculation(
+  moduleAggregates: ModuleAggregate[],
+  finalPallets: number
+): ValidationResult {
+  const errors: string[] = []
+
+  if (moduleAggregates.length === 0) {
+    return { passed: true, errors: [] }
+  }
+
+  // 최종 pallets >= 각 모듈 단독 파레트 최대값
+  const maxStandalone = Math.max(...moduleAggregates.map(agg => agg.palletsStandalone))
+  if (finalPallets < maxStandalone) {
+    errors.push(
+      `검증 실패: 최종 파레트(${finalPallets}) < 단독 최대(${maxStandalone})`
+    )
+  }
+
+  return {
+    passed: errors.length === 0,
+    errors
+  }
 }
