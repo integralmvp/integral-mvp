@@ -442,6 +442,7 @@ function AreaInputField({
   onAreaChange,
   onSelectConfirm,
 }: AreaInputFieldProps) {
+  const [showModuleDetails, setShowModuleDetails] = useState(false)
 
   const handleAddBox = () => {
     const newBox: BoxInputUI = {
@@ -694,28 +695,73 @@ function AreaInputField({
                 </span>
               </div>
 
-              <div className="space-y-2">
-                {result.moduleSummary.map((summary, idx) => {
-                  // 모드별 환산 값 계산
-                  const pallets = mode === 'STORAGE' ? Math.ceil(summary.estimatedCubes / 128) : null
-                  const cubes = summary.estimatedCubes
+              {/* 모듈 시각적 표시 */}
+              <div className="flex gap-1.5 mb-3">
+                {['소형', '중형', '대형'].map(moduleName => {
+                  const isSelected = result.moduleSummary?.some(agg => agg.module === moduleName)
+                  const moduleSpec = moduleName === '소형'
+                    ? { width: 550, depth: 275 }
+                    : moduleName === '중형'
+                    ? { width: 550, depth: 366 }
+                    : { width: 650, depth: 450 }
 
                   return (
-                    <div key={idx} className="bg-slate-50 rounded p-2">
-                      <div className="text-xs text-slate-800">
-                        {mode === 'STORAGE' ? (
-                          <span>
-                            <span className="font-bold">{summary.module} 모듈</span>, {summary.boxCount}개 박스 = 총 <span className="font-bold text-blue-700">{pallets} 파렛트</span>
-                          </span>
-                        ) : (
-                          <span>
-                            <span className="font-bold">{summary.module} 모듈</span>, {summary.boxCount}개 박스 = 총 <span className="font-bold text-emerald-700">{cubes} 큐브</span>
-                          </span>
-                        )}
+                    <div
+                      key={moduleName}
+                      className={`flex-1 py-2 px-2 border rounded text-center ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50 text-blue-900'
+                          : 'border-slate-200 bg-slate-50 text-slate-400'
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{moduleName}</div>
+                      <div className="text-[9px] mt-0.5">
+                        {moduleSpec.width}×{moduleSpec.depth}mm
                       </div>
                     </div>
                   )
                 })}
+              </div>
+
+              {/* 환산 결과 요약 (펼치기/접기) */}
+              <div>
+                <div
+                  className="flex items-center justify-between mb-2 cursor-pointer"
+                  onClick={() => setShowModuleDetails(!showModuleDetails)}
+                >
+                  <span className="text-xs font-semibold text-slate-700">
+                    환산 결과 요약
+                  </span>
+                  <span className="text-xs text-blue-600 hover:text-blue-800">
+                    {showModuleDetails ? '접기' : '펼치기'}
+                  </span>
+                </div>
+
+                {showModuleDetails && (
+                  <div className="space-y-2">
+                    {result.moduleSummary.map((summary, idx) => {
+                      // 모드별 환산 값 계산
+                      const pallets = mode === 'STORAGE' ? Math.ceil(summary.estimatedCubes / 128) : null
+                      const cubes = summary.estimatedCubes
+
+                      return (
+                        <div key={idx} className="bg-slate-50 rounded p-2">
+                          <div className="text-xs text-slate-800">
+                            {mode === 'STORAGE' ? (
+                              <span>
+                                <span className="font-bold">{summary.module} 모듈</span>, {summary.boxCount}개 박스 = 총 <span className="font-bold text-blue-700">{pallets} 파렛트</span>
+                              </span>
+                            ) : (
+                              <span>
+                                <span className="font-bold">{summary.module} 모듈</span>, {summary.boxCount}개 박스 = 총 <span className="font-bold text-emerald-700">{cubes} 큐브</span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
