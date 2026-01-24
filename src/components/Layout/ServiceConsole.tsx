@@ -1,7 +1,7 @@
 // 서비스 콘솔 - 탭 + 아코디언 폼 (Phase 2+3: 통합 엔진 적용)
 import { useState, useEffect } from 'react'
 import type { BoxInputUI } from '../../types/models'
-import { computeDemand, computeDemandFromArea, type DemandResult, type BoxInput, cubesToCBM, palletsToCBM, cbmToWarehouseCount, cbmToTruckCount, REFERENCE_WAREHOUSE, REFERENCE_TRUCK } from '../../engine'
+import { computeDemand, computeDemandFromArea, type DemandResult, type BoxInput, cubesToCBM, palletsToCBM, cbmToWarehouseCount, cbmToTruckCount } from '../../engine'
 import { PalletIcon3D, CubeIcon3D, WarehouseIcon, TruckIcon } from '../visualizations'
 
 type ServiceType = 'storage' | 'transport' | 'both'
@@ -766,24 +766,27 @@ function AreaInputField({
             </div>
           )}
 
-          {/* 환산 결과 요약 */}
+          {/* 환산 결과 */}
           {result && !result.hasUnclassified && (
             <>
-              <div className="border border-slate-200 rounded-lg p-3">
+              {/* 환산 결과 창 (하이라이트) */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-slate-700">
-                    환산 결과 요약
+                  <span className="text-sm font-semibold text-blue-900">
+                    환산 결과
                   </span>
-                  <button
-                    onClick={() => setShowModuleDetails(!showModuleDetails)}
-                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    상세
-                  </button>
+                  {result.moduleSummary && result.moduleSummary.length > 0 && (
+                    <button
+                      onClick={() => setShowModuleDetails(!showModuleDetails)}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      상세
+                    </button>
+                  )}
                 </div>
 
-                <div className="bg-slate-50 rounded p-2">
-                  <div className="text-sm font-bold text-slate-800">
+                <div className="bg-white rounded p-2.5 border border-blue-100">
+                  <div className="text-base font-bold text-slate-900">
                     {mode === 'STORAGE'
                       ? `총 ${result.demandPallets} 파렛트`
                       : `총 ${result.demandCubes} 큐브`}
@@ -797,13 +800,13 @@ function AreaInputField({
 
                 {/* 상세 정보 (상세 버튼 클릭 시 펼침) */}
                 {showModuleDetails && result.moduleSummary && result.moduleSummary.length > 0 && (
-                  <div className="mt-3 space-y-2 border-t border-slate-200 pt-3">
+                  <div className="mt-3 space-y-2 border-t border-blue-200 pt-3">
                     {result.moduleSummary.map((summary, idx) => {
                       const pallets = mode === 'STORAGE' ? Math.ceil(summary.estimatedCubes / 128) : null
                       const cubes = summary.estimatedCubes
 
                       return (
-                        <div key={idx} className="bg-slate-50 rounded p-2">
+                        <div key={idx} className="bg-white rounded p-2 border border-blue-100">
                           <div className="text-xs text-slate-800">
                             {mode === 'STORAGE' ? (
                               <span>
@@ -829,55 +832,36 @@ function AreaInputField({
                 </div>
 
                 {/* 수평 흐름: 파렛트/큐브 → 화살표 → 창고/트럭 */}
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-end justify-center gap-6">
                   {/* 파렛트/큐브 */}
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center" style={{ width: '150px' }}>
                     {mode === 'STORAGE' ? (
                       <PalletIcon3D showDimensions={true} size={150} />
                     ) : (
                       <CubeIcon3D showDimensions={true} size={150} />
                     )}
-                    <div className="text-sm font-bold text-slate-800 mt-2">
-                      {mode === 'STORAGE'
-                        ? `${result.demandPallets} 파렛트`
-                        : `${result.demandCubes} 큐브`}
-                    </div>
                   </div>
 
                   {/* 화살표 */}
-                  <div className="text-2xl text-slate-400">
+                  <div className="text-3xl text-slate-400 pb-2">
                     →
                   </div>
 
                   {/* 창고/트럭 */}
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center" style={{ width: '150px' }}>
                     {mode === 'STORAGE' ? (
                       <WarehouseIcon
                         count={cbmToWarehouseCount(palletsToCBM(result.demandPallets || 0))}
-                        size={80}
+                        size={150}
                         showLabel={true}
                       />
                     ) : (
                       <TruckIcon
                         count={cbmToTruckCount(cubesToCBM(result.demandCubes))}
-                        size={80}
+                        size={150}
                         showLabel={true}
                       />
                     )}
-                  </div>
-                </div>
-
-                {/* 보조 정보 */}
-                <div className="bg-slate-50 rounded p-2 text-center">
-                  <div className="text-xs text-slate-600">
-                    <span className="inline-flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                      {mode === 'STORAGE'
-                        ? `기준 창고: 10평 (${REFERENCE_WAREHOUSE.volumeCBM} CBM)`
-                        : `기준 트럭: 1톤 (${REFERENCE_TRUCK.capacityCBM} CBM)`}
-                    </span>
                   </div>
                 </div>
 
@@ -974,14 +958,14 @@ function AreaInputField({
 
           {result && areaConfirmed && (
             <>
-              {/* 환산 결과 요약 */}
-              <div className="border border-slate-200 rounded-lg p-3">
-                <div className="text-xs font-semibold text-slate-700 mb-2">
-                  환산 결과 요약
+              {/* 환산 결과 (하이라이트) */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="text-sm font-semibold text-blue-900 mb-2">
+                  환산 결과
                 </div>
 
-                <div className="bg-slate-50 rounded p-2">
-                  <div className="text-sm font-bold text-slate-800">
+                <div className="bg-white rounded p-2.5 border border-blue-100">
+                  <div className="text-base font-bold text-slate-900">
                     {mode === 'STORAGE'
                       ? `총 ${result.demandPallets} 파렛트`
                       : `총 ${result.demandCubes} 큐브`}
@@ -1001,55 +985,36 @@ function AreaInputField({
                 </div>
 
                 {/* 수평 흐름: 파렛트/큐브 → 화살표 → 창고/트럭 */}
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-end justify-center gap-6">
                   {/* 파렛트/큐브 */}
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center" style={{ width: '150px' }}>
                     {mode === 'STORAGE' ? (
                       <PalletIcon3D showDimensions={true} size={150} />
                     ) : (
                       <CubeIcon3D showDimensions={true} size={150} />
                     )}
-                    <div className="text-sm font-bold text-slate-800 mt-2">
-                      {mode === 'STORAGE'
-                        ? `${result.demandPallets} 파렛트`
-                        : `${result.demandCubes} 큐브`}
-                    </div>
                   </div>
 
                   {/* 화살표 */}
-                  <div className="text-2xl text-slate-400">
+                  <div className="text-3xl text-slate-400 pb-2">
                     →
                   </div>
 
                   {/* 창고/트럭 */}
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center" style={{ width: '150px' }}>
                     {mode === 'STORAGE' ? (
                       <WarehouseIcon
                         count={cbmToWarehouseCount(palletsToCBM(result.demandPallets || 0))}
-                        size={80}
+                        size={150}
                         showLabel={true}
                       />
                     ) : (
                       <TruckIcon
                         count={cbmToTruckCount(cubesToCBM(result.demandCubes))}
-                        size={80}
+                        size={150}
                         showLabel={true}
                       />
                     )}
-                  </div>
-                </div>
-
-                {/* 보조 정보 */}
-                <div className="bg-slate-50 rounded p-2 text-center">
-                  <div className="text-xs text-slate-600">
-                    <span className="inline-flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                      {mode === 'STORAGE'
-                        ? `기준 창고: 10평 (${REFERENCE_WAREHOUSE.volumeCBM} CBM)`
-                        : `기준 트럭: 1톤 (${REFERENCE_TRUCK.capacityCBM} CBM)`}
-                    </span>
                   </div>
                 </div>
 

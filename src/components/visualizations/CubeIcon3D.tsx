@@ -53,19 +53,21 @@ export default function CubeIcon3D({ showDimensions = true, size = 150 }: CubeIc
               <path d="M 43,5 Q 45,7 45,10 L 45,30 Q 45,33 43,35" stroke="#666" strokeWidth="1" fill="none"/>
               <text x="48" y="22" fontSize="10" fill="#666" fontWeight="bold">250mm</text>
 
-              {/* 밑판 가로 치수선 (하단) */}
-              <line x1="-30" y1="58" x2="0" y2="78" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-              <line x1="-30" y1="55" x2="-30" y2="61" stroke="#666" strokeWidth="1"/>
-              <line x1="0" y1="75" x2="0" y2="81" stroke="#666" strokeWidth="1"/>
-              <path d="M -30,58 Q -28,60 -25,60 L -5,60 Q -2,60 0,78" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="-20" y="72" fontSize="10" fill="#666" fontWeight="bold">250mm</text>
+              {/* 밑판 가로 치수선 (왼쪽 변) */}
+              <line x1="-30" y1="60" x2="0" y2="60" stroke="#666" strokeWidth="1" strokeDasharray="2,2" transform="rotate(-26.5 -15 60)"/>
+              <line x1="-30" y1="57" x2="-30" y2="63" stroke="#666" strokeWidth="1"/>
+              <line x1="0" y1="57" x2="0" y2="63" stroke="#666" strokeWidth="1"/>
+              {/* 중괄호 */}
+              <path d="M -30,65 Q -28,67 -25,67 L -5,67 Q -2,67 0,65" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="-20" y="78" fontSize="10" fill="#666" fontWeight="bold">250mm</text>
 
-              {/* 밑판 세로 치수선 (하단) */}
-              <line x1="0" y1="78" x2="30" y2="58" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-              <line x1="0" y1="75" x2="0" y2="81" stroke="#666" strokeWidth="1"/>
-              <line x1="30" y1="55" x2="30" y2="61" stroke="#666" strokeWidth="1"/>
-              <path d="M 0,78 Q 2,76 5,76 L 25,76 Q 28,76 30,58" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="10" y="88" fontSize="10" fill="#666" fontWeight="bold">250mm</text>
+              {/* 밑판 세로 치수선 (오른쪽 변) */}
+              <line x1="0" y1="60" x2="30" y2="60" stroke="#666" strokeWidth="1" strokeDasharray="2,2" transform="rotate(26.5 15 60)"/>
+              <line x1="0" y1="57" x2="0" y2="63" stroke="#666" strokeWidth="1"/>
+              <line x1="30" y1="57" x2="30" y2="63" stroke="#666" strokeWidth="1"/>
+              {/* 중괄호 */}
+              <path d="M 0,65 Q 2,67 5,67 L 25,67 Q 28,67 30,65" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="10" y="78" fontSize="10" fill="#666" fontWeight="bold">250mm</text>
             </>
           )}
         </g>
