@@ -88,7 +88,18 @@ export const CUBE_CONFIG = {
 } as const
 
 /**
- * 기준 창고 (시각화 참고용)
+ * Storage 면적 환산 전용 상수
+ * - 운영계수(storageAreaFactor): 창고 운영 시 동선/여유/벽면 고려
+ * - 1 파레트 바닥면적 × 운영계수 = 실제 필요 창고 면적
+ */
+export const STORAGE_AREA_CONSTANTS = {
+  palletFootprintM2: 1.21,     // 파레트 바닥면적 (1.1m × 1.1m) - PALLET_SPEC.baseAreaM2와 동일
+  storageAreaFactor: 1.30,     // 운영계수 (동선/여유/벽면 고려)
+  m2PerPyeong: 3.3058,         // 1평 = 3.3058㎡
+} as const
+
+/**
+ * 기준 창고 (시각화 참고용) - 레거시, 더 이상 사용하지 않음
  * - 10평 = 33㎡ × 3m = 99 CBM
  */
 export const REFERENCE_WAREHOUSE = {

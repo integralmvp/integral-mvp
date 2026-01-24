@@ -8,7 +8,7 @@
 // ============ Exports ============
 
 // 설정
-export { CUBE_CONFIG, CUBES_PER_PALLET, REFERENCE_WAREHOUSE, REFERENCE_TRUCK, type ModuleName } from './cubeConfig'
+export { CUBE_CONFIG, CUBES_PER_PALLET, REFERENCE_WAREHOUSE, REFERENCE_TRUCK, STORAGE_AREA_CONSTANTS, type ModuleName } from './cubeConfig'
 
 // 형상 분류
 export { classifyModule, classifyBoxes, hasUnclassified, type BoxInput, type ShapeCheck } from './shapeClassifier'
@@ -17,7 +17,12 @@ export { classifyModule, classifyBoxes, hasUnclassified, type BoxInput, type Sha
 export { calcCubeDemand, type DemandMode, type CubeDemand, type ModuleSummary } from './cubeEngine'
 
 // 단위 변환
-export { cubesToPallets, palletsToCubes, areaTopallets, areaToCubes, cubesToCBM, palletsToCBM, cbmToWarehouseCount, cbmToTruckCount } from './unitConvert'
+export {
+  cubesToPallets, palletsToCubes, areaTopallets, areaToCubes,
+  cubesToCBM, palletsToCBM, cbmToWarehouseCount, cbmToTruckCount,
+  // Storage 전용: 운영계수 보정 환산
+  palletsToAreaM2, palletsToAreaPyeong, areaToPalletsWithFactor, areaPyeongToPalletsWithFactor
+} from './unitConvert'
 
 // ============ 통합 인터페이스 ============
 
