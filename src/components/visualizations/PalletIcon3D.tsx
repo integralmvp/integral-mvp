@@ -69,7 +69,7 @@ export default function PalletIcon3D({ showDimensions = true, size = 150, count 
                 <line x1="-11" y1="45" x2="-5" y2="45" stroke="#666" strokeWidth="1"/>
                 {/* 중괄호 */}
                 <path d="M -13,0 Q -15,2 -15,5 L -15,40 Q -15,43 -13,45" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="-50" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(63)">1100mm</text>
+                <text x="-55" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(63)">1100mm</text>
               </g>
             </>
           )}
