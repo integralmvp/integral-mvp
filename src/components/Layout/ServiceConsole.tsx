@@ -776,14 +776,14 @@ function AreaInputField({
                     <line x1="5.5" y1="8" x2="19.5" y2="16" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
                     <line x1="9" y1="6" x2="23" y2="14" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
                     <line x1="12.5" y1="4" x2="26.5" y2="12" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
-                    {/* 왼쪽 측면 */}
-                    <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
+                    {/* 왼쪽 측면 - 그림자색 배경 (비어있는 공간) */}
+                    <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#993d1f" stroke="#ff6b35" strokeWidth="0.5"/>
                     {/* 오른쪽 측면 */}
                     <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
-                    {/* 각목 3개 - 왼쪽 측면에만 (상판과 밑판을 연결) */}
-                    <path d="M 4,11 L 4,19 L 6,20 L 6,12 Z" fill="#993d1f"/>
-                    <path d="M 8,14 L 8,22 L 10,23 L 10,15 Z" fill="#993d1f"/>
-                    <path d="M 12,16 L 12,24 L 14,25 L 14,17 Z" fill="#993d1f"/>
+                    {/* 각목 3개 - 주황색 (실제 나무 각목) */}
+                    <path d="M 2,10 L 2,18 L 4,19 L 4,11 Z" fill="#ff6b35"/>
+                    <path d="M 8,14 L 8,22 L 10,23 L 10,15 Z" fill="#ff6b35"/>
+                    <path d="M 14,17 L 14,25 L 16,26 L 16,18 Z" fill="#ff6b35"/>
                   </svg>
                 </div>
                 <div className="flex-1">
@@ -886,14 +886,14 @@ function AreaInputField({
                     <line x1="5.5" y1="8" x2="19.5" y2="16" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
                     <line x1="9" y1="6" x2="23" y2="14" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
                     <line x1="12.5" y1="4" x2="26.5" y2="12" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
-                    {/* 왼쪽 측면 */}
-                    <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
+                    {/* 왼쪽 측면 - 그림자색 배경 (비어있는 공간) */}
+                    <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#993d1f" stroke="#ff6b35" strokeWidth="0.5"/>
                     {/* 오른쪽 측면 */}
                     <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
-                    {/* 각목 3개 - 왼쪽 측면에만 (상판과 밑판을 연결) */}
-                    <path d="M 4,11 L 4,19 L 6,20 L 6,12 Z" fill="#993d1f"/>
-                    <path d="M 8,14 L 8,22 L 10,23 L 10,15 Z" fill="#993d1f"/>
-                    <path d="M 12,16 L 12,24 L 14,25 L 14,17 Z" fill="#993d1f"/>
+                    {/* 각목 3개 - 주황색 (실제 나무 각목) */}
+                    <path d="M 2,10 L 2,18 L 4,19 L 4,11 Z" fill="#ff6b35"/>
+                    <path d="M 8,14 L 8,22 L 10,23 L 10,15 Z" fill="#ff6b35"/>
+                    <path d="M 14,17 L 14,25 L 16,26 L 16,18 Z" fill="#ff6b35"/>
                   </svg>
                 </div>
                 <div className="flex-1">
