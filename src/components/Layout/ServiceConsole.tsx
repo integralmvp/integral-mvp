@@ -760,10 +760,10 @@ function AreaInputField({
                   <svg width="40" height="35" viewBox="0 0 32 28" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.8))' }}>
                     {/* 아이소메트릭 3D 파렛트 (주황) */}
                     <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" strokeWidth="0.5"/>
-                    {/* 상판 나무 판자 선 3개 (그림자 색) */}
-                    <line x1="9" y1="6" x2="23" y2="6" stroke="#993d1f" strokeWidth="0.6" opacity="0.6"/>
-                    <line x1="6" y1="9" x2="26" y2="9" stroke="#993d1f" strokeWidth="0.6" opacity="0.6"/>
-                    <line x1="9" y1="14" x2="23" y2="14" stroke="#993d1f" strokeWidth="0.6" opacity="0.6"/>
+                    {/* 상판 나무 판자 간 공백 3개 (상판 변과 평행) */}
+                    <line x1="5.5" y1="8" x2="19.5" y2="16" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
+                    <line x1="9" y1="6" x2="23" y2="14" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
+                    <line x1="12.5" y1="4" x2="26.5" y2="12" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
                     <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
                     <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
                     <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#993d1f"/>
