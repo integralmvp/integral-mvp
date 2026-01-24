@@ -132,14 +132,27 @@ export interface StorageAreaSelection {
 }
 
 // ============ PR3-2 재재설계: 박스 실측 입력 기반 자동 분류 ============
+// NOTE: 통합 엔진 도입 (Phase 1) - engine/shapeClassifier.ts와 호환
 
-// 박스 실측 입력 Row
-export interface BoxInput {
-  id: string
+// 박스 실측 입력 Row (UI 레이어)
+export interface BoxInputUI {
+  id: string      // UI 식별자
   width: number   // mm
   depth: number   // mm
   height: number  // mm
   count: number
+}
+
+// 박스 입력 (엔진 레이어 - engine과 호환)
+// NOTE: engine/shapeClassifier.ts의 BoxInput과 동일 구조
+export interface BoxInput {
+  widthMm: number
+  depthMm: number
+  heightMm: number
+  count: number
+  // 확장 필드 (Phase 4 매칭 시 사용)
+  weightKg?: number
+  stackable?: boolean
 }
 
 // 분류 결과 (SMALL/MEDIUM/LARGE/UNCLASSIFIED)
@@ -171,6 +184,32 @@ export interface BoxBasedAreaSelection {
   areaInSquareMeters?: number
   // 최종 환산 결과
   estimatedPallets?: number
+}
+
+// ============ Phase 1: 통합 엔진 - Offer 모델 확장 (TODO) ============
+// NOTE: Phase 4 매칭/추천 시 사용 예정
+
+// 보관 오퍼 (확장)
+export interface StorageOfferExtended {
+  capacityPallets: number      // 용량 (파렛트)
+  capacityCubes: number         // 용량 (큐브 = pallets * 128)
+  remainingPallets: number      // 남은 용량 (파렛트)
+  remainingCubes: number        // 남은 용량 (큐브)
+  pricePerPallet: number        // 파렛트당 가격
+  // TODO: 제약 조건 추가 (allowedModules, maxWeight, etc.)
+}
+
+// 운송 오퍼 (확장)
+export interface RouteOfferExtended {
+  capacityCubes: number         // 용량 (큐브)
+  remainingCubes: number        // 남은 용량 (큐브)
+  pricePerCube: number          // 큐브당 가격
+  // TODO: 제약 조건 추가
+  constraints?: {
+    allowedModules?: ('소형' | '중형' | '대형')[]
+    maxEdgeMm?: number
+    maxWeightKg?: number
+  }
 }
 
 // PR3에서 추가될 타입들:
