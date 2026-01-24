@@ -11,7 +11,7 @@ export default function WarehouseIcon({ count, size = 80, showLabel = true }: Wa
       {/* 라벨 */}
       {showLabel && (
         <div className="text-xs font-semibold text-slate-700">
-          10평 창고
+          &lt;10평 창고&gt;
         </div>
       )}
 
