@@ -78,8 +78,13 @@ export default function PalletIcon3D({ showDimensions = true, size = 150, count 
 
       {/* 카운트 */}
       {count !== undefined && (
-        <div className="text-sm font-bold text-slate-800">
-          {count} 파렛트
+        <div className="text-center">
+          <div className="text-sm font-bold text-slate-800">
+            {count} 파렛트
+          </div>
+          <div className="text-[10px] text-slate-500">
+            최대 적재 높이 1800mm
+          </div>
         </div>
       )}
     </div>
