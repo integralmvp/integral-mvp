@@ -2,11 +2,12 @@
 interface CubeIcon3DProps {
   showDimensions?: boolean
   size?: number
+  count?: number
 }
 
-export default function CubeIcon3D({ showDimensions = true, size = 150 }: CubeIcon3DProps) {
+export default function CubeIcon3D({ showDimensions = true, size = 150, count }: CubeIcon3DProps) {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-2">
       <svg
         width={size}
         height={size * 1.2}
@@ -53,25 +54,32 @@ export default function CubeIcon3D({ showDimensions = true, size = 150 }: CubeIc
               <path d="M 43,5 Q 45,7 45,10 L 45,30 Q 45,33 43,35" stroke="#666" strokeWidth="1" fill="none"/>
               <text x="48" y="22" fontSize="10" fill="#666" fontWeight="bold">250mm</text>
 
-              {/* 밑판 가로 치수선 (왼쪽 변) */}
-              <line x1="-30" y1="60" x2="0" y2="60" stroke="#666" strokeWidth="1" strokeDasharray="2,2" transform="rotate(-26.5 -15 60)"/>
-              <line x1="-30" y1="57" x2="-30" y2="63" stroke="#666" strokeWidth="1"/>
-              <line x1="0" y1="57" x2="0" y2="63" stroke="#666" strokeWidth="1"/>
-              {/* 중괄호 */}
-              <path d="M -30,65 Q -28,67 -25,67 L -5,67 Q -2,67 0,65" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="-20" y="78" fontSize="10" fill="#666" fontWeight="bold">250mm</text>
+              {/* 밑판 가로 치수선 (왼쪽 변 - 대각선) */}
+              <line x1="-30" y1="58" x2="0" y2="78" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="-32" y1="56" x2="-28" y2="60" stroke="#666" strokeWidth="1"/>
+              <line x1="-2" y1="76" x2="2" y2="80" stroke="#666" strokeWidth="1"/>
+              {/* 중괄호 - 대각선 방향 */}
+              <path d="M -30,55 Q -28,53 -25,54 L -5,74 Q -2,75 0,77" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="-24" y="60" fontSize="10" fill="#666" fontWeight="bold" transform="rotate(-26.5 -15 64)">250mm</text>
 
-              {/* 밑판 세로 치수선 (오른쪽 변) */}
-              <line x1="0" y1="60" x2="30" y2="60" stroke="#666" strokeWidth="1" strokeDasharray="2,2" transform="rotate(26.5 15 60)"/>
-              <line x1="0" y1="57" x2="0" y2="63" stroke="#666" strokeWidth="1"/>
-              <line x1="30" y1="57" x2="30" y2="63" stroke="#666" strokeWidth="1"/>
-              {/* 중괄호 */}
-              <path d="M 0,65 Q 2,67 5,67 L 25,67 Q 28,67 30,65" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="10" y="78" fontSize="10" fill="#666" fontWeight="bold">250mm</text>
+              {/* 밑판 세로 치수선 (오른쪽 변 - 대각선) */}
+              <line x1="0" y1="78" x2="30" y2="58" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="-2" y1="76" x2="2" y2="80" stroke="#666" strokeWidth="1"/>
+              <line x1="28" y1="56" x2="32" y2="60" stroke="#666" strokeWidth="1"/>
+              {/* 중괄호 - 대각선 방향 */}
+              <path d="M 0,77 Q 2,79 5,78 L 25,58 Q 28,57 30,55" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="7" y="72" fontSize="10" fill="#666" fontWeight="bold" transform="rotate(26.5 15 68)">250mm</text>
             </>
           )}
         </g>
       </svg>
+
+      {/* 카운트 */}
+      {count !== undefined && (
+        <div className="text-sm font-bold text-slate-800">
+          {count} 큐브
+        </div>
+      )}
     </div>
   )
 }
