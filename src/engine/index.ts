@@ -1,0 +1,84 @@
+// ============================================
+// INTEGRAL MVP - 플랫폼 통합 엔진
+// ============================================
+// 모든 계산 로직의 단일 진입점
+// Phase 1: 엔진 빌드
+// Phase 2-4: 매칭/추천/AI 확장 예정
+
+// ============ Exports ============
+
+// 설정
+export { CUBE_CONFIG, CUBES_PER_PALLET, type ModuleName } from './cubeConfig'
+
+// 형상 분류
+export { classifyModule, classifyBoxes, hasUnclassified, type BoxInput, type ShapeCheck } from './shapeClassifier'
+
+// 큐브 계산
+export { calcCubeDemand, type DemandMode, type CubeDemand, type ModuleSummary } from './cubeEngine'
+
+// 단위 변환
+export { cubesToPallets, palletsToCubes, areaTopallets, areaToCubes } from './unitConvert'
+
+// ============ 통합 인터페이스 ============
+
+import { calcCubeDemand, type DemandMode, type CubeDemand } from './cubeEngine'
+import { cubesToPallets, areaToCubes } from './unitConvert'
+import type { BoxInput } from './shapeClassifier'
+
+/**
+ * 수요 계산 결과 (통합 인터페이스)
+ */
+export interface DemandResult {
+  demandCubes: number           // 필요 큐브 수 (정수)
+  demandPallets?: number        // 필요 파렛트 수 (정수, STORAGE 모드만)
+  moduleSummary: CubeDemand['byModule']  // 모듈별 요약
+  hasUnclassified: boolean      // UNCLASSIFIED 박스 존재 여부
+  // 상세 정보 (확장용)
+  detail: CubeDemand
+}
+
+/**
+ * 박스 입력 기반 수요 계산 (메인 함수)
+ * @param boxes 박스 입력 리스트
+ * @param mode 계산 모드 (STORAGE | ROUTE)
+ * @returns 수요 계산 결과
+ */
+export function computeDemand(
+  boxes: BoxInput[],
+  mode: DemandMode
+): DemandResult {
+  // 큐브 수요 계산
+  const cubeDemand = calcCubeDemand(boxes, mode)
+
+  // 모드별 처리
+  const demandCubes = cubeDemand.totalCubes
+  const demandPallets = mode === 'STORAGE' ? cubesToPallets(demandCubes) : undefined
+
+  return {
+    demandCubes,
+    demandPallets,
+    moduleSummary: cubeDemand.byModule,
+    hasUnclassified: cubeDemand.hasUnclassified,
+    detail: cubeDemand,
+  }
+}
+
+/**
+ * 면적 입력 기반 수요 계산 (Fallback)
+ * @param areaM2 면적 (㎡)
+ * @param mode 계산 모드 (STORAGE | ROUTE)
+ * @returns 수요 계산 결과
+ */
+export function computeDemandFromArea(
+  areaM2: number,
+  mode: DemandMode
+): Pick<DemandResult, 'demandCubes' | 'demandPallets'> {
+  // 면적 → 큐브
+  const demandCubes = areaToCubes(areaM2)
+  const demandPallets = mode === 'STORAGE' ? cubesToPallets(demandCubes) : undefined
+
+  return {
+    demandCubes,
+    demandPallets,
+  }
+}
