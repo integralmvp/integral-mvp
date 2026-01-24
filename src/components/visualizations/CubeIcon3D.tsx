@@ -54,24 +54,24 @@ export default function CubeIcon3D({ showDimensions = true, size = 150, count }:
               <path d="M 43,5 Q 45,7 45,10 L 45,30 Q 45,33 43,35" stroke="#666" strokeWidth="1" fill="none"/>
               <text x="48" y="22" fontSize="14" fill="#666" fontWeight="bold">250mm</text>
 
-              {/* 밑판 가로 치수선 (왼쪽 변 - 높이 치수 패턴 시계방향 66도 회전) */}
-              <g transform="translate(40, 30) rotate(66)">
+              {/* 밑판 가로 치수선 (왼쪽 변 - 높이 치수 패턴 시계방향 60도 회전) */}
+              <g transform="translate(40, 30) rotate(60)">
                 <line x1="8" y1="0" x2="8" y2="36" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
                 <line x1="5" y1="0" x2="11" y2="0" stroke="#666" strokeWidth="1"/>
                 <line x1="5" y1="36" x2="11" y2="36" stroke="#666" strokeWidth="1"/>
                 {/* 중괄호 */}
                 <path d="M 13,0 Q 15,2 15,5 L 15,31 Q 15,34 13,36" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="13" y="20" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(-66)">250mm</text>
+                <text x="8" y="20" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(-60)">250mm</text>
               </g>
 
-              {/* 밑판 세로 치수선 (오른쪽 변 - 높이 치수 패턴 반시계방향 66도 회전) */}
-              <g transform="translate(-40, 30) rotate(-66)">
+              {/* 밑판 세로 치수선 (오른쪽 변 - 높이 치수 패턴 반시계방향 60도 회전) */}
+              <g transform="translate(-40, 30) rotate(-60)">
                 <line x1="-8" y1="0" x2="-8" y2="36" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
                 <line x1="-11" y1="0" x2="-5" y2="0" stroke="#666" strokeWidth="1"/>
                 <line x1="-11" y1="36" x2="-5" y2="36" stroke="#666" strokeWidth="1"/>
                 {/* 중괄호 */}
                 <path d="M -13,0 Q -15,2 -15,5 L -15,31 Q -15,34 -13,36" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="-47" y="20" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(66)">250mm</text>
+                <text x="-52" y="20" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(60)">250mm</text>
               </g>
             </>
           )}
