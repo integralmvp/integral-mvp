@@ -53,7 +53,7 @@ export default function PalletIcon3D({ showDimensions = true, size = 150, count 
               <text x="58" y="-22" fontSize="14" fill="#666" fontWeight="bold">1800mm</text>
 
               {/* 밑판 가로 치수선 (왼쪽 변 - 높이 치수 패턴 시계방향 110도 회전) */}
-              <g transform="translate(20, 10) rotate(70)">
+              <g transform="translate(40, 10) rotate(70)">
                 <line x1="8" y1="0" x2="8" y2="45" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
                 <line x1="5" y1="0" x2="11" y2="0" stroke="#666" strokeWidth="1"/>
                 <line x1="5" y1="45" x2="11" y2="45" stroke="#666" strokeWidth="1"/>
@@ -63,7 +63,7 @@ export default function PalletIcon3D({ showDimensions = true, size = 150, count 
               </g>
 
               {/* 밑판 세로 치수선 (오른쪽 변 - 높이 치수 패턴 시계방향 110도 회전) */}
-              <g transform="translate(-20, 10) rotate(-70)">
+              <g transform="translate(-40, 10) rotate(-70)">
                 <line x1="-8" y1="0" x2="-8" y2="45" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
                 <line x1="-11" y1="0" x2="-5" y2="0" stroke="#666" strokeWidth="1"/>
                 <line x1="-11" y1="45" x2="-5" y2="45" stroke="#666" strokeWidth="1"/>
