@@ -785,22 +785,9 @@ function AreaInputField({
                   )}
                 </div>
 
-                <div className="bg-white rounded p-2.5 border border-blue-100">
-                  <div className="text-base font-bold text-slate-900">
-                    {mode === 'STORAGE'
-                      ? `총 ${result.demandPallets} 파렛트`
-                      : `총 ${result.demandCubes} 큐브`}
-                  </div>
-                  <div className="text-xs text-slate-600 mt-0.5">
-                    {mode === 'STORAGE'
-                      ? `${palletsToCBM(result.demandPallets || 0)} CBM (구매 공간 기준 체적)`
-                      : `${cubesToCBM(result.demandCubes)} CBM (구매 공간 기준 체적)`}
-                  </div>
-                </div>
-
                 {/* 상세 정보 (상세 버튼 클릭 시 펼침) */}
                 {showModuleDetails && result.moduleSummary && result.moduleSummary.length > 0 && (
-                  <div className="mt-3 space-y-2 border-t border-blue-200 pt-3">
+                  <div className="mb-3 space-y-2 border-b border-blue-200 pb-3">
                     {result.moduleSummary.map((summary, idx) => {
                       const pallets = mode === 'STORAGE' ? Math.ceil(summary.estimatedCubes / 128) : null
                       const cubes = summary.estimatedCubes
@@ -823,6 +810,19 @@ function AreaInputField({
                     })}
                   </div>
                 )}
+
+                <div className="bg-white rounded p-2.5 border border-blue-100">
+                  <div className="text-base font-bold text-slate-900">
+                    {mode === 'STORAGE'
+                      ? `총 ${result.demandPallets} 파렛트`
+                      : `총 ${result.demandCubes} 큐브`}
+                  </div>
+                  <div className="text-xs text-slate-600 mt-0.5">
+                    {mode === 'STORAGE'
+                      ? `${palletsToCBM(result.demandPallets || 0)} CBM (구매 공간 기준 체적)`
+                      : `${cubesToCBM(result.demandCubes)} CBM (구매 공간 기준 체적)`}
+                  </div>
+                </div>
               </div>
 
               {/* 안내사항 */}
@@ -835,10 +835,13 @@ function AreaInputField({
                 <div className="flex items-end justify-center gap-6">
                   {/* 파렛트/큐브 */}
                   <div className="flex flex-col items-center" style={{ width: '150px' }}>
+                    <div className="text-xs font-semibold text-slate-700 mb-2">
+                      {mode === 'STORAGE' ? '기준 파렛트' : '기준 큐브'}
+                    </div>
                     {mode === 'STORAGE' ? (
-                      <PalletIcon3D showDimensions={true} size={150} />
+                      <PalletIcon3D showDimensions={true} size={150} count={result.demandPallets} />
                     ) : (
-                      <CubeIcon3D showDimensions={true} size={150} />
+                      <CubeIcon3D showDimensions={true} size={150} count={result.demandCubes} />
                     )}
                   </div>
 
@@ -988,10 +991,13 @@ function AreaInputField({
                 <div className="flex items-end justify-center gap-6">
                   {/* 파렛트/큐브 */}
                   <div className="flex flex-col items-center" style={{ width: '150px' }}>
+                    <div className="text-xs font-semibold text-slate-700 mb-2">
+                      {mode === 'STORAGE' ? '기준 파렛트' : '기준 큐브'}
+                    </div>
                     {mode === 'STORAGE' ? (
-                      <PalletIcon3D showDimensions={true} size={150} />
+                      <PalletIcon3D showDimensions={true} size={150} count={result.demandPallets} />
                     ) : (
-                      <CubeIcon3D showDimensions={true} size={150} />
+                      <CubeIcon3D showDimensions={true} size={150} count={result.demandCubes} />
                     )}
                   </div>
 

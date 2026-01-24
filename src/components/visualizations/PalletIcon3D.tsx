@@ -2,11 +2,12 @@
 interface PalletIcon3DProps {
   showDimensions?: boolean
   size?: number
+  count?: number
 }
 
-export default function PalletIcon3D({ showDimensions = true, size = 150 }: PalletIcon3DProps) {
+export default function PalletIcon3D({ showDimensions = true, size = 150, count }: PalletIcon3DProps) {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-2">
       <svg
         width={size}
         height={size * 1.3}
@@ -51,25 +52,32 @@ export default function PalletIcon3D({ showDimensions = true, size = 150 }: Pall
               <path d="M 53,0 Q 55,-2 55,-5 L 55,-45 Q 55,-48 53,-50" stroke="#666" strokeWidth="1" fill="none"/>
               <text x="58" y="-22" fontSize="10" fill="#666" fontWeight="bold">1800mm</text>
 
-              {/* 밑판 가로 치수선 (왼쪽 변) */}
-              <line x1="-40" y1="60" x2="0" y2="60" stroke="#666" strokeWidth="1" strokeDasharray="2,2" transform="rotate(-26.5 -20 60)"/>
-              <line x1="-40" y1="57" x2="-40" y2="63" stroke="#666" strokeWidth="1"/>
-              <line x1="0" y1="57" x2="0" y2="63" stroke="#666" strokeWidth="1"/>
-              {/* 중괄호 */}
-              <path d="M -40,65 Q -38,67 -35,67 L -5,67 Q -2,67 0,65" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="-25" y="78" fontSize="10" fill="#666" fontWeight="bold">1100mm</text>
+              {/* 밑판 가로 치수선 (왼쪽 변 - 대각선) */}
+              <line x1="-40" y1="58" x2="0" y2="78" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="-42" y1="56" x2="-38" y2="60" stroke="#666" strokeWidth="1"/>
+              <line x1="-2" y1="76" x2="2" y2="80" stroke="#666" strokeWidth="1"/>
+              {/* 중괄호 - 대각선 방향 */}
+              <path d="M -40,55 Q -38,53 -35,54 L -5,74 Q -2,75 0,77" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="-30" y="60" fontSize="10" fill="#666" fontWeight="bold" transform="rotate(-26.5 -22 64)">1100mm</text>
 
-              {/* 밑판 세로 치수선 (오른쪽 변) */}
-              <line x1="0" y1="60" x2="40" y2="60" stroke="#666" strokeWidth="1" strokeDasharray="2,2" transform="rotate(26.5 20 60)"/>
-              <line x1="0" y1="57" x2="0" y2="63" stroke="#666" strokeWidth="1"/>
-              <line x1="40" y1="57" x2="40" y2="63" stroke="#666" strokeWidth="1"/>
-              {/* 중괄호 */}
-              <path d="M 0,65 Q 2,67 5,67 L 35,67 Q 38,67 40,65" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="15" y="78" fontSize="10" fill="#666" fontWeight="bold">1100mm</text>
+              {/* 밑판 세로 치수선 (오른쪽 변 - 대각선) */}
+              <line x1="0" y1="78" x2="40" y2="58" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="-2" y1="76" x2="2" y2="80" stroke="#666" strokeWidth="1"/>
+              <line x1="38" y1="56" x2="42" y2="60" stroke="#666" strokeWidth="1"/>
+              {/* 중괄호 - 대각선 방향 */}
+              <path d="M 0,77 Q 2,79 5,78 L 35,58 Q 38,57 40,55" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="10" y="72" fontSize="10" fill="#666" fontWeight="bold" transform="rotate(26.5 22 68)">1100mm</text>
             </>
           )}
         </g>
       </svg>
+
+      {/* 카운트 */}
+      {count !== undefined && (
+        <div className="text-sm font-bold text-slate-800">
+          {count} 파렛트
+        </div>
+      )}
     </div>
   )
 }
