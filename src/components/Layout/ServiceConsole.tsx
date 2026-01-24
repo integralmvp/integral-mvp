@@ -1,7 +1,8 @@
 // 서비스 콘솔 - 탭 + 아코디언 폼 (Phase 2+3: 통합 엔진 적용)
 import { useState, useEffect } from 'react'
 import type { BoxInputUI } from '../../types/models'
-import { computeDemand, computeDemandFromArea, type DemandResult, type BoxInput } from '../../engine'
+import { computeDemand, computeDemandFromArea, type DemandResult, type BoxInput, cubesToCBM, palletsToCBM, cbmToWarehouseCount, cbmToTruckCount } from '../../engine'
+import { PalletIcon3D, CubeIcon3D, WarehouseIcon, TruckIcon } from '../visualizations'
 
 type ServiceType = 'storage' | 'transport' | 'both'
 
@@ -444,6 +445,7 @@ function AreaInputField({
   const [showModuleDetails, setShowModuleDetails] = useState(false)
   const [tempAreaM2, setTempAreaM2] = useState<number>(0)
   const [areaConfirmed, setAreaConfirmed] = useState(false)
+  const [conversionConfirmed, setConversionConfirmed] = useState(false)
 
   const handleAddBox = () => {
     const newBox: BoxInputUI = {
@@ -764,67 +766,131 @@ function AreaInputField({
             </div>
           )}
 
-          {/* 최종 결과 + CTA */}
+          {/* 최종 결과 + 시각화 */}
           {result && !result.hasUnclassified && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0">
-                  <svg width="40" height="35" viewBox="0 0 32 28" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.8))' }}>
-                    {/* 아이소메트릭 3D 파렛트 (주황) */}
-                    <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" strokeWidth="0.5"/>
-                    {/* 상판 나무 판자 간 공백 3개 (상판 변과 평행) */}
-                    <line x1="5.5" y1="8" x2="19.5" y2="16" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
-                    <line x1="9" y1="6" x2="23" y2="14" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
-                    <line x1="12.5" y1="4" x2="26.5" y2="12" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
-                    {/* 왼쪽 측면 - 그림자색 배경 (비어있는 공간) */}
-                    <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#993d1f" stroke="#ff6b35" strokeWidth="0.5"/>
-                    {/* 오른쪽 측면 */}
-                    <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
-                    {/* 각목 3개 - 주황색 (실제 나무 각목) */}
-                    <path d="M 2,10 L 2,18 L 4,19 L 4,11 Z" fill="#ff6b35"/>
-                    <path d="M 8,14 L 8,22 L 10,23 L 10,15 Z" fill="#ff6b35"/>
-                    <path d="M 14,17 L 14,25 L 16,26 L 16,18 Z" fill="#ff6b35"/>
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  {mode === 'STORAGE' ? (
-                    <>
-                      <div className="text-sm font-bold text-blue-900">
-                        총 {result.demandPallets} 파렛트
-                      </div>
-                      <div className="text-xs text-blue-700 mt-0.5">
-                        1파렛트 = 1.1m × 1.1m, 최대 적재 높이 1.8m 기준
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-sm font-bold text-emerald-900">
-                        총 {result.demandCubes} 큐브
-                      </div>
-                      <div className="text-xs text-emerald-700 mt-0.5">
-                        1큐브 = 250mm × 250mm × 250mm (0.015625m³)
-                      </div>
-                    </>
-                  )}
+            <div className="border border-slate-300 rounded-lg p-4 space-y-4">
+              {/* 안내사항 타이틀 */}
+              <div className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2">
+                📋 안내사항
+              </div>
+
+              {/* 파렛트/큐브 기준 시각화 */}
+              <div className="flex items-center justify-center">
+                {mode === 'STORAGE' ? (
+                  <PalletIcon3D showDimensions={true} size={100} />
+                ) : (
+                  <CubeIcon3D showDimensions={true} size={100} />
+                )}
+              </div>
+
+              <div className="text-center">
+                <div className="text-lg font-bold text-slate-900">
+                  {mode === 'STORAGE' ? `${result.demandPallets} 파렛트` : `${result.demandCubes} 큐브`}
                 </div>
               </div>
 
-              {/* CTA 버튼 */}
-              <button
-                onClick={onSelectConfirm}
-                disabled={isButtonDisabled()}
-                className={`w-full py-2 text-sm font-bold rounded-lg transition-colors ${
-                  isButtonDisabled()
-                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                    : mode === 'STORAGE'
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                }`}
-              >
-                {mode === 'STORAGE'
-                  ? `${result.demandPallets} 파렛트를 선택하시겠습니까?`
-                  : `${result.demandCubes} 큐브로 운송을 요청하시겠습니까?`}
-              </button>
+              {/* 구분선 */}
+              <div className="border-t border-slate-200"></div>
+
+              {/* 창고/트럭 기준 시각화 */}
+              <div>
+                <div className="text-xs font-semibold text-slate-700 mb-2 text-center">
+                  참고: 기준 창고/트럭 규모 환산
+                </div>
+                <div className="flex items-center justify-center gap-6">
+                  <WarehouseIcon
+                    count={
+                      mode === 'STORAGE'
+                        ? cbmToWarehouseCount(palletsToCBM(result.demandPallets || 0))
+                        : cbmToWarehouseCount(cubesToCBM(result.demandCubes))
+                    }
+                    size={60}
+                  />
+                  <TruckIcon
+                    count={
+                      mode === 'STORAGE'
+                        ? cbmToTruckCount(palletsToCBM(result.demandPallets || 0))
+                        : cbmToTruckCount(cubesToCBM(result.demandCubes))
+                    }
+                    size={60}
+                  />
+                </div>
+              </div>
+
+              {/* 보조 정보 */}
+              <div className="bg-slate-50 rounded p-2 text-center">
+                <div className="text-xs text-slate-600">
+                  <span className="inline-flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    {mode === 'STORAGE'
+                      ? `${palletsToCBM(result.demandPallets || 0)} CBM`
+                      : `${cubesToCBM(result.demandCubes)} CBM`}
+                    {' '}(구매 공간 기준 체적)
+                  </span>
+                </div>
+              </div>
+
+              {/* 안내 문구 */}
+              <div className="text-[10px] text-slate-500 text-center leading-relaxed">
+                구매자의 이해를 돕기 위한 정보이며, 현장 적재 상황에 따라 사용 형태는 달라질 수 있습니다.
+              </div>
+
+              {/* 구분선 */}
+              <div className="border-t border-slate-200"></div>
+
+              {/* 체크박스 확인 */}
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="conversion-confirmed"
+                  checked={conversionConfirmed}
+                  onChange={(e) => setConversionConfirmed(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <label htmlFor="conversion-confirmed" className="text-xs text-slate-700 cursor-pointer select-none">
+                  환산 결과를 확인했습니다
+                </label>
+              </div>
+
+              {/* 환산 상세 결과 (체크 후 펼침) */}
+              {conversionConfirmed && (
+                <div className="space-y-3 border-t border-slate-200 pt-3">
+                  <div className="text-xs font-semibold text-slate-700">
+                    환산 상세 결과
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="text-sm font-bold text-blue-900">
+                      {mode === 'STORAGE'
+                        ? `총 ${result.demandPallets} 파렛트`
+                        : `총 ${result.demandCubes} 큐브`}
+                    </div>
+                    <div className="text-xs text-blue-700 mt-1">
+                      {mode === 'STORAGE'
+                        ? '1파렛트 = 1.1m × 1.1m × 1.8m'
+                        : '1큐브 = 250mm × 250mm × 250mm (0.015625m³)'}
+                    </div>
+                  </div>
+
+                  {/* CTA 버튼 */}
+                  <button
+                    onClick={onSelectConfirm}
+                    disabled={isButtonDisabled()}
+                    className={`w-full py-2 text-sm font-bold rounded-lg transition-colors ${
+                      isButtonDisabled()
+                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                        : mode === 'STORAGE'
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
+                  >
+                    {mode === 'STORAGE'
+                      ? `${result.demandPallets} 파렛트를 선택하시겠습니까?`
+                      : `${result.demandCubes} 큐브로 운송을 요청하시겠습니까?`}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </>
@@ -876,64 +942,129 @@ function AreaInputField({
           </div>
 
           {result && areaConfirmed && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0">
-                  <svg width="40" height="35" viewBox="0 0 32 28" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.8))' }}>
-                    {/* 아이소메트릭 3D 파렛트 (주황) */}
-                    <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" strokeWidth="0.5"/>
-                    {/* 상판 나무 판자 간 공백 3개 (상판 변과 평행) */}
-                    <line x1="5.5" y1="8" x2="19.5" y2="16" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
-                    <line x1="9" y1="6" x2="23" y2="14" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
-                    <line x1="12.5" y1="4" x2="26.5" y2="12" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
-                    {/* 왼쪽 측면 - 그림자색 배경 (비어있는 공간) */}
-                    <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#993d1f" stroke="#ff6b35" strokeWidth="0.5"/>
-                    {/* 오른쪽 측면 */}
-                    <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
-                    {/* 각목 3개 - 주황색 (실제 나무 각목) */}
-                    <path d="M 2,10 L 2,18 L 4,19 L 4,11 Z" fill="#ff6b35"/>
-                    <path d="M 8,14 L 8,22 L 10,23 L 10,15 Z" fill="#ff6b35"/>
-                    <path d="M 14,17 L 14,25 L 16,26 L 16,18 Z" fill="#ff6b35"/>
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  {mode === 'STORAGE' ? (
-                    <>
-                      <div className="text-sm font-bold text-blue-900">
-                        {result.demandPallets} 파렛트
-                      </div>
-                      <div className="text-xs text-blue-700 mt-0.5">
-                        1파렛트 = 1.1m × 1.1m
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-sm font-bold text-emerald-900">
-                        {result.demandCubes} 큐브
-                      </div>
-                      <div className="text-xs text-emerald-700 mt-0.5">
-                        1큐브 = 250mm × 250mm × 250mm
-                      </div>
-                    </>
-                  )}
+            <div className="border border-slate-300 rounded-lg p-4 space-y-4">
+              {/* 안내사항 타이틀 */}
+              <div className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2">
+                📋 안내사항
+              </div>
+
+              {/* 파렛트/큐브 기준 시각화 */}
+              <div className="flex items-center justify-center">
+                {mode === 'STORAGE' ? (
+                  <PalletIcon3D showDimensions={true} size={100} />
+                ) : (
+                  <CubeIcon3D showDimensions={true} size={100} />
+                )}
+              </div>
+
+              <div className="text-center">
+                <div className="text-lg font-bold text-slate-900">
+                  {mode === 'STORAGE' ? `${result.demandPallets} 파렛트` : `${result.demandCubes} 큐브`}
                 </div>
               </div>
 
-              <button
-                onClick={onSelectConfirm}
-                disabled={isButtonDisabled()}
-                className={`w-full py-2 text-sm font-bold rounded-lg transition-colors ${
-                  isButtonDisabled()
-                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                    : mode === 'STORAGE'
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                }`}
-              >
-                {mode === 'STORAGE'
-                  ? `${result.demandPallets} 파렛트를 선택하시겠습니까?`
-                  : `${result.demandCubes} 큐브로 운송을 요청하시겠습니까?`}
-              </button>
+              {/* 구분선 */}
+              <div className="border-t border-slate-200"></div>
+
+              {/* 창고/트럭 기준 시각화 */}
+              <div>
+                <div className="text-xs font-semibold text-slate-700 mb-2 text-center">
+                  참고: 기준 창고/트럭 규모 환산
+                </div>
+                <div className="flex items-center justify-center gap-6">
+                  <WarehouseIcon
+                    count={
+                      mode === 'STORAGE'
+                        ? cbmToWarehouseCount(palletsToCBM(result.demandPallets || 0))
+                        : cbmToWarehouseCount(cubesToCBM(result.demandCubes))
+                    }
+                    size={60}
+                  />
+                  <TruckIcon
+                    count={
+                      mode === 'STORAGE'
+                        ? cbmToTruckCount(palletsToCBM(result.demandPallets || 0))
+                        : cbmToTruckCount(cubesToCBM(result.demandCubes))
+                    }
+                    size={60}
+                  />
+                </div>
+              </div>
+
+              {/* 보조 정보 */}
+              <div className="bg-slate-50 rounded p-2 text-center">
+                <div className="text-xs text-slate-600">
+                  <span className="inline-flex items-center gap-1">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    {mode === 'STORAGE'
+                      ? `${palletsToCBM(result.demandPallets || 0)} CBM`
+                      : `${cubesToCBM(result.demandCubes)} CBM`}
+                    {' '}(구매 공간 기준 체적)
+                  </span>
+                </div>
+              </div>
+
+              {/* 안내 문구 */}
+              <div className="text-[10px] text-slate-500 text-center leading-relaxed">
+                구매자의 이해를 돕기 위한 정보이며, 현장 적재 상황에 따라 사용 형태는 달라질 수 있습니다.
+              </div>
+
+              {/* 구분선 */}
+              <div className="border-t border-slate-200"></div>
+
+              {/* 체크박스 확인 */}
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="conversion-confirmed-area"
+                  checked={conversionConfirmed}
+                  onChange={(e) => setConversionConfirmed(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <label htmlFor="conversion-confirmed-area" className="text-xs text-slate-700 cursor-pointer select-none">
+                  환산 결과를 확인했습니다
+                </label>
+              </div>
+
+              {/* 환산 상세 결과 (체크 후 펼침) */}
+              {conversionConfirmed && (
+                <div className="space-y-3 border-t border-slate-200 pt-3">
+                  <div className="text-xs font-semibold text-slate-700">
+                    환산 상세 결과
+                  </div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="text-sm font-bold text-blue-900">
+                      {mode === 'STORAGE'
+                        ? `총 ${result.demandPallets} 파렛트`
+                        : `총 ${result.demandCubes} 큐브`}
+                    </div>
+                    <div className="text-xs text-blue-700 mt-1">
+                      {mode === 'STORAGE'
+                        ? '1파렛트 = 1.1m × 1.1m × 1.8m'
+                        : '1큐브 = 250mm × 250mm × 250mm (0.015625m³)'}
+                    </div>
+                  </div>
+
+                  {/* CTA 버튼 */}
+                  <button
+                    onClick={onSelectConfirm}
+                    disabled={isButtonDisabled()}
+                    className={`w-full py-2 text-sm font-bold rounded-lg transition-colors ${
+                      isButtonDisabled()
+                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                        : mode === 'STORAGE'
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
+                  >
+                    {mode === 'STORAGE'
+                      ? `${result.demandPallets} 파렛트를 선택하시겠습니까?`
+                      : `${result.demandCubes} 큐브로 운송을 요청하시겠습니까?`}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </>

@@ -88,6 +88,25 @@ export const CUBE_CONFIG = {
 } as const
 
 /**
+ * 기준 창고 (시각화 참고용)
+ * - 10평 = 33㎡ × 3m = 99 CBM
+ */
+export const REFERENCE_WAREHOUSE = {
+  areaM2: 33,              // 10평
+  heightM: 3,              // 천장 높이
+  volumeCBM: 99,           // 체적 (33 × 3)
+} as const
+
+/**
+ * 기준 트럭 (시각화 참고용)
+ * - 1톤 트럭 = 7 CBM
+ */
+export const REFERENCE_TRUCK = {
+  capacityCBM: 7,          // 적재 체적
+  label: '1톤 트럭',
+} as const
+
+/**
  * 모듈 타입 (타입 안전성)
  */
 export type ModuleName = keyof typeof MODULE_SPECS
