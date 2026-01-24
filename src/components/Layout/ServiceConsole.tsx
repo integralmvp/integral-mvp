@@ -433,7 +433,7 @@ interface AreaInputFieldProps {
 function AreaInputField({
   inputType,
   boxes,
-  areaM2,
+  areaM2: _areaM2,
   result,
   mode,
   onInputTypeChange,
@@ -442,6 +442,8 @@ function AreaInputField({
   onSelectConfirm,
 }: AreaInputFieldProps) {
   const [showModuleDetails, setShowModuleDetails] = useState(false)
+  const [tempAreaM2, setTempAreaM2] = useState<number>(0)
+  const [areaConfirmed, setAreaConfirmed] = useState(false)
 
   const handleAddBox = () => {
     const newBox: BoxInputUI = {
@@ -477,6 +479,8 @@ function AreaInputField({
   }
 
   const handleSwitchToArea = () => {
+    setTempAreaM2(0)
+    setAreaConfirmed(false)
     onInputTypeChange('area')
   }
 
@@ -509,7 +513,11 @@ function AreaInputField({
         <label className="block text-xs font-medium text-slate-700 mb-2">단위 선택</label>
         <div className="flex gap-2">
           <button
-            onClick={() => onInputTypeChange('box')}
+            onClick={() => {
+              onInputTypeChange('box')
+              setTempAreaM2(0)
+              setAreaConfirmed(false)
+            }}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
               inputType === 'box'
                 ? 'bg-blue-500 text-white'
@@ -519,7 +527,11 @@ function AreaInputField({
             포장 단위
           </button>
           <button
-            onClick={() => onInputTypeChange('area')}
+            onClick={() => {
+              onInputTypeChange('area')
+              setTempAreaM2(0)
+              setAreaConfirmed(false)
+            }}
             className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
               inputType === 'area'
                 ? 'bg-blue-500 text-white'
@@ -764,11 +776,14 @@ function AreaInputField({
                     <line x1="5.5" y1="8" x2="19.5" y2="16" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
                     <line x1="9" y1="6" x2="23" y2="14" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
                     <line x1="12.5" y1="4" x2="26.5" y2="12" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
+                    {/* 왼쪽 측면 */}
                     <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
+                    {/* 오른쪽 측면 */}
                     <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
-                    <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#993d1f"/>
-                    <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#993d1f"/>
-                    <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#993d1f"/>
+                    {/* 각목 3개 - 왼쪽 측면에만 (상판 판자와 연결) */}
+                    <path d="M 4,12 L 4,16 L 7,18 L 7,14 Z" fill="#993d1f"/>
+                    <path d="M 8,17 L 8,21 L 11,23 L 11,19 Z" fill="#993d1f"/>
+                    <path d="M 12,22 L 12,26 L 15,26 L 15,22 Z" fill="#993d1f"/>
                   </svg>
                 </div>
                 <div className="flex-1">
@@ -818,30 +833,67 @@ function AreaInputField({
       {/* 면적 단위 입력 */}
       {inputType === 'area' && (
         <>
-          <div>
-            <label className="block text-xs font-medium text-slate-700 mb-2">면적 (㎡)</label>
+          <div className={`rounded-lg p-3 space-y-2 ${areaConfirmed ? 'bg-green-50 border-2 border-green-300' : 'bg-slate-50'}`}>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-medium text-slate-700">
+                면적 (㎡) {areaConfirmed && <span className="text-green-600">✓ 완료</span>}
+              </label>
+            </div>
             <input
               type="number"
               min="0"
               step="0.1"
-              value={areaM2 || ''}
-              onChange={(e) => onAreaChange(Number(e.target.value))}
+              value={tempAreaM2 || ''}
+              onChange={(e) => {
+                setTempAreaM2(Number(e.target.value))
+                setAreaConfirmed(false)
+              }}
+              onWheel={(e) => e.currentTarget.blur()}
+              disabled={areaConfirmed}
               placeholder="면적을 입력하세요"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-slate-100"
             />
+
+            {/* 입력 완료 버튼 */}
+            {!areaConfirmed && (
+              <button
+                onClick={() => {
+                  if (tempAreaM2 > 0) {
+                    onAreaChange(tempAreaM2)
+                    setAreaConfirmed(true)
+                  }
+                }}
+                disabled={!tempAreaM2 || tempAreaM2 <= 0}
+                className={`w-full py-2 text-xs font-bold rounded transition-colors ${
+                  tempAreaM2 && tempAreaM2 > 0
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                    : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                }`}
+              >
+                입력 완료
+              </button>
+            )}
           </div>
 
-          {result && (
+          {result && areaConfirmed && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0">
                   <svg width="40" height="35" viewBox="0 0 32 28" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.8))' }}>
+                    {/* 아이소메트릭 3D 파렛트 (주황) */}
                     <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" strokeWidth="0.5"/>
+                    {/* 상판 나무 판자 간 공백 3개 (상판 변과 평행) */}
+                    <line x1="5.5" y1="8" x2="19.5" y2="16" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
+                    <line x1="9" y1="6" x2="23" y2="14" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
+                    <line x1="12.5" y1="4" x2="26.5" y2="12" stroke="#993d1f" strokeWidth="1.5" opacity="0.5"/>
+                    {/* 왼쪽 측면 */}
                     <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
+                    {/* 오른쪽 측면 */}
                     <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
-                    <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#993d1f"/>
-                    <path d="M 14,22 L 14,26 L 18,26 L 18,22 Z" fill="#993d1f"/>
-                    <path d="M 24,19 L 24,23 L 27,21 L 27,17 Z" fill="#993d1f"/>
+                    {/* 각목 3개 - 왼쪽 측면에만 (상판 판자와 연결) */}
+                    <path d="M 4,12 L 4,16 L 7,18 L 7,14 Z" fill="#993d1f"/>
+                    <path d="M 8,17 L 8,21 L 11,23 L 11,19 Z" fill="#993d1f"/>
+                    <path d="M 12,22 L 12,26 L 15,26 L 15,22 Z" fill="#993d1f"/>
                   </svg>
                 </div>
                 <div className="flex-1">
