@@ -52,24 +52,24 @@ export default function PalletIcon3D({ showDimensions = true, size = 150, count 
               <path d="M 53,0 Q 55,-2 55,-5 L 55,-45 Q 55,-48 53,-50" stroke="#666" strokeWidth="1" fill="none"/>
               <text x="58" y="-22" fontSize="14" fill="#666" fontWeight="bold">1800mm</text>
 
-              {/* 밑판 가로 치수선 (왼쪽 변 - 높이 치수 패턴 시계방향 70도 회전) */}
-              <g transform="translate(-20, 10) rotate(70)">
+              {/* 밑판 가로 치수선 (왼쪽 변 - 높이 치수 패턴 시계방향 63도 회전) */}
+              <g transform="translate(40, 27) rotate(63)">
                 <line x1="8" y1="0" x2="8" y2="45" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
                 <line x1="5" y1="0" x2="11" y2="0" stroke="#666" strokeWidth="1"/>
                 <line x1="5" y1="45" x2="11" y2="45" stroke="#666" strokeWidth="1"/>
                 {/* 중괄호 */}
                 <path d="M 13,0 Q 15,2 15,5 L 15,40 Q 15,43 13,45" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="18" y="25" fontSize="14" fill="#666" fontWeight="bold">1100mm</text>
+                <text x="11" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(-63)">1100mm</text>
               </g>
 
-              {/* 밑판 세로 치수선 (오른쪽 변 - 높이 치수 패턴 반시계방향 70도 회전) */}
-              <g transform="translate(20, 10) rotate(-70)">
+              {/* 밑판 세로 치수선 (오른쪽 변 - 높이 치수 패턴 시계방향 63도 회전) */}
+              <g transform="translate(-40, 27) rotate(-63)">
                 <line x1="-8" y1="0" x2="-8" y2="45" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
                 <line x1="-11" y1="0" x2="-5" y2="0" stroke="#666" strokeWidth="1"/>
                 <line x1="-11" y1="45" x2="-5" y2="45" stroke="#666" strokeWidth="1"/>
                 {/* 중괄호 */}
                 <path d="M -13,0 Q -15,2 -15,5 L -15,40 Q -15,43 -13,45" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="-50" y="25" fontSize="14" fill="#666" fontWeight="bold">1100mm</text>
+                <text x="-60" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(63)">1100mm</text>
               </g>
             </>
           )}
