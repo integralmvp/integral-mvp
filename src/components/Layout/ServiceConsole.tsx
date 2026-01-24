@@ -149,7 +149,8 @@ export default function ServiceConsole() {
     <div
       className="h-full flex flex-col overflow-hidden rounded-2xl shadow-2xl"
       style={{
-        background: 'rgba(255, 255, 255, 0.8)'
+        background: 'rgba(255, 255, 255, 0.8)',
+        cursor: 'default'
       }}
     >
       {/* 타이틀 */}
@@ -441,7 +442,6 @@ function AreaInputField({
   onAreaChange,
   onSelectConfirm,
 }: AreaInputFieldProps) {
-  const [showModuleDetails, setShowModuleDetails] = useState(false)
 
   const handleAddBox = () => {
     const newBox: BoxInputUI = {
@@ -480,8 +480,14 @@ function AreaInputField({
     }
   }
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur()
+    }
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={{ cursor: 'default' }}>
       {/* 플로우 설명 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
         <p className="text-xs text-blue-800">
@@ -556,49 +562,97 @@ function AreaInputField({
                         <label className="block text-[10px] text-slate-600 mb-1">
                           가로(mm)
                         </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={box.width || ''}
-                          onChange={(e) => handleBoxChange(box.id, 'width', Number(e.target.value))}
-                          className="w-full px-2 py-1 border border-slate-300 rounded text-xs"
-                        />
+                        <div className="relative">
+                          <input
+                            id={`${box.id}-width`}
+                            type="number"
+                            min="0"
+                            value={box.width || ''}
+                            onChange={(e) => handleBoxChange(box.id, 'width', Number(e.target.value))}
+                            onKeyDown={handleInputKeyDown}
+                            className="w-full px-2 py-1 pr-7 border border-slate-300 rounded text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById(`${box.id}-width`)?.blur()}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-800 text-sm"
+                            title="완료 (Enter)"
+                          >
+                            ✓
+                          </button>
+                        </div>
                       </div>
                       <div>
                         <label className="block text-[10px] text-slate-600 mb-1">
                           세로(mm)
                         </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={box.depth || ''}
-                          onChange={(e) => handleBoxChange(box.id, 'depth', Number(e.target.value))}
-                          className="w-full px-2 py-1 border border-slate-300 rounded text-xs"
-                        />
+                        <div className="relative">
+                          <input
+                            id={`${box.id}-depth`}
+                            type="number"
+                            min="0"
+                            value={box.depth || ''}
+                            onChange={(e) => handleBoxChange(box.id, 'depth', Number(e.target.value))}
+                            onKeyDown={handleInputKeyDown}
+                            className="w-full px-2 py-1 pr-7 border border-slate-300 rounded text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById(`${box.id}-depth`)?.blur()}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-800 text-sm"
+                            title="완료 (Enter)"
+                          >
+                            ✓
+                          </button>
+                        </div>
                       </div>
                       <div>
                         <label className="block text-[10px] text-slate-600 mb-1">
                           높이(mm)
                         </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={box.height || ''}
-                          onChange={(e) => handleBoxChange(box.id, 'height', Number(e.target.value))}
-                          className="w-full px-2 py-1 border border-slate-300 rounded text-xs"
-                        />
+                        <div className="relative">
+                          <input
+                            id={`${box.id}-height`}
+                            type="number"
+                            min="0"
+                            value={box.height || ''}
+                            onChange={(e) => handleBoxChange(box.id, 'height', Number(e.target.value))}
+                            onKeyDown={handleInputKeyDown}
+                            className="w-full px-2 py-1 pr-7 border border-slate-300 rounded text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById(`${box.id}-height`)?.blur()}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-800 text-sm"
+                            title="완료 (Enter)"
+                          >
+                            ✓
+                          </button>
+                        </div>
                       </div>
                       <div>
                         <label className="block text-[10px] text-slate-600 mb-1">
                           개수
                         </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={box.count || ''}
-                          onChange={(e) => handleBoxChange(box.id, 'count', Number(e.target.value))}
-                          className="w-full px-2 py-1 border border-slate-300 rounded text-xs"
-                        />
+                        <div className="relative">
+                          <input
+                            id={`${box.id}-count`}
+                            type="number"
+                            min="0"
+                            value={box.count || ''}
+                            onChange={(e) => handleBoxChange(box.id, 'count', Number(e.target.value))}
+                            onKeyDown={handleInputKeyDown}
+                            className="w-full px-2 py-1 pr-7 border border-slate-300 rounded text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById(`${box.id}-count`)?.blur()}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-800 text-sm"
+                            title="완료 (Enter)"
+                          >
+                            ✓
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -631,36 +685,38 @@ function AreaInputField({
             </div>
           )}
 
-          {/* 모듈별 요약 (선택사항) */}
+          {/* 포장 모듈 자동 분류 결과 */}
           {result && result.moduleSummary && result.moduleSummary.length > 0 && !result.hasUnclassified && (
             <div className="border border-slate-200 rounded-lg p-3">
-              <div
-                className="flex items-center justify-between mb-2 cursor-pointer"
-                onClick={() => setShowModuleDetails(!showModuleDetails)}
-              >
+              <div className="mb-2">
                 <span className="text-xs font-semibold text-slate-700">
-                  모듈별 참고 정보
-                </span>
-                <span className="text-xs text-blue-600 hover:text-blue-800">
-                  {showModuleDetails ? '접기' : '펼치기'}
+                  표준 포장 모듈 자동 분류 결과
                 </span>
               </div>
 
-              {showModuleDetails && (
-                <div className="space-y-2">
-                  {result.moduleSummary.map((summary, idx) => (
+              <div className="space-y-2">
+                {result.moduleSummary.map((summary, idx) => {
+                  // 모드별 환산 값 계산
+                  const pallets = mode === 'STORAGE' ? Math.ceil(summary.estimatedCubes / 128) : null
+                  const cubes = summary.estimatedCubes
+
+                  return (
                     <div key={idx} className="bg-slate-50 rounded p-2">
-                      <div className="text-xs font-bold text-slate-800 mb-1">
-                        {summary.module}
-                      </div>
-                      <div className="text-[10px] text-slate-600 space-y-0.5">
-                        <div>• 박스 수: {summary.boxCount}개</div>
-                        <div>• 추정 큐브: {summary.estimatedCubes}개</div>
+                      <div className="text-xs text-slate-800">
+                        {mode === 'STORAGE' ? (
+                          <span>
+                            <span className="font-bold">{summary.module} 모듈</span>, {summary.boxCount}개 박스 = 총 <span className="font-bold text-blue-700">{pallets} 파렛트</span>
+                          </span>
+                        ) : (
+                          <span>
+                            <span className="font-bold">{summary.module} 모듈</span>, {summary.boxCount}개 박스 = 총 <span className="font-bold text-emerald-700">{cubes} 큐브</span>
+                          </span>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  )
+                })}
+              </div>
             </div>
           )}
 
