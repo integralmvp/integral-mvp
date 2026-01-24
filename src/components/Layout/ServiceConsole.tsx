@@ -37,8 +37,8 @@ export default function ServiceConsole() {
   const [transportSelectedCubes, setTransportSelectedCubes] = useState<number | null>(null)
 
   // 보관+운송 탭 상태 (추후 구현)
-  const [bothStorageSelectedPallets, setBothStorageSelectedPallets] = useState<number | null>(null)
-  const [bothTransportSelectedCubes, setBothTransportSelectedCubes] = useState<number | null>(null)
+  const [bothStorageSelectedPallets] = useState<number | null>(null)
+  const [bothTransportSelectedCubes] = useState<number | null>(null)
 
   // 보관 탭: 계산 트리거
   useEffect(() => {
