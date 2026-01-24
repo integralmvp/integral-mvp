@@ -61,7 +61,7 @@ export default function CubeIcon3D({ showDimensions = true, size = 150, count }:
                 <line x1="5" y1="36" x2="11" y2="36" stroke="#666" strokeWidth="1"/>
                 {/* 중괄호 */}
                 <path d="M 13,0 Q 15,2 15,5 L 15,31 Q 15,34 13,36" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="4" y="23" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(-57)">250mm</text>
+                <text x="4" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(-57)">250mm</text>
               </g>
 
               {/* 밑판 세로 치수선 (오른쪽 변 - 높이 치수 패턴 반시계방향 57도 회전) */}
@@ -71,7 +71,7 @@ export default function CubeIcon3D({ showDimensions = true, size = 150, count }:
                 <line x1="-11" y1="36" x2="-5" y2="36" stroke="#666" strokeWidth="1"/>
                 {/* 중괄호 */}
                 <path d="M -13,0 Q -15,2 -15,5 L -15,31 Q -15,34 -13,36" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="-52" y="23" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(57)">250mm</text>
+                <text x="-52" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(57)">250mm</text>
               </g>
             </>
           )}
