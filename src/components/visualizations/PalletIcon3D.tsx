@@ -4,17 +4,17 @@ interface PalletIcon3DProps {
   size?: number
 }
 
-export default function PalletIcon3D({ showDimensions = true, size = 120 }: PalletIcon3DProps) {
+export default function PalletIcon3D({ showDimensions = true, size = 150 }: PalletIcon3DProps) {
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center">
       <svg
         width={size}
-        height={size * 1.2}
-        viewBox={showDimensions ? "-20 -30 140 180" : "0 0 100 120"}
+        height={size * 1.3}
+        viewBox={showDimensions ? "-30 -80 160 240" : "0 0 100 120"}
         style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.15))' }}
       >
         {/* 아이소메트릭 3D 파렛트 */}
-        <g transform="translate(50, 40)">
+        <g transform="translate(50, 50)">
           {/* 상판 (주황색) */}
           <path d="M 0,-20 L 40,0 L 0,20 L -40,0 Z" fill="#ff6b35" stroke="#ff8c5a" strokeWidth="0.8"/>
           {/* 상판 나무 판자 간 공백 */}
@@ -32,40 +32,42 @@ export default function PalletIcon3D({ showDimensions = true, size = 120 }: Pall
           <path d="M -20,10 L -20,40 L -15,42.5 L -15,12.5 Z" fill="#ff6b35"/>
           <path d="M 0,20 L 0,50 L 5,52.5 L 5,22.5 Z" fill="#ff6b35"/>
 
-          {/* z축 치수선 (점선) */}
           {showDimensions && (
             <>
+              {/* z축 점선 (상판 모서리에서 위로) - 최대 적재 높이 표현 */}
+              <line x1="-40" y1="0" x2="-40" y2="-50" stroke="#666" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
+              <line x1="40" y1="0" x2="40" y2="-50" stroke="#666" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
+              <line x1="0" y1="-20" x2="0" y2="-70" stroke="#666" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
+              <line x1="0" y1="20" x2="0" y2="-30" stroke="#666" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
+
+              {/* 가상 상단 공간 테두리 (점선) */}
+              <path d="M 0,-70 L 40,-50 L 0,-30 L -40,-50 Z" fill="none" stroke="#666" strokeWidth="1" strokeDasharray="3,3" opacity="0.4"/>
+
               {/* 높이 치수선 (오른쪽) */}
-              <line x1="48" y1="5" x2="48" y2="35" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-              <line x1="45" y1="5" x2="51" y2="5" stroke="#666" strokeWidth="1"/>
-              <line x1="45" y1="35" x2="51" y2="35" stroke="#666" strokeWidth="1"/>
+              <line x1="48" y1="0" x2="48" y2="-50" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="45" y1="0" x2="51" y2="0" stroke="#666" strokeWidth="1"/>
+              <line x1="45" y1="-50" x2="51" y2="-50" stroke="#666" strokeWidth="1"/>
               {/* 중괄호 */}
-              <path d="M 53,5 Q 55,7 55,10 L 55,30 Q 55,33 53,35" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="58" y="22" fontSize="8" fill="#666" fontWeight="bold">1800mm</text>
+              <path d="M 53,0 Q 55,-2 55,-5 L 55,-45 Q 55,-48 53,-50" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="58" y="-22" fontSize="10" fill="#666" fontWeight="bold">1800mm</text>
 
-              {/* 가로 치수선 (앞쪽 상단) */}
-              <line x1="-40" y1="-8" x2="0" y2="12" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-              <line x1="-40" y1="-11" x2="-40" y2="-5" stroke="#666" strokeWidth="1"/>
-              <line x1="0" y1="9" x2="0" y2="15" stroke="#666" strokeWidth="1"/>
-              <path d="M -40,-8 Q -38,-10 -35,-10 L -5,-10 Q -2,-10 0,12" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="-25" y="-13" fontSize="8" fill="#666" fontWeight="bold">1100mm</text>
+              {/* 밑판 가로 치수선 (하단) */}
+              <line x1="-40" y1="58" x2="0" y2="78" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="-40" y1="55" x2="-40" y2="61" stroke="#666" strokeWidth="1"/>
+              <line x1="0" y1="75" x2="0" y2="81" stroke="#666" strokeWidth="1"/>
+              <path d="M -40,58 Q -38,60 -35,60 L -5,60 Q -2,60 0,78" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="-25" y="72" fontSize="10" fill="#666" fontWeight="bold">1100mm</text>
 
-              {/* 세로 치수선 (오른쪽 상단) */}
-              <line x1="0" y1="12" x2="40" y2="-8" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-              <line x1="0" y1="9" x2="0" y2="15" stroke="#666" strokeWidth="1"/>
-              <line x1="40" y1="-11" x2="40" y2="-5" stroke="#666" strokeWidth="1"/>
-              <path d="M 0,12 Q 2,10 5,10 L 35,10 Q 38,10 40,-8" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="15" y="8" fontSize="8" fill="#666" fontWeight="bold">1100mm</text>
+              {/* 밑판 세로 치수선 (하단) */}
+              <line x1="0" y1="78" x2="40" y2="58" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="0" y1="75" x2="0" y2="81" stroke="#666" strokeWidth="1"/>
+              <line x1="40" y1="55" x2="40" y2="61" stroke="#666" strokeWidth="1"/>
+              <path d="M 0,78 Q 2,76 5,76 L 35,76 Q 38,76 40,58" stroke="#666" strokeWidth="1" fill="none"/>
+              <text x="15" y="88" fontSize="10" fill="#666" fontWeight="bold">1100mm</text>
             </>
           )}
         </g>
       </svg>
-
-      {showDimensions && (
-        <div className="text-xs font-bold text-slate-700">
-          1 파렛트 = 1.1m × 1.1m × 1.8m
-        </div>
-      )}
     </div>
   )
 }
