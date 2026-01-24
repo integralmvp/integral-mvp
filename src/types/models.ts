@@ -141,6 +141,7 @@ export interface BoxInputUI {
   depth: number   // mm
   height: number  // mm
   count: number
+  completed?: boolean  // 입력 완료 여부
 }
 
 // 박스 입력 (엔진 레이어 - engine과 호환)

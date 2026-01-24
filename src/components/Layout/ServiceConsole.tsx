@@ -40,15 +40,14 @@ export default function ServiceConsole() {
   const [bothStorageSelectedPallets] = useState<number | null>(null)
   const [bothTransportSelectedCubes] = useState<number | null>(null)
 
-  // 보관 탭: 계산 트리거
+  // 보관 탭: 계산 트리거 (완료된 박스만)
   useEffect(() => {
     if (storageInputType === 'box' && storageBoxes.length > 0) {
-      // 모든 박스 필드가 유효한지 확인
-      const allValid = storageBoxes.every(
-        b => b.width > 0 && b.depth > 0 && b.height > 0 && b.count > 0
-      )
-      if (allValid) {
-        const engineBoxes = storageBoxes.map(toEngineBoxInput)
+      // 완료된 박스만 필터링
+      const completedBoxes = storageBoxes.filter(b => b.completed === true)
+
+      if (completedBoxes.length > 0) {
+        const engineBoxes = completedBoxes.map(toEngineBoxInput)
         const result = computeDemand(engineBoxes, 'STORAGE')
         setStorageResult(result)
 
@@ -73,14 +72,14 @@ export default function ServiceConsole() {
     }
   }, [storageBoxes, storageAreaM2, storageInputType])
 
-  // 운송 탭: 계산 트리거
+  // 운송 탭: 계산 트리거 (완료된 박스만)
   useEffect(() => {
     if (transportInputType === 'box' && transportBoxes.length > 0) {
-      const allValid = transportBoxes.every(
-        b => b.width > 0 && b.depth > 0 && b.height > 0 && b.count > 0
-      )
-      if (allValid) {
-        const engineBoxes = transportBoxes.map(toEngineBoxInput)
+      // 완료된 박스만 필터링
+      const completedBoxes = transportBoxes.filter(b => b.completed === true)
+
+      if (completedBoxes.length > 0) {
+        const engineBoxes = completedBoxes.map(toEngineBoxInput)
         const result = computeDemand(engineBoxes, 'ROUTE')
         setTransportResult(result)
 
@@ -451,6 +450,7 @@ function AreaInputField({
       depth: 0,
       height: 0,
       count: 0,
+      completed: false,
     }
     onBoxesChange([...boxes, newBox])
   }
@@ -460,10 +460,18 @@ function AreaInputField({
   }
 
   const handleBoxChange = (boxId: string, field: keyof BoxInputUI, value: number) => {
-    if (field === 'id') return
+    if (field === 'id' || field === 'completed') return
     onBoxesChange(
       boxes.map(box =>
-        box.id === boxId ? { ...box, [field]: value } : box
+        box.id === boxId ? { ...box, [field]: value, completed: false } : box
+      )
+    )
+  }
+
+  const handleBoxComplete = (boxId: string) => {
+    onBoxesChange(
+      boxes.map(box =>
+        box.id === boxId ? { ...box, completed: true } : box
       )
     )
   }
@@ -481,10 +489,8 @@ function AreaInputField({
     }
   }
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.currentTarget.blur()
-    }
+  const isBoxComplete = (box: BoxInputUI) => {
+    return box.width > 0 && box.depth > 0 && box.height > 0 && box.count > 0
   }
 
   return (
@@ -544,120 +550,100 @@ function AreaInputField({
 
             {boxes.length > 0 ? (
               <div className="space-y-2">
-                {boxes.map((box, index) => (
-                  <div key={box.id} className="bg-slate-50 rounded-lg p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-700">
-                        박스 {index + 1}
-                      </span>
-                      <button
-                        onClick={() => handleRemoveBox(box.id)}
-                        className="text-xs text-red-600 hover:text-red-800"
-                      >
-                        삭제
-                      </button>
-                    </div>
+                {boxes.map((box, index) => {
+                  const isComplete = isBoxComplete(box)
+                  const isConfirmed = box.completed === true
 
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-[10px] text-slate-600 mb-1">
-                          가로(mm)
-                        </label>
-                        <div className="relative">
+                  return (
+                    <div key={box.id} className={`rounded-lg p-3 space-y-2 ${isConfirmed ? 'bg-green-50 border-2 border-green-300' : 'bg-slate-50'}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-700">
+                          박스 {index + 1} {isConfirmed && <span className="text-green-600">✓ 완료</span>}
+                        </span>
+                        <button
+                          onClick={() => handleRemoveBox(box.id)}
+                          className="text-xs text-red-600 hover:text-red-800"
+                        >
+                          삭제
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] text-slate-600 mb-1">
+                            가로(mm)
+                          </label>
                           <input
-                            id={`${box.id}-width`}
                             type="number"
                             min="0"
                             value={box.width || ''}
                             onChange={(e) => handleBoxChange(box.id, 'width', Number(e.target.value))}
-                            onKeyDown={handleInputKeyDown}
-                            className="w-full px-2 py-1 pr-7 border border-slate-300 rounded text-xs"
+                            onWheel={(e) => e.currentTarget.blur()}
+                            disabled={isConfirmed}
+                            className="w-full px-2 py-1 border border-slate-300 rounded text-xs disabled:bg-slate-100"
                           />
-                          <button
-                            type="button"
-                            onClick={() => document.getElementById(`${box.id}-width`)?.blur()}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-800 text-sm"
-                            title="완료 (Enter)"
-                          >
-                            ✓
-                          </button>
                         </div>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-slate-600 mb-1">
-                          세로(mm)
-                        </label>
-                        <div className="relative">
+                        <div>
+                          <label className="block text-[10px] text-slate-600 mb-1">
+                            세로(mm)
+                          </label>
                           <input
-                            id={`${box.id}-depth`}
                             type="number"
                             min="0"
                             value={box.depth || ''}
                             onChange={(e) => handleBoxChange(box.id, 'depth', Number(e.target.value))}
-                            onKeyDown={handleInputKeyDown}
-                            className="w-full px-2 py-1 pr-7 border border-slate-300 rounded text-xs"
+                            onWheel={(e) => e.currentTarget.blur()}
+                            disabled={isConfirmed}
+                            className="w-full px-2 py-1 border border-slate-300 rounded text-xs disabled:bg-slate-100"
                           />
-                          <button
-                            type="button"
-                            onClick={() => document.getElementById(`${box.id}-depth`)?.blur()}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-800 text-sm"
-                            title="완료 (Enter)"
-                          >
-                            ✓
-                          </button>
                         </div>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-slate-600 mb-1">
-                          높이(mm)
-                        </label>
-                        <div className="relative">
+                        <div>
+                          <label className="block text-[10px] text-slate-600 mb-1">
+                            높이(mm)
+                          </label>
                           <input
-                            id={`${box.id}-height`}
                             type="number"
                             min="0"
                             value={box.height || ''}
                             onChange={(e) => handleBoxChange(box.id, 'height', Number(e.target.value))}
-                            onKeyDown={handleInputKeyDown}
-                            className="w-full px-2 py-1 pr-7 border border-slate-300 rounded text-xs"
+                            onWheel={(e) => e.currentTarget.blur()}
+                            disabled={isConfirmed}
+                            className="w-full px-2 py-1 border border-slate-300 rounded text-xs disabled:bg-slate-100"
                           />
-                          <button
-                            type="button"
-                            onClick={() => document.getElementById(`${box.id}-height`)?.blur()}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-800 text-sm"
-                            title="완료 (Enter)"
-                          >
-                            ✓
-                          </button>
                         </div>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] text-slate-600 mb-1">
-                          개수
-                        </label>
-                        <div className="relative">
+                        <div>
+                          <label className="block text-[10px] text-slate-600 mb-1">
+                            개수
+                          </label>
                           <input
-                            id={`${box.id}-count`}
                             type="number"
                             min="0"
                             value={box.count || ''}
                             onChange={(e) => handleBoxChange(box.id, 'count', Number(e.target.value))}
-                            onKeyDown={handleInputKeyDown}
-                            className="w-full px-2 py-1 pr-7 border border-slate-300 rounded text-xs"
+                            onWheel={(e) => e.currentTarget.blur()}
+                            disabled={isConfirmed}
+                            className="w-full px-2 py-1 border border-slate-300 rounded text-xs disabled:bg-slate-100"
                           />
-                          <button
-                            type="button"
-                            onClick={() => document.getElementById(`${box.id}-count`)?.blur()}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 text-green-600 hover:text-green-800 text-sm"
-                            title="완료 (Enter)"
-                          >
-                            ✓
-                          </button>
                         </div>
                       </div>
+
+                      {/* 입력 완료 버튼 */}
+                      {!isConfirmed && (
+                        <button
+                          onClick={() => handleBoxComplete(box.id)}
+                          disabled={!isComplete}
+                          className={`w-full py-2 text-xs font-bold rounded transition-colors ${
+                            isComplete
+                              ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                              : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                          }`}
+                        >
+                          입력 완료
+                        </button>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="text-xs text-slate-400 text-center py-4 border border-dashed border-slate-300 rounded">
@@ -749,11 +735,11 @@ function AreaInputField({
                           <div className="text-xs text-slate-800">
                             {mode === 'STORAGE' ? (
                               <span>
-                                <span className="font-bold">{summary.module} 모듈</span>, {summary.boxCount}개 박스 = 총 <span className="font-bold text-blue-700">{pallets} 파렛트</span>
+                                <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-blue-700">{pallets} 파렛트</span>
                               </span>
                             ) : (
                               <span>
-                                <span className="font-bold">{summary.module} 모듈</span>, {summary.boxCount}개 박스 = 총 <span className="font-bold text-emerald-700">{cubes} 큐브</span>
+                                <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-emerald-700">{cubes} 큐브</span>
                               </span>
                             )}
                           </div>
@@ -774,6 +760,10 @@ function AreaInputField({
                   <svg width="40" height="35" viewBox="0 0 32 28" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.8))' }}>
                     {/* 아이소메트릭 3D 파렛트 (주황) */}
                     <path d="M 16,2 L 30,10 L 16,18 L 2,10 Z" fill="#ff6b35" stroke="#ff8c5a" strokeWidth="0.5"/>
+                    {/* 상판 나무 판자 선 3개 (그림자 색) */}
+                    <line x1="9" y1="6" x2="23" y2="6" stroke="#993d1f" strokeWidth="0.6" opacity="0.6"/>
+                    <line x1="6" y1="9" x2="26" y2="9" stroke="#993d1f" strokeWidth="0.6" opacity="0.6"/>
+                    <line x1="9" y1="14" x2="23" y2="14" stroke="#993d1f" strokeWidth="0.6" opacity="0.6"/>
                     <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
                     <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
                     <path d="M 5,17 L 5,21 L 8,23 L 8,19 Z" fill="#993d1f"/>
