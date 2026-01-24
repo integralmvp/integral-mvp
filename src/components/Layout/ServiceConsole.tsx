@@ -1,7 +1,12 @@
 // 서비스 콘솔 - 탭 + 아코디언 폼 (Phase 2+3: 통합 엔진 적용)
 import { useState, useEffect } from 'react'
 import type { BoxInputUI } from '../../types/models'
-import { computeDemand, computeDemandFromArea, type DemandResult, type BoxInput, cubesToCBM, palletsToCBM, cbmToWarehouseCount, cbmToTruckCount } from '../../engine'
+import {
+  computeDemand, computeDemandFromArea, type DemandResult, type BoxInput,
+  cubesToCBM, palletsToCBM, cbmToTruckCount,
+  // Storage 전용: 운영계수 보정 환산
+  areaToPalletsWithFactor, palletsToCubes, STORAGE_AREA_CONSTANTS
+} from '../../engine'
 import { PalletIcon3D, CubeIcon3D, WarehouseIcon, TruckIcon } from '../visualizations'
 
 type ServiceType = 'storage' | 'transport' | 'both'
@@ -60,10 +65,12 @@ export default function ServiceConsole() {
         setStorageResult(null)
       }
     } else if (storageInputType === 'area' && storageAreaM2 > 0) {
-      const result = computeDemandFromArea(storageAreaM2, 'STORAGE')
+      // Storage 전용: 운영계수 역보정 적용
+      const demandPallets = areaToPalletsWithFactor(storageAreaM2)
+      const demandCubes = palletsToCubes(demandPallets)
       setStorageResult({
-        demandCubes: result.demandCubes,
-        demandPallets: result.demandPallets,
+        demandCubes,
+        demandPallets,
         moduleSummary: [],
         hasUnclassified: false,
         detail: null as any,
@@ -813,7 +820,7 @@ function AreaInputField({
                   <div className="flex flex-col items-center" style={{ width: '150px' }}>
                     {mode === 'STORAGE' ? (
                       <WarehouseIcon
-                        count={cbmToWarehouseCount(palletsToCBM(result.demandPallets || 0))}
+                        pallets={result.demandPallets || 0}
                         size={150}
                         showLabel={true}
                       />
@@ -929,7 +936,7 @@ function AreaInputField({
                 <div className="bg-white rounded p-2.5 border border-blue-100">
                   <div className="text-base font-bold text-slate-900">
                     {mode === 'STORAGE'
-                      ? `총 ${result.demandPallets} 파렛트`
+                      ? `수용 가능: ${result.demandPallets} 파렛트`
                       : `총 ${result.demandCubes} 큐브`}
                   </div>
                   <div className="text-xs text-slate-600 mt-0.5">
@@ -937,6 +944,11 @@ function AreaInputField({
                       ? `${palletsToCBM(result.demandPallets || 0)} CBM (구매 공간 기준 체적)`
                       : `${cubesToCBM(result.demandCubes)} CBM (구매 공간 기준 체적)`}
                   </div>
+                  {mode === 'STORAGE' && (
+                    <div className="text-[10px] text-slate-500 mt-1">
+                      운영 동선 고려(÷{STORAGE_AREA_CONSTANTS.storageAreaFactor.toFixed(2)})
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -969,7 +981,7 @@ function AreaInputField({
                   <div className="flex flex-col items-center" style={{ width: '150px' }}>
                     {mode === 'STORAGE' ? (
                       <WarehouseIcon
-                        count={cbmToWarehouseCount(palletsToCBM(result.demandPallets || 0))}
+                        pallets={result.demandPallets || 0}
                         size={150}
                         showLabel={true}
                       />

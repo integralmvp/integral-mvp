@@ -1,20 +1,20 @@
-// 창고 아이콘 (10평 기준)
+// 창고 아이콘 (면적 표시 - 운영계수 보정 적용)
+import { palletsToAreaM2, palletsToAreaPyeong } from '../../engine'
+
 interface WarehouseIconProps {
-  count?: number
+  pallets?: number          // 파레트 수 (신규: 면적 환산에 사용)
+  count?: number            // 레거시: 채 수 (더 이상 사용하지 않음)
   size?: number
   showLabel?: boolean
 }
 
-export default function WarehouseIcon({ count, size = 80, showLabel = true }: WarehouseIconProps) {
+export default function WarehouseIcon({ pallets, size = 80, showLabel = true }: WarehouseIconProps) {
+  // 파레트 → 면적 환산 (운영계수 적용)
+  const areaM2 = pallets ? palletsToAreaM2(pallets) : 0
+  const areaPyeong = pallets ? palletsToAreaPyeong(pallets) : 0
+
   return (
     <div className="flex flex-col items-center gap-2">
-      {/* 라벨 */}
-      {showLabel && (
-        <div className="text-xs font-semibold text-slate-700">
-          &lt;10평 창고&gt;
-        </div>
-      )}
-
       {/* 아이콘 */}
       <svg
         width={size}
@@ -43,10 +43,15 @@ export default function WarehouseIcon({ count, size = 80, showLabel = true }: Wa
         <line x1="50" y1="15" x2="50" y2="40" stroke="#475569" strokeWidth="1" opacity="0.3"/>
       </svg>
 
-      {/* 카운트 */}
-      {count !== undefined && (
-        <div className="text-sm font-bold text-slate-800">
-          약 {count}채
+      {/* 면적 표시 (파레트가 있는 경우) */}
+      {showLabel && pallets !== undefined && pallets > 0 && (
+        <div className="text-center">
+          <div className="text-sm font-bold text-slate-800">
+            약 {areaM2}㎡ ({areaPyeong}평)
+          </div>
+          <div className="text-[10px] text-slate-500">
+            운영 동선 고려(×1.30)
+          </div>
         </div>
       )}
     </div>
