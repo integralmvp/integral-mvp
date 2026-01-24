@@ -780,10 +780,10 @@ function AreaInputField({
                     <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
                     {/* 오른쪽 측면 */}
                     <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
-                    {/* 각목 3개 - 왼쪽 측면에만 (상판 판자와 연결) */}
-                    <path d="M 4,12 L 4,16 L 7,18 L 7,14 Z" fill="#993d1f"/>
-                    <path d="M 8,17 L 8,21 L 11,23 L 11,19 Z" fill="#993d1f"/>
-                    <path d="M 12,22 L 12,26 L 15,26 L 15,22 Z" fill="#993d1f"/>
+                    {/* 각목 3개 - 왼쪽 측면에만 (상판과 밑판을 연결) */}
+                    <path d="M 4,11 L 4,19 L 6,20 L 6,12 Z" fill="#993d1f"/>
+                    <path d="M 8,14 L 8,22 L 10,23 L 10,15 Z" fill="#993d1f"/>
+                    <path d="M 12,16 L 12,24 L 14,25 L 14,17 Z" fill="#993d1f"/>
                   </svg>
                 </div>
                 <div className="flex-1">
@@ -890,10 +890,10 @@ function AreaInputField({
                     <path d="M 2,10 L 2,18 L 16,26 L 16,18 Z" fill="#cc5429" stroke="#ff6b35" strokeWidth="0.5"/>
                     {/* 오른쪽 측면 */}
                     <path d="M 30,10 L 30,18 L 16,26 L 16,18 Z" fill="#e65c2e" stroke="#ff6b35" strokeWidth="0.5"/>
-                    {/* 각목 3개 - 왼쪽 측면에만 (상판 판자와 연결) */}
-                    <path d="M 4,12 L 4,16 L 7,18 L 7,14 Z" fill="#993d1f"/>
-                    <path d="M 8,17 L 8,21 L 11,23 L 11,19 Z" fill="#993d1f"/>
-                    <path d="M 12,22 L 12,26 L 15,26 L 15,22 Z" fill="#993d1f"/>
+                    {/* 각목 3개 - 왼쪽 측면에만 (상판과 밑판을 연결) */}
+                    <path d="M 4,11 L 4,19 L 6,20 L 6,12 Z" fill="#993d1f"/>
+                    <path d="M 8,14 L 8,22 L 10,23 L 10,15 Z" fill="#993d1f"/>
+                    <path d="M 12,16 L 12,24 L 14,25 L 14,17 Z" fill="#993d1f"/>
                   </svg>
                 </div>
                 <div className="flex-1">
