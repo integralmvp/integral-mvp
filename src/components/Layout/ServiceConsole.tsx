@@ -722,47 +722,6 @@ function AreaInputField({
                   )
                 })}
               </div>
-
-              {/* 환산 결과 요약 (펼치기/접기) */}
-              <div>
-                <div
-                  className="flex items-center justify-between mb-2 cursor-pointer"
-                  onClick={() => setShowModuleDetails(!showModuleDetails)}
-                >
-                  <span className="text-xs font-semibold text-slate-700">
-                    환산 결과 요약
-                  </span>
-                  <span className="text-xs text-blue-600 hover:text-blue-800">
-                    {showModuleDetails ? '접기' : '펼치기'}
-                  </span>
-                </div>
-
-                {showModuleDetails && (
-                  <div className="space-y-2">
-                    {result.moduleSummary.map((summary, idx) => {
-                      // 모드별 환산 값 계산
-                      const pallets = mode === 'STORAGE' ? Math.ceil(summary.estimatedCubes / 128) : null
-                      const cubes = summary.estimatedCubes
-
-                      return (
-                        <div key={idx} className="bg-slate-50 rounded p-2">
-                          <div className="text-xs text-slate-800">
-                            {mode === 'STORAGE' ? (
-                              <span>
-                                <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-blue-700">{pallets} 파렛트</span>
-                              </span>
-                            ) : (
-                              <span>
-                                <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-emerald-700">{cubes} 큐브</span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
             </div>
           )}
 
@@ -836,7 +795,7 @@ function AreaInputField({
                   {/* 파렛트/큐브 */}
                   <div className="flex flex-col items-center" style={{ width: '150px' }}>
                     <div className="text-xs font-semibold text-slate-700 mb-2">
-                      {mode === 'STORAGE' ? '기준 파렛트' : '기준 큐브'}
+                      {mode === 'STORAGE' ? '<기준 파렛트>' : '<기준 큐브>'}
                     </div>
                     {mode === 'STORAGE' ? (
                       <PalletIcon3D showDimensions={true} size={150} count={result.demandPallets} />
@@ -992,7 +951,7 @@ function AreaInputField({
                   {/* 파렛트/큐브 */}
                   <div className="flex flex-col items-center" style={{ width: '150px' }}>
                     <div className="text-xs font-semibold text-slate-700 mb-2">
-                      {mode === 'STORAGE' ? '기준 파렛트' : '기준 큐브'}
+                      {mode === 'STORAGE' ? '<기준 파렛트>' : '<기준 큐브>'}
                     </div>
                     {mode === 'STORAGE' ? (
                       <PalletIcon3D showDimensions={true} size={150} count={result.demandPallets} />

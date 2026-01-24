@@ -11,14 +11,14 @@ export default function TruckIcon({ count, size = 80, showLabel = true }: TruckI
       {/* 라벨 */}
       {showLabel && (
         <div className="text-xs font-semibold text-slate-700">
-          1톤 트럭
+          &lt;1톤 트럭&gt;
         </div>
       )}
 
       {/* 아이콘 */}
       <svg
         width={size}
-        height={size * 0.7}
+        height={size}
         viewBox="0 0 100 70"
         style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.15))' }}
       >
