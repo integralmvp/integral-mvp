@@ -22,6 +22,7 @@ export interface ModuleSummary {
   boxCount: number              // 해당 모듈로 분류된 박스 수
   totalVolumeM3: number         // 해당 모듈의 총 체적 (m³)
   estimatedCubes: number        // 해당 모듈의 추정 큐브 수 (설명용, 대략)
+  heightMax: number             // 해당 모듈의 최대 높이 (mm)
 }
 
 /**
@@ -71,6 +72,7 @@ export function calcCubeDemand(
   const moduleGroups: Map<ModuleName | 'UNCLASSIFIED', {
     boxCount: number
     totalVolumeM3: number
+    heightMax: number
   }> = new Map()
 
   boxes.forEach((box, index) => {
@@ -78,12 +80,13 @@ export function calcCubeDemand(
     const module = classification.module
 
     if (!moduleGroups.has(module)) {
-      moduleGroups.set(module, { boxCount: 0, totalVolumeM3: 0 })
+      moduleGroups.set(module, { boxCount: 0, totalVolumeM3: 0, heightMax: 0 })
     }
 
     const group = moduleGroups.get(module)!
     group.boxCount += box.count
     group.totalVolumeM3 += boxVolumes[index]
+    group.heightMax = Math.max(group.heightMax, box.heightMm)
   })
 
   const byModule: ModuleSummary[] = []
@@ -97,6 +100,7 @@ export function calcCubeDemand(
       boxCount: data.boxCount,
       totalVolumeM3: data.totalVolumeM3,
       estimatedCubes,
+      heightMax: data.heightMax,
     })
   })
 
