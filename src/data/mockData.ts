@@ -8,6 +8,9 @@ import type {
   StorageProduct,
   CargoType,
   StorageType,
+  ProductCategory,
+  LocationOption,
+  WeightRange,
 } from '../types/models'
 
 // ============ 제주도 좌표 ============
@@ -388,3 +391,86 @@ export const HANDLING_OPTIONS = [
   '온도민감',
   '적재방향',
 ] as const
+
+// ============ PR3-3: UI 재설계 - 품목 카테고리 (우체국 품목 코드 체계 기반) ============
+export const PRODUCT_CATEGORIES: ProductCategory[] = [
+  {
+    code: 'FOOD',
+    name: '식품',
+    subCategories: [
+      { code: 'FOOD-FRESH', name: '신선식품' },
+      { code: 'FOOD-PROCESSED', name: '가공식품' },
+      { code: 'FOOD-FROZEN', name: '냉동식품' },
+      { code: 'FOOD-BEVERAGE', name: '음료' },
+    ]
+  },
+  {
+    code: 'AGRI',
+    name: '농산물',
+    subCategories: [
+      { code: 'AGRI-FRUIT', name: '과일류' },
+      { code: 'AGRI-VEG', name: '채소류' },
+      { code: 'AGRI-GRAIN', name: '곡류' },
+    ]
+  },
+  {
+    code: 'MARINE',
+    name: '수산물',
+    subCategories: [
+      { code: 'MARINE-FRESH', name: '활어/선어' },
+      { code: 'MARINE-DRIED', name: '건어물' },
+      { code: 'MARINE-PROCESSED', name: '수산가공품' },
+    ]
+  },
+  {
+    code: 'INDUSTRIAL',
+    name: '공산품',
+    subCategories: [
+      { code: 'INDUSTRIAL-ELEC', name: '전자제품' },
+      { code: 'INDUSTRIAL-HOME', name: '생활용품' },
+      { code: 'INDUSTRIAL-MATERIAL', name: '원자재' },
+    ]
+  },
+  {
+    code: 'ETC',
+    name: '기타',
+    subCategories: [
+      { code: 'ETC-DOC', name: '서류/문서' },
+      { code: 'ETC-SAMPLE', name: '샘플/시제품' },
+      { code: 'ETC-OTHER', name: '기타' },
+    ]
+  },
+]
+
+// ============ PR3-3: UI 재설계 - 중량 구간 ============
+export const WEIGHT_RANGES: { value: WeightRange; label: string }[] = [
+  { value: '0-5kg', label: '5kg 이하' },
+  { value: '5-10kg', label: '5kg ~ 10kg' },
+  { value: '10-20kg', label: '10kg ~ 20kg' },
+  { value: '20-30kg', label: '20kg ~ 30kg' },
+  { value: '30kg+', label: '30kg 초과' },
+]
+
+// ============ PR3-3: UI 재설계 - 제주 지역 목록 (범위 개념) ============
+export const JEJU_LOCATIONS: LocationOption[] = [
+  // 도 전체
+  { id: 'jeju-all', name: '제주도 전체', level: 'island' },
+  // 시 단위
+  { id: 'jeju-city', name: '제주시', level: 'city', parentId: 'jeju-all' },
+  { id: 'seogwipo-city', name: '서귀포시', level: 'city', parentId: 'jeju-all' },
+  // 읍면동 단위 (제주시)
+  { id: 'ara-dong', name: '아라동', level: 'district', parentId: 'jeju-city' },
+  { id: 'nohyeong-dong', name: '노형동', level: 'district', parentId: 'jeju-city' },
+  { id: 'yeon-dong', name: '연동', level: 'district', parentId: 'jeju-city' },
+  { id: 'ido-dong', name: '이도동', level: 'district', parentId: 'jeju-city' },
+  { id: 'aewol-eup', name: '애월읍', level: 'district', parentId: 'jeju-city' },
+  { id: 'hallim-eup', name: '한림읍', level: 'district', parentId: 'jeju-city' },
+  { id: 'jocheon-eup', name: '조천읍', level: 'district', parentId: 'jeju-city' },
+  { id: 'gujwa-eup', name: '구좌읍', level: 'district', parentId: 'jeju-city' },
+  // 읍면동 단위 (서귀포시)
+  { id: 'seogwipo-dong', name: '서귀동', level: 'district', parentId: 'seogwipo-city' },
+  { id: 'seongsan-eup', name: '성산읍', level: 'district', parentId: 'seogwipo-city' },
+  { id: 'namwon-eup', name: '남원읍', level: 'district', parentId: 'seogwipo-city' },
+  { id: 'daejeong-eup', name: '대정읍', level: 'district', parentId: 'seogwipo-city' },
+  { id: 'andeok-myeon', name: '안덕면', level: 'district', parentId: 'seogwipo-city' },
+]
