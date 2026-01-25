@@ -2,8 +2,10 @@
 // INTEGRAL MVP - 플랫폼 통합 엔진
 // ============================================
 // 모든 계산 로직의 단일 진입점
-// Phase 1: 엔진 빌드
-// Phase 2-4: 매칭/추천/AI 확장 예정
+// Phase 1: 엔진 빌드 - 완료
+// Phase 2-3: 운영계수 보정 환산 - 완료
+// Phase 4: 검색·매칭 타입/스텁 준비 - 완료
+// PR4: 실제 매칭 구현 예정
 
 // ============ Exports ============
 
@@ -23,6 +25,27 @@ export {
   // Storage 전용: 운영계수 보정 환산
   palletsToAreaM2, palletsToAreaPyeong, areaToPalletsWithFactor, areaPyeongToPalletsWithFactor
 } from './unitConvert'
+
+// 매칭 타입 (Phase 4)
+export type {
+  StorageDemand, RouteDemand,
+  StorageOffer, RouteOffer,
+  MatchValidation, MatchScore, MatchResult,
+  StorageSearchRequest, RouteSearchRequest,
+  StorageSearchResponse, RouteSearchResponse,
+  StorageMatchResult, RouteMatchResult,
+} from './matchingTypes'
+
+// 매칭 엔진 (Phase 4 - 스텁)
+export {
+  checkCapacity,
+  filterStorageOffers, filterRouteOffers,
+  validateStorageMatch, validateRouteMatch,
+  scoreStorageMatch, scoreRouteMatch,
+  estimateStorageCost, estimateRouteCost,
+  createStorageMatchResult, createRouteMatchResult,
+  searchStorageOffers, searchRouteOffers,
+} from './matchingEngine'
 
 // ============ 통합 인터페이스 ============
 
