@@ -130,7 +130,7 @@ offer.remainingCubes >= demandCubes
 
 ```
 src/
-├── engine/                    # 플랫폼 통합 엔진
+├── engine/                    # 플랫폼 통합 엔진 (순수 함수만, React import 금지)
 │   ├── cubeConfig.ts         # Cube/Pallet 설정
 │   ├── shapeClassifier.ts    # 형상 분류기
 │   ├── cubeEngine.ts         # 큐브 수요 계산
@@ -139,15 +139,29 @@ src/
 │   ├── matchingEngine.ts     # 매칭 함수 스텁 (Phase 4)
 │   └── index.ts              # 통합 export
 ├── components/
-│   ├── Layout/               # 레이아웃 (CommandLayout, ServiceConsole)
-│   ├── Map/                  # 지도 (MapboxContainer)
+│   ├── Layout/
+│   │   ├── CommandLayout.tsx
+│   │   └── ServiceConsole/   # Feature 폴더 구조
+│   │       ├── ServiceConsole.tsx  # 조립 컴포넌트 (200줄 이내)
+│   │       ├── sections/     # 화면 섹션 단위 컴포넌트
+│   │       ├── ui/           # Feature 내부 UI 컴포넌트
+│   │       ├── hooks/        # 상태/로직 훅
+│   │       └── utils/        # 변환/검증 유틸리티
+│   ├── Map/
+│   │   └── MapboxContainer/  # Feature 폴더 구조
+│   │       ├── MapboxContainer.tsx  # 조립 컴포넌트
+│   │       ├── hooks/        # 지도 인스턴스/레이어 훅
+│   │       ├── ui/           # 지도 위젯 컴포넌트
+│   │       └── utils/        # 좌표/스타일 유틸리티
 │   ├── visualizations/       # 시각화 (CubeIcon3D, PalletIcon3D 등)
-│   ├── common/               # 공통 컴포넌트
+│   ├── common/               # 공통 컴포넌트 (2곳 이상 사용, 도메인 무관)
 │   ├── deal/                 # 거래 모달
 │   ├── routes/               # 경로 카드
 │   └── storages/             # 공간 카드
 ├── types/
-│   └── models.ts             # 데이터 모델 타입
+│   └── models.ts             # UI/입력/상품 모델 타입
+├── styles/
+│   └── fonts.css             # 폰트 스타일
 └── data/
     └── mockData.ts           # 더미 데이터
 ```
@@ -195,10 +209,71 @@ src/
 | PR1 | 프로젝트 초기 설정 | ✅ 완료 |
 | PR2-4 | UI 전면 개편 | ✅ 완료 |
 | PR3-2 | 통합 엔진 + 수요면적 UX | ✅ 완료 |
+| PR3-2.5 | 프로젝트 구조 리팩토링 | ✅ 완료 |
 | PR4 | 검색 매칭 + 지도 연동 | 📋 예정 |
 | PR5 | 거래 모달 + 규정 매칭 | 📋 예정 |
 | PR6 | 마무리 + 최적화 | 📋 예정 |
 
 ---
 
-**최종 수정**: 2025.01.25 (PR3-2 통합 엔진 완료)
+## 코드 컨벤션 (PR3-2.5 확정)
+
+### 폴더 및 책임 규칙
+
+| 위치 | 용도 |
+|------|------|
+| `components/common/` | 공용 컴포넌트 (2곳 이상 사용, 도메인 무관) |
+| `{feature}/ui/` | Feature 내부 UI 컴포넌트 |
+| `{feature}/sections/` | 화면 섹션 단위 구성 |
+| `{feature}/hooks/` | 상태/로직 훅 |
+| `{feature}/utils/` | 변환/검증/보조 로직 |
+
+> **중요**: Feature 내부에 `components/` 폴더 생성 금지, 반드시 `ui/` 사용
+
+### 컴포넌트 크기 가드레일
+
+- 조립(컨테이너) 컴포넌트: **200줄 목표**
+- 단일 컴포넌트: **최대 300줄** 초과 금지
+- 300줄 초과 시 `sections/` 또는 `ui/`로 분리
+
+### UI / 로직 / 계산 분리 원칙
+
+- JSX 내부에서 계산/변환 로직 작성 **금지**
+- 계산/변환은 `engine/` 또는 `utils/`에서 수행
+- 상태 및 핸들러는 `hooks/`로 분리
+- `engine/`에는 순수 함수만 허용 (React import 금지)
+
+### 타입 정책
+
+| 타입 종류 | 위치 |
+|----------|------|
+| UI / 입력 / 상품 모델 | `types/models.ts` |
+| 엔진 / 매칭 도메인 | `engine/matchingTypes.ts` |
+| UI ↔ 엔진 변환 | `utils/`에서 담당 |
+
+### 확장 대비 가드레일
+
+1. **탭 섹션 비대화 방지**
+   - `sections/`의 탭 컴포넌트는 조립/분기 역할만 수행
+   - 내부 로직/폼/UI는 `ui/` 또는 더 작은 섹션으로 분리
+
+2. **상태 훅 비대화 방지**
+   - 상태 훅은 단일 진실 소스 역할만 수행
+   - 계산/파생 로직은 `utils/` 또는 `engine/`으로 이동
+   - 상태가 커질 경우 slice 개념으로 분리 훅 추가 허용
+
+3. **검증 로직 분산 금지**
+   - 입력/조건 검증 로직은 `utils/`의 validation 파일로 집중
+   - UI 컴포넌트에 검증 로직 분산 작성 금지
+
+### 작업 청소 규칙
+
+작업 종료 시 반드시 수행:
+- 미사용 파일/컴포넌트 삭제
+- 미사용 export 제거
+- dead code 제거
+- import 정리
+
+---
+
+**최종 수정**: 2025.01.25 (PR3-2.5 프로젝트 구조 리팩토링 완료)
