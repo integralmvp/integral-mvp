@@ -6,17 +6,24 @@ import { StorageTabSection, TransportTabSection, BothTabSection } from './sectio
 interface TabButtonProps {
   label: string
   isActive: boolean
-  activeColor: string
+  tabType: ServiceType
   onClick: () => void
 }
 
-function TabButton({ label, isActive, activeColor, onClick }: TabButtonProps) {
+// Tailwind는 동적 클래스를 지원하지 않으므로 전체 클래스 문자열 매핑
+const tabActiveStyles: Record<ServiceType, string> = {
+  storage: 'text-blue-600 border-b-2 border-blue-600',
+  transport: 'text-emerald-600 border-b-2 border-emerald-600',
+  both: 'text-purple-600 border-b-2 border-purple-600',
+}
+
+function TabButton({ label, isActive, tabType, onClick }: TabButtonProps) {
   return (
     <button
       onClick={onClick}
       className={`flex-1 py-4 text-sm font-semibold transition-colors ${
         isActive
-          ? `text-${activeColor}-600 border-b-2 border-${activeColor}-600`
+          ? tabActiveStyles[tabType]
           : 'text-slate-600 hover:text-slate-900'
       }`}
     >
@@ -72,19 +79,19 @@ export default function ServiceConsole() {
         <TabButton
           label="보관"
           isActive={state.activeTab === 'storage'}
-          activeColor="blue"
+          tabType="storage"
           onClick={() => actions.setActiveTab('storage')}
         />
         <TabButton
           label="운송"
           isActive={state.activeTab === 'transport'}
-          activeColor="emerald"
+          tabType="transport"
           onClick={() => actions.setActiveTab('transport')}
         />
         <TabButton
           label="보관+운송"
           isActive={state.activeTab === 'both'}
-          activeColor="purple"
+          tabType="both"
           onClick={() => actions.setActiveTab('both')}
         />
       </div>
