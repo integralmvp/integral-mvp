@@ -1,7 +1,8 @@
 // 서비스 콘솔 - 조립 컴포넌트
-// PR3-3: UI 재설계 - 화물 등록 → 물량 입력 → 조건 입력 흐름
+// 3행 그리드 레이아웃 UI 재설계
 import { useServiceConsoleState, type ServiceType } from './hooks'
 import { StorageTabSection, TransportTabSection, BothTabSection } from './sections'
+import { SlotCounter } from './ui'
 
 // 탭 버튼 컴포넌트
 interface TabButtonProps {
@@ -33,7 +34,7 @@ function TabButton({ label, isActive, tabType, onClick }: TabButtonProps) {
   )
 }
 
-// 검색 버튼 컴포넌트 (건수 표시 포함)
+// 검색 버튼 컴포넌트 (슬롯 애니메이션 건수 표시)
 interface SearchButtonProps {
   activeTab: ServiceType
   productCount: number
@@ -52,7 +53,8 @@ function SearchButton({ activeTab, productCount, onClick }: SearchButtonProps) {
       onClick={onClick}
       className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all hover:shadow-lg bg-gradient-to-r ${gradientMap[activeTab]}`}
     >
-      {productCount}건의 상품 검색하기
+      <SlotCounter value={productCount} className="font-bold" />
+      건의 상품 검색하기
     </button>
   )
 }
@@ -98,12 +100,10 @@ export default function ServiceConsole() {
         />
       </div>
 
-      {/* 폼 영역 */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-3">
+      {/* 폼 영역 - 3행 그리드 레이아웃 */}
+      <div className="flex-1 overflow-y-auto p-4">
         {state.activeTab === 'storage' && (
           <StorageTabSection
-            expandedField={state.expandedField}
-            onFieldClick={actions.handleFieldClick}
             cargos={state.cargos}
             registeredCargos={state.registeredCargos}
             onAddCargo={actions.addCargo}
@@ -122,8 +122,6 @@ export default function ServiceConsole() {
 
         {state.activeTab === 'transport' && (
           <TransportTabSection
-            expandedField={state.expandedField}
-            onFieldClick={actions.handleFieldClick}
             cargos={state.cargos}
             registeredCargos={state.registeredCargos}
             onAddCargo={actions.addCargo}
@@ -142,8 +140,6 @@ export default function ServiceConsole() {
 
         {state.activeTab === 'both' && (
           <BothTabSection
-            expandedField={state.expandedField}
-            onFieldClick={actions.handleFieldClick}
             serviceOrder={state.serviceOrder}
             onServiceOrderChange={actions.setServiceOrder}
             cargos={state.cargos}
@@ -165,8 +161,8 @@ export default function ServiceConsole() {
         )}
       </div>
 
-      {/* 검색 버튼 */}
-      <div className="p-6 border-t border-slate-200">
+      {/* 검색 버튼 - 하단 고정 */}
+      <div className="p-4 border-t border-slate-200">
         <SearchButton
           activeTab={state.activeTab}
           productCount={state.availableProductCount}
