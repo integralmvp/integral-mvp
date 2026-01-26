@@ -1,4 +1,5 @@
-// 서비스 콘솔 - 조립 컴포넌트 (리팩토링 후: ~140줄)
+// 서비스 콘솔 - 조립 컴포넌트
+// PR3-3: UI 재설계 - 화물 등록 → 물량 입력 → 조건 입력 흐름
 import { useServiceConsoleState, type ServiceType } from './hooks'
 import { StorageTabSection, TransportTabSection, BothTabSection } from './sections'
 
@@ -32,13 +33,14 @@ function TabButton({ label, isActive, tabType, onClick }: TabButtonProps) {
   )
 }
 
-// 검색 버튼 컴포넌트
+// 검색 버튼 컴포넌트 (건수 표시 포함)
 interface SearchButtonProps {
   activeTab: ServiceType
+  productCount: number
   onClick: () => void
 }
 
-function SearchButton({ activeTab, onClick }: SearchButtonProps) {
+function SearchButton({ activeTab, productCount, onClick }: SearchButtonProps) {
   const gradientMap: Record<ServiceType, string> = {
     storage: 'from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700',
     transport: 'from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700',
@@ -50,7 +52,7 @@ function SearchButton({ activeTab, onClick }: SearchButtonProps) {
       onClick={onClick}
       className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all hover:shadow-lg bg-gradient-to-r ${gradientMap[activeTab]}`}
     >
-      🔍 검색하기
+      {productCount}건의 상품 검색하기
     </button>
   )
 }
@@ -102,15 +104,19 @@ export default function ServiceConsole() {
           <StorageTabSection
             expandedField={state.expandedField}
             onFieldClick={actions.handleFieldClick}
-            storageInputType={state.storageInputType}
-            storageBoxes={state.storageBoxes}
-            storageAreaM2={state.storageAreaM2}
-            storageResult={state.storageResult}
-            storageSelectedPallets={state.storageSelectedPallets}
-            onInputTypeChange={actions.setStorageInputType}
-            onBoxesChange={actions.setStorageBoxes}
-            onAreaChange={actions.setStorageAreaM2}
-            onSelectConfirm={actions.handleStorageSelectPallets}
+            cargos={state.cargos}
+            registeredCargos={state.registeredCargos}
+            onAddCargo={actions.addCargo}
+            onRemoveCargo={actions.removeCargo}
+            onUpdateCargo={actions.updateCargo}
+            onCompleteCargo={actions.completeCargo}
+            onUpdateQuantity={actions.updateCargoQuantity}
+            onConfirmQuantity={actions.confirmQuantityInput}
+            totalCubes={state.totalCubes}
+            totalPallets={state.totalPallets}
+            demandResult={state.demandResult}
+            storageCondition={state.storageCondition}
+            onUpdateCondition={actions.updateStorageCondition}
           />
         )}
 
@@ -118,15 +124,19 @@ export default function ServiceConsole() {
           <TransportTabSection
             expandedField={state.expandedField}
             onFieldClick={actions.handleFieldClick}
-            transportInputType={state.transportInputType}
-            transportBoxes={state.transportBoxes}
-            transportAreaM2={state.transportAreaM2}
-            transportResult={state.transportResult}
-            transportSelectedCubes={state.transportSelectedCubes}
-            onInputTypeChange={actions.setTransportInputType}
-            onBoxesChange={actions.setTransportBoxes}
-            onAreaChange={actions.setTransportAreaM2}
-            onSelectConfirm={actions.handleTransportSelectCubes}
+            cargos={state.cargos}
+            registeredCargos={state.registeredCargos}
+            onAddCargo={actions.addCargo}
+            onRemoveCargo={actions.removeCargo}
+            onUpdateCargo={actions.updateCargo}
+            onCompleteCargo={actions.completeCargo}
+            onUpdateQuantity={actions.updateCargoQuantity}
+            onConfirmQuantity={actions.confirmQuantityInput}
+            totalCubes={state.totalCubes}
+            totalPallets={state.totalPallets}
+            demandResult={state.demandResult}
+            transportCondition={state.transportCondition}
+            onUpdateCondition={actions.updateTransportCondition}
           />
         )}
 
@@ -134,13 +144,34 @@ export default function ServiceConsole() {
           <BothTabSection
             expandedField={state.expandedField}
             onFieldClick={actions.handleFieldClick}
+            serviceOrder={state.serviceOrder}
+            onServiceOrderChange={actions.setServiceOrder}
+            cargos={state.cargos}
+            registeredCargos={state.registeredCargos}
+            onAddCargo={actions.addCargo}
+            onRemoveCargo={actions.removeCargo}
+            onUpdateCargo={actions.updateCargo}
+            onCompleteCargo={actions.completeCargo}
+            onUpdateQuantity={actions.updateCargoQuantity}
+            onConfirmQuantity={actions.confirmQuantityInput}
+            totalCubes={state.totalCubes}
+            totalPallets={state.totalPallets}
+            demandResult={state.demandResult}
+            storageCondition={state.storageCondition}
+            transportCondition={state.transportCondition}
+            onUpdateStorageCondition={actions.updateStorageCondition}
+            onUpdateTransportCondition={actions.updateTransportCondition}
           />
         )}
       </div>
 
       {/* 검색 버튼 */}
       <div className="p-6 border-t border-slate-200">
-        <SearchButton activeTab={state.activeTab} onClick={actions.handleSearch} />
+        <SearchButton
+          activeTab={state.activeTab}
+          productCount={state.availableProductCount}
+          onClick={actions.handleSearch}
+        />
       </div>
     </div>
   )

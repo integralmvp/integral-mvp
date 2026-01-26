@@ -213,6 +213,67 @@ export interface RouteOfferExtended {
   }
 }
 
+// ============ PR3-3: UI 재설계 - 화물 등록 관련 타입 ============
+
+// 중량 구간
+export type WeightRange = '0-5kg' | '5-10kg' | '10-20kg' | '20-30kg' | '30kg+'
+
+// 품목 카테고리 (우체국 품목 코드 체계 기반)
+export interface ProductCategory {
+  code: string
+  name: string
+  subCategories?: { code: string; name: string }[]
+}
+
+// 화물 UI 모델 (화물 등록 시 사용)
+export interface CargoUI {
+  id: string
+  // 박스 규격
+  width: number   // mm
+  depth: number   // mm
+  height: number  // mm
+  // 분류 결과
+  moduleType?: '소형' | '중형' | '대형' | 'UNCLASSIFIED'
+  // 품목
+  productCategory?: string
+  productSubCategory?: string
+  // 중량
+  weightRange?: WeightRange
+  // 상태
+  completed: boolean
+}
+
+// 등록된 화물 (화물 등록 완료 후)
+export interface RegisteredCargo extends CargoUI {
+  cargoNumber: number  // 화물 번호 (등록 순서)
+  quantity?: number    // 물량 입력 시 저장
+  estimatedCubes?: number  // 환산된 큐브 수
+}
+
+// 지역 옵션 (드롭다운용 - 범위 개념)
+export interface LocationOption {
+  id: string
+  name: string
+  level: 'island' | 'city' | 'district'  // 제주도 전체 / 시 / 읍면동
+  parentId?: string
+}
+
+// 조건 입력 상태
+export interface StorageCondition {
+  location?: string        // 보관 장소
+  startDate?: string       // 보관 시작일
+  endDate?: string         // 보관 종료일
+}
+
+export interface TransportCondition {
+  origin?: string          // 출발지
+  destination?: string     // 도착지
+  transportDate?: string   // 운송 날짜
+}
+
+// 보관+운송 순서
+export type ServiceOrder = 'storage-first' | 'transport-first' | null
+
 // PR3에서 추가될 타입들:
 // - DealRequest/Response
 // - RegulationRule
