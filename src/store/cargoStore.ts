@@ -116,6 +116,14 @@ export function addCargo(params: CreateCargoParams): CargoInfo {
     sizeBand: signature.sizeBand,
   })
 
+  // 시그니처 설정 이벤트 (초기 설정도 추적)
+  logCargoSignatureUpdated(cargo.id, {
+    moduleClass: signature.moduleClass,
+    itemCode: signature.itemCode,
+    weightBand: signature.weightBand,
+    sizeBand: signature.sizeBand,
+  })
+
   return cargo
 }
 
