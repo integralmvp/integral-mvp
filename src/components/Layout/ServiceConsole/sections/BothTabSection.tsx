@@ -222,7 +222,7 @@ export default function BothTabSection({
   return (
     <div className="flex flex-col h-full">
       {/* 상단: 순서 전환 UI - 순서에 따라 버튼 재정렬 */}
-      <div className="flex items-center justify-center gap-2 py-0.5 -mt-3 flex-shrink-0">
+      <div className="flex items-center justify-center gap-2 py-1.5 -mt-3 flex-shrink-0">
         {/* 첫 번째 버튼 */}
         <button
           onClick={() => handleViewChange(firstButton)}
@@ -260,7 +260,7 @@ export default function BothTabSection({
       </div>
 
       {/* 그리드 영역 */}
-      <div className="grid grid-rows-[1.35fr_1fr_1fr] gap-3 flex-1 min-h-0">
+      <div className="grid grid-rows-[1.45fr_1fr_1fr] gap-3 flex-1 min-h-0">
         {/* 1행: 화물 정보 | 물량 정보 (공통) */}
         <div className="grid grid-cols-2 gap-2 min-h-0">
           {/* 화물 정보 */}
