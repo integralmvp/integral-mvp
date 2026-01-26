@@ -61,19 +61,6 @@ VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
 | 보관 (Storage) | **Pallet** | Cube |
 | 운송 (Route) | **Cube** | Cube |
 
-### 면적↔파레트 환산 (운영계수 보정)
-
-```typescript
-// Storage 전용: 운영계수 = 1.30 (동선/여유/벽면 고려)
-
-// 파레트 → 면적
-requiredAreaM2 = pallets × 1.21 × 1.30
-
-// 면적 → 파레트 (역보정)
-effectiveAreaM2 = inputAreaM2 / 1.30
-pallets = floor(effectiveAreaM2 / 1.21)
-```
-
 ### 포장 모듈의 역할
 
 ```
@@ -86,137 +73,137 @@ pallets = floor(effectiveAreaM2 / 1.21)
 └─────────────────────────────────────────────────────────┘
 ```
 
-### UNCLASSIFIED Fallback 규칙
-
-- 어떤 표준 모듈에도 맞지 않는 박스 → `UNCLASSIFIED`
-- 체적 기반 큐브 계산은 정상 수행
-- UI에 경고 표시 (비표준 규격 안내)
-
-### 핵심 제약 (매칭)
-
-```typescript
-// 모든 매칭의 필수 조건
-offer.remainingCubes >= demandCubes
-```
-
----
-
-## Phase 작업 경계
-
-### Phase 1-3: 완료 (PR3-2)
-
-| Phase | 작업 내용 | 상태 |
-|-------|----------|------|
-| Phase 1 | Cube 설정, 형상 분류기, 큐브 계산 엔진 | ✅ 완료 |
-| Phase 2 | 단위 변환 유틸리티 (cubesToPallets 등) | ✅ 완료 |
-| Phase 3 | 운영계수 보정 환산 (palletsToAreaM2 등) | ✅ 완료 |
-| Phase 4 | 매칭 타입 정의 + 함수 스텁 준비 | ✅ 완료 |
-
-### PR4: 검색 매칭 구현 (예정)
-
-| 작업 | 설명 |
-|------|------|
-| 필터링 로직 | filterStorageOffers, filterRouteOffers 구현 |
-| 검증 로직 | validateStorageMatch, validateRouteMatch 구현 |
-| 점수 계산 | scoreStorageMatch, scoreRouteMatch 구현 |
-| 비용 계산 | estimateStorageCost, estimateRouteCost 구현 |
-| 검색 함수 | searchStorageOffers, searchRouteOffers 구현 |
-| 지도 연동 | 매칭 결과 지도 하이라이트 |
-| UI 연결 | 상품 카드 리스트, 거래 모달 연결 |
-
 ---
 
 ## 프로젝트 구조
 
 ```
 src/
-├── engine/                    # 플랫폼 통합 엔진 (순수 함수만, React import 금지)
-│   ├── cubeConfig.ts         # Cube/Pallet 설정
-│   ├── shapeClassifier.ts    # 형상 분류기
-│   ├── cubeEngine.ts         # 큐브 수요 계산
-│   ├── unitConvert.ts        # 단위 변환 유틸리티
-│   ├── matchingTypes.ts      # 매칭 타입 정의 (Phase 4)
-│   ├── matchingEngine.ts     # 매칭 함수 스텁 (Phase 4)
-│   └── index.ts              # 통합 export
+├── engine/                    # 플랫폼 통합 엔진 (순수 함수만)
 ├── components/
 │   ├── Layout/
 │   │   ├── CommandLayout.tsx
-│   │   └── ServiceConsole/   # Feature 폴더 구조
-│   │       ├── ServiceConsole.tsx  # 조립 컴포넌트 (200줄 이내)
-│   │       ├── sections/     # 화면 섹션 단위 컴포넌트
-│   │       ├── ui/           # Feature 내부 UI 컴포넌트
-│   │       ├── hooks/        # 상태/로직 훅
-│   │       └── utils/        # 변환/검증 유틸리티
-│   ├── Map/
-│   │   └── MapboxContainer/  # Feature 폴더 구조
-│   │       ├── MapboxContainer.tsx  # 조립 컴포넌트
-│   │       ├── hooks/        # 지도 인스턴스/레이어 훅
-│   │       ├── ui/           # 지도 위젯 컴포넌트
-│   │       └── utils/        # 좌표/스타일 유틸리티
-│   ├── visualizations/       # 시각화 (CubeIcon3D, PalletIcon3D 등)
-│   ├── common/               # 공통 컴포넌트 (2곳 이상 사용, 도메인 무관)
-│   ├── deal/                 # 거래 모달
-│   ├── routes/               # 경로 카드
-│   └── storages/             # 공간 카드
-├── types/
-│   └── models.ts             # UI/입력/상품 모델 타입
-├── styles/
-│   └── fonts.css             # 폰트 스타일
-└── data/
-    └── mockData.ts           # 더미 데이터
+│   │   └── ServiceConsole/   # 3행 그리드 레이아웃 UI
+│   │       ├── ServiceConsole.tsx
+│   │       ├── sections/     # StorageTab, TransportTab, BothTab
+│   │       ├── ui/           # GridCell, InputModal, CargoSummaryCard 등
+│   │       └── hooks/        # useServiceConsoleState
+│   ├── Map/MapboxContainer/
+│   ├── visualizations/
+│   ├── common/
+│   ├── deal/
+│   ├── routes/
+│   └── storages/
+├── assets/icons/console/     # 입력칸 아이콘 (SVG)
+├── types/models.ts
+├── styles/fonts.css
+└── data/mockData.ts
 ```
+
+---
+
+## Service Console UI 구조 규칙 (MVP 기준)
+
+### 1. UI 설계 목적
+
+Service Console UI는 단순 입력 화면이 아니라,
+플랫폼의 **정보 데이터 수집 흐름**과 **이벤트 조건 필터링 흐름**을
+시각적으로 드러내는 구조로 설계한다.
+
+입력 순서는 곧 플랫폼 데이터 처리 순서와 동일해야 한다.
+
+### 2. 탭 내부 레이아웃 원칙 (고정 규칙)
+
+탭 내부는 **스크롤 없이 한 화면에 조건이 모두 보이도록 구성**한다.
+입력 영역은 항상 3행 그리드 구조를 유지한다.
+
+#### ▸ 3행 구조
+
+**1행 (2열)**
+- 좌측: 화물 정보
+- 우측: 물량 정보 (큐브/파레트 환산 결과와 연결)
+
+**2행**
+- 보관 탭: 보관 장소
+- 운송 탭: 출발지 ↔ 도착지
+- 보관+운송 탭: 단계 순서에 따라 동일 구조 재사용
+
+**3행**
+- 보관 탭: 시작일 / 종료일
+- 운송 탭: 운송 날짜
+
+이 구조는 기능 추가 시에도 유지되며, 행 순서는 변경하지 않는다.
+
+### 3. 화물 영역 설계 규칙
+
+화물 입력은 플랫폼 정보 데이터의 시작점이다.
+
+- 화물 추가 버튼은 항상 노출
+- 등록된 화물은 요약 카드 형태로 표시
+- 카드 단위 삭제 가능
+- 화물 수가 많을 경우 기본 화면은 요약 중심, 확장은 내부 처리
+
+화물 정보 → 이후 모든 필터링의 기준이 되므로 UI에서 가장 먼저 배치한다.
+
+### 4. 색상 및 시각 스타일 원칙
+
+탭별 색상 구분은 사용하지 않는다.
+Service Console 전체 톤은 **Neutral/Black 기반, 상징 컬러 navy blue**로 통일한다.
+
+| 요소 | 컬러 |
+|------|------|
+| 헤더 로고 INTEGRAL | `text-blue-900` |
+| 탭 Active | `text-blue-900`, `border-blue-900` |
+| 검색 버튼 | `from-blue-800 to-blue-900` |
+| 모달 헤더 | `bg-blue-900` |
+| 확인 버튼 | `bg-blue-900 hover:bg-blue-950` |
+| 쌍방향 화살표 | `text-blue-900` |
+
+### 5. UI와 엔진의 관계
+
+이 UI는 단순 폼이 아니라:
+
+- **1행**: 정보 데이터 입력
+- **2~3행**: 이벤트 조건 입력
+- **하단 검색 버튼**: 조건 확정 트리거
+
+라는 **플랫폼 운영 구조를 시각화한 화면**이다.
+
+UI 변경 시:
+플랫폼 통합 거래 엔진(큐브 단위 계산)과
+플랫폼 운영 프로세스(데이터 수집 구조)를
+훼손하지 않도록 설계해야 한다.
+
+---
+
+## 디자인 시스템
+
+### 지도 요소
+
+| 요소 | 색상 |
+|------|------|
+| 지도 배경 | Mapbox light-v11 |
+| 공간 상품 마커 | #ff6b35 (주황색) |
+| 도내 경로 | #3b82f6 (파란색, 실선) |
+| 입도 경로 | #10b981 (녹색, 점선) |
+| 출도 경로 | #a855f7 (보라색, 점선) |
 
 ---
 
 ## 제약사항
 
 ### 절대 구현하지 말 것
-- 로그인/회원가입 시스템
-- 실제 결제 시스템
-- 백엔드 서버 / 데이터베이스
-- 별도 페이지 라우팅
-- 실시간 데이터 연동
-- 실제 거래 실행
+- 로그인/회원가입, 실제 결제, 백엔드/DB
+- 별도 페이지 라우팅, 실시간 데이터, 실제 거래
 
 ### 허용되는 범위
-- 더미 데이터 기반 모든 UI
-- 모달 기반 상세 페이지
-- 룰 기반 규정 매칭
-- 더미 비용 계산
-- 성공 토스트 피드백
-
----
-
-## 디자인 시스템 (간략)
-
-| 요소 | 색상/스타일 |
-|------|------------|
-| 지도 배경 | Mapbox light-v11 |
-| 공간 상품 마커 | #ff6b35 (주황색) |
-| 도내 경로 | #3b82f6 (파란색, 실선) |
-| 입도 경로 | #10b981 (녹색, 점선) |
-| 출도 경로 | #a855f7 (보라색, 점선) |
-| 보관 버튼 | blue-500 그라데이션 |
-| 운송 버튼 | emerald-500 그라데이션 |
-| 보관+운송 버튼 | purple-500 그라데이션 |
-
----
-
-## PR 로드맵
-
-| PR | 내용 | 상태 |
-|----|------|------|
-| PR1 | 프로젝트 초기 설정 | ✅ 완료 |
-| PR2-4 | UI 전면 개편 | ✅ 완료 |
-| PR3-2 | 통합 엔진 + 수요면적 UX | ✅ 완료 |
-| PR3-2.5 | 프로젝트 구조 리팩토링 | ✅ 완료 |
-| PR4 | 검색 매칭 + 지도 연동 | 📋 예정 |
-| PR5 | 거래 모달 + 규정 매칭 | 📋 예정 |
-| PR6 | 마무리 + 최적화 | 📋 예정 |
+- 더미 데이터 기반 UI, 모달 상세, 룰 기반 매칭, 더미 비용 계산
 
 ---
 
 ## 코드 컨벤션 (PR3-2.5 확정)
+
+> **중요**: 코드 컨벤션 내용은 문서 업데이트 시에도 **절대 삭제하면 안된다**
 
 ### 폴더 및 책임 규칙
 
@@ -228,17 +215,17 @@ src/
 | `{feature}/hooks/` | 상태/로직 훅 |
 | `{feature}/utils/` | 변환/검증/보조 로직 |
 
-> **중요**: Feature 내부에 `components/` 폴더 생성 금지, 반드시 `ui/` 사용
+**중요**: Feature 내부에 `components/` 폴더 생성 금지, 반드시 `ui/` 사용
 
 ### 컴포넌트 크기 가드레일
 
-- 조립(컨테이너) 컴포넌트: **200줄 목표**
-- 단일 컴포넌트: **최대 300줄** 초과 금지
+- 조립(컨테이너) 컴포넌트: 200줄 목표
+- 단일 컴포넌트: 최대 300줄 초과 금지
 - 300줄 초과 시 `sections/` 또는 `ui/`로 분리
 
 ### UI / 로직 / 계산 분리 원칙
 
-- JSX 내부에서 계산/변환 로직 작성 **금지**
+- JSX 내부에서 계산/변환 로직 작성 금지
 - 계산/변환은 `engine/` 또는 `utils/`에서 수행
 - 상태 및 핸들러는 `hooks/`로 분리
 - `engine/`에는 순수 함수만 허용 (React import 금지)
@@ -253,18 +240,18 @@ src/
 
 ### 확장 대비 가드레일
 
-1. **탭 섹션 비대화 방지**
-   - `sections/`의 탭 컴포넌트는 조립/분기 역할만 수행
-   - 내부 로직/폼/UI는 `ui/` 또는 더 작은 섹션으로 분리
+**탭 섹션 비대화 방지**
+- `sections/`의 탭 컴포넌트는 조립/분기 역할만 수행
+- 내부 로직/폼/UI는 `ui/` 또는 더 작은 섹션으로 분리
 
-2. **상태 훅 비대화 방지**
-   - 상태 훅은 단일 진실 소스 역할만 수행
-   - 계산/파생 로직은 `utils/` 또는 `engine/`으로 이동
-   - 상태가 커질 경우 slice 개념으로 분리 훅 추가 허용
+**상태 훅 비대화 방지**
+- 상태 훅은 단일 진실 소스 역할만 수행
+- 계산/파생 로직은 `utils/` 또는 `engine/`으로 이동
+- 상태가 커질 경우 slice 개념으로 분리 훅 추가 허용
 
-3. **검증 로직 분산 금지**
-   - 입력/조건 검증 로직은 `utils/`의 validation 파일로 집중
-   - UI 컴포넌트에 검증 로직 분산 작성 금지
+**검증 로직 분산 금지**
+- 입력/조건 검증 로직은 `utils/`의 validation 파일로 집중
+- UI 컴포넌트에 검증 로직 분산 작성 금지
 
 ### 작업 청소 규칙
 
@@ -276,4 +263,16 @@ src/
 
 ---
 
-**최종 수정**: 2025.01.25 (PR3-2.5 프로젝트 구조 리팩토링 완료)
+## PR 로드맵
+
+| PR | 내용 | 상태 |
+|----|------|------|
+| PR1~PR3-2.5 | 초기 설정, UI 개편, 통합 엔진, 구조 리팩토링 | ✅ 완료 |
+| PR3-3 | ServiceConsole 3행 그리드 UI + Navy blue 통일 | ✅ 완료 |
+| PR4 | 검색 매칭 + 지도 연동 | 📋 예정 |
+| PR5 | 거래 모달 + 규정 매칭 | 📋 예정 |
+| PR6 | 마무리 + 최적화 | 📋 예정 |
+
+---
+
+**최종 수정**: 2025.01.26 (PR3-3 ServiceConsole UI 재설계 완료)

@@ -26,7 +26,7 @@ export default function CargoSummaryCard({
   if (compact) {
     // 캐러셀용 컴팩트 카드 - 타이틀 아래 배치, 크기 확대
     return (
-      <div className="flex-shrink-0 w-[58px] p-1.5 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-300/80 shadow-sm">
+      <div className="flex-shrink-0 w-[68px] mt-6 p-1.5 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-300/80 shadow-sm">
         {/* 순번 + 삭제 */}
         <div className="flex items-center justify-between mb-0.5">
           <span className="text-[10px] font-bold text-slate-700">{index + 1}</span>
@@ -140,7 +140,7 @@ export function CargoCarousel({
       {hasMore && (
         <button
           onClick={handleNextPage}
-          className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 transition-colors"
+          className="flex-shrink-0 mt-6 w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 transition-colors"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
