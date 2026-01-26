@@ -3,11 +3,14 @@ import type { ReactNode } from 'react'
 
 interface GridCellProps {
   label: string
+  emoji?: string
   onClick?: () => void
   children?: ReactNode
   className?: string
   disabled?: boolean
   colorScheme?: 'blue' | 'emerald' | 'purple' | 'slate'
+  // 1행 화물/물량 칸용 확장 높이
+  tall?: boolean
 }
 
 const colorStyles = {
@@ -35,11 +38,13 @@ const colorStyles = {
 
 export default function GridCell({
   label,
+  emoji,
   onClick,
   children,
   className = '',
   disabled = false,
   colorScheme = 'slate',
+  tall = false,
 }: GridCellProps) {
   const colors = colorStyles[colorScheme]
 
@@ -49,16 +54,21 @@ export default function GridCell({
       onClick={onClick}
       disabled={disabled}
       className={`
-        w-full min-h-[80px] p-3 rounded-xl border-2 text-left transition-all
+        w-full p-3 rounded-xl border-2 text-left transition-all
+        ${tall ? 'min-h-[140px]' : 'min-h-[80px]'}
         ${colors.border} ${colors.bg}
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'}
         ${className}
       `}
     >
-      <div className={`text-[10px] font-semibold uppercase tracking-wide mb-1 ${colors.label}`}>
-        {label}
+      {/* 라벨 + 이모지 (좌상단) */}
+      <div className="flex items-center gap-1.5 mb-2">
+        {emoji && <span className="text-lg">{emoji}</span>}
+        <span className={`text-sm font-bold ${colors.label}`}>{label}</span>
       </div>
-      <div className="text-sm text-slate-800">
+
+      {/* 콘텐츠 (중앙 정렬) */}
+      <div className="flex items-center justify-center text-base font-medium text-slate-800 min-h-[40px]">
         {children}
       </div>
     </button>

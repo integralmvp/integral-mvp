@@ -5,15 +5,17 @@
 import { useState } from 'react'
 import type { CargoUI, RegisteredCargo, StorageCondition } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine'
+import { JEJU_LOCATIONS } from '../../../../data/mockData'
 import {
   GridCell,
-  CargoSummaryCard,
+  CargoCarousel,
   InputModal,
   CargoRegistrationCard,
   QuantityInputCard,
   LocationDropdown,
   DatePicker,
   ConversionResult,
+  CargoSummaryCard,
 } from '../ui'
 
 interface StorageTabSectionProps {
@@ -49,14 +51,18 @@ export default function StorageTabSection({
   onCompleteCargo,
   onUpdateQuantity,
   onConfirmQuantity,
-  totalCubes,
+  totalCubes: _totalCubes,
   totalPallets,
   demandResult,
   storageCondition,
   onUpdateCondition,
 }: StorageTabSectionProps) {
   const [activeModal, setActiveModal] = useState<ModalType>(null)
-  const [showAllCargos, setShowAllCargos] = useState(false)
+
+  // 임시 상태 (모달에서 "선택하시겠습니까?" 버튼 누르기 전까지)
+  const [tempLocation, setTempLocation] = useState<string | undefined>(storageCondition.location)
+  const [tempStartDate, setTempStartDate] = useState<string | undefined>(storageCondition.startDate)
+  const [tempEndDate, setTempEndDate] = useState<string | undefined>(storageCondition.endDate)
 
   // 등록 대기 중인 화물 (미완료)
   const pendingCargos = cargos.filter(c => !c.completed)
@@ -65,15 +71,43 @@ export default function StorageTabSection({
   const allQuantitiesEntered = registeredCargos.length > 0 &&
     registeredCargos.every(c => c.quantity !== undefined && c.quantity > 0)
 
-  // 화물 표시 (기본 2개, 확장 시 전체)
-  const visibleCargos = showAllCargos ? registeredCargos : registeredCargos.slice(0, 2)
-  const hiddenCargoCount = registeredCargos.length - 2
-
   // 날짜 포맷
   const formatDate = (date?: string) => {
     if (!date) return null
     const d = new Date(date)
     return `${d.getMonth() + 1}/${d.getDate()}`
+  }
+
+  // 장소명 가져오기
+  const getLocationName = (locationId?: string) => {
+    if (!locationId) return null
+    const loc = JEJU_LOCATIONS.find(l => l.id === locationId)
+    return loc?.name || locationId
+  }
+
+  // 모달 열기 (임시 상태 초기화)
+  const openModal = (modal: ModalType) => {
+    if (modal === 'location') {
+      setTempLocation(storageCondition.location)
+    } else if (modal === 'date') {
+      setTempStartDate(storageCondition.startDate)
+      setTempEndDate(storageCondition.endDate)
+    }
+    setActiveModal(modal)
+  }
+
+  // 장소 선택 확정
+  const confirmLocation = () => {
+    if (tempLocation) {
+      onUpdateCondition({ location: tempLocation })
+    }
+    setActiveModal(null)
+  }
+
+  // 날짜 선택 확정
+  const confirmDate = () => {
+    onUpdateCondition({ startDate: tempStartDate, endDate: tempEndDate })
+    setActiveModal(null)
   }
 
   return (
@@ -83,70 +117,38 @@ export default function StorageTabSection({
         {/* 화물 정보 */}
         <GridCell
           label="화물 정보"
+          emoji="📦"
           colorScheme="blue"
-          onClick={() => setActiveModal('cargo')}
+          onClick={() => openModal('cargo')}
+          tall
         >
-          {registeredCargos.length === 0 ? (
-            <div className="flex items-center gap-1 text-blue-600">
-              <span className="text-lg">+</span>
-              <span>화물 추가</span>
-            </div>
-          ) : (
-            <div className="space-y-1.5">
-              {visibleCargos.map((cargo, idx) => (
-                <CargoSummaryCard
-                  key={cargo.id}
-                  cargo={cargo}
-                  index={idx}
-                  onRemove={onRemoveCargo}
-                  compact
-                />
-              ))}
-              {hiddenCargoCount > 0 && !showAllCargos && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowAllCargos(true)
-                  }}
-                  className="w-full py-1 text-[10px] text-blue-600 hover:text-blue-800"
-                >
-                  화물 {hiddenCargoCount}개 더 보기 ▾
-                </button>
-              )}
-              {showAllCargos && hiddenCargoCount > 0 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowAllCargos(false)
-                  }}
-                  className="w-full py-1 text-[10px] text-blue-600 hover:text-blue-800"
-                >
-                  접기 ▴
-                </button>
-              )}
-            </div>
-          )}
+          <CargoCarousel
+            cargos={registeredCargos}
+            onRemove={onRemoveCargo}
+            onAddClick={() => openModal('cargo')}
+            colorScheme="blue"
+          />
         </GridCell>
 
         {/* 물량 정보 */}
         <GridCell
           label="물량 정보"
+          emoji="📊"
           colorScheme="blue"
-          onClick={() => setActiveModal('quantity')}
+          onClick={() => openModal('quantity')}
           disabled={registeredCargos.length === 0}
+          tall
         >
           {registeredCargos.length === 0 ? (
-            <span className="text-slate-400 text-xs">화물 등록 필요</span>
+            <span className="text-slate-400">화물 등록 필요</span>
           ) : !allQuantitiesEntered ? (
-            <span className="text-blue-600 text-xs">수량 입력하기</span>
+            <span className="text-blue-600">수량 입력하기</span>
           ) : (
-            <div className="space-y-0.5">
-              <div className="text-lg font-bold text-slate-800">
-                {totalPallets} <span className="text-xs font-normal text-slate-500">Pallet</span>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-slate-800">
+                {totalPallets}
               </div>
-              <div className="text-xs text-slate-500">
-                {totalCubes} Cube
-              </div>
+              <div className="text-sm text-slate-500">파레트</div>
             </div>
           )}
         </GridCell>
@@ -155,11 +157,12 @@ export default function StorageTabSection({
       {/* 2행: 보관 장소 */}
       <GridCell
         label="보관 장소"
+        emoji="📍"
         colorScheme="blue"
-        onClick={() => setActiveModal('location')}
+        onClick={() => openModal('location')}
       >
         {storageCondition.location ? (
-          <span className="text-slate-800">{storageCondition.location}</span>
+          <span className="text-lg">{getLocationName(storageCondition.location)}</span>
         ) : (
           <span className="text-slate-400">장소를 선택해주세요</span>
         )}
@@ -169,22 +172,24 @@ export default function StorageTabSection({
       <div className="grid grid-cols-2 gap-3">
         <GridCell
           label="시작일"
+          emoji="📅"
           colorScheme="blue"
-          onClick={() => setActiveModal('date')}
+          onClick={() => openModal('date')}
         >
           {storageCondition.startDate ? (
-            <span className="text-slate-800">{formatDate(storageCondition.startDate)}</span>
+            <span className="text-lg">{formatDate(storageCondition.startDate)}</span>
           ) : (
             <span className="text-slate-400">선택</span>
           )}
         </GridCell>
         <GridCell
           label="종료일"
+          emoji="📅"
           colorScheme="blue"
-          onClick={() => setActiveModal('date')}
+          onClick={() => openModal('date')}
         >
           {storageCondition.endDate ? (
-            <span className="text-slate-800">{formatDate(storageCondition.endDate)}</span>
+            <span className="text-lg">{formatDate(storageCondition.endDate)}</span>
           ) : (
             <span className="text-slate-400">선택</span>
           )}
@@ -211,14 +216,16 @@ export default function StorageTabSection({
           {registeredCargos.length > 0 && (
             <div className="space-y-2">
               <div className="text-xs font-semibold text-slate-700">등록된 화물</div>
-              {registeredCargos.map((cargo, idx) => (
-                <CargoSummaryCard
-                  key={cargo.id}
-                  cargo={cargo}
-                  index={idx}
-                  onRemove={onRemoveCargo}
-                />
-              ))}
+              <div className="flex flex-wrap gap-2">
+                {registeredCargos.map((cargo, idx) => (
+                  <CargoSummaryCard
+                    key={cargo.id}
+                    cargo={cargo}
+                    index={idx}
+                    onRemove={onRemoveCargo}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
@@ -254,7 +261,7 @@ export default function StorageTabSection({
         <div className="space-y-4">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
             <p className="text-xs text-blue-800">
-              등록된 화물별 수량을 입력하면 필요한 파렛트 수가 자동으로 계산됩니다.
+              등록된 화물별 수량을 입력하면 필요한 파레트 수가 자동으로 계산됩니다.
             </p>
           </div>
 
@@ -291,13 +298,19 @@ export default function StorageTabSection({
       >
         <div className="space-y-4">
           <LocationDropdown
-            value={storageCondition.location}
-            onChange={(location) => {
-              onUpdateCondition({ location })
-              setActiveModal(null)
-            }}
+            value={tempLocation}
+            onChange={setTempLocation}
             placeholder="보관 장소 선택"
           />
+
+          {tempLocation && (
+            <button
+              onClick={confirmLocation}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors"
+            >
+              선택하시겠습니까?
+            </button>
+          )}
         </div>
       </InputModal>
 
@@ -311,11 +324,20 @@ export default function StorageTabSection({
         <div className="space-y-4">
           <DatePicker
             mode="range"
-            startDate={storageCondition.startDate}
-            endDate={storageCondition.endDate}
-            onStartDateChange={(date) => onUpdateCondition({ startDate: date })}
-            onEndDateChange={(date) => onUpdateCondition({ endDate: date })}
+            startDate={tempStartDate}
+            endDate={tempEndDate}
+            onStartDateChange={setTempStartDate}
+            onEndDateChange={setTempEndDate}
           />
+
+          {(tempStartDate || tempEndDate) && (
+            <button
+              onClick={confirmDate}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors"
+            >
+              선택하시겠습니까?
+            </button>
+          )}
         </div>
       </InputModal>
     </div>
