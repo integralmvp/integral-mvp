@@ -24,12 +24,12 @@ export default function CargoSummaryCard({
   const moduleLabel = cargo.moduleType === 'UNCLASSIFIED' ? '비표준' : cargo.moduleType
 
   if (compact) {
-    // 캐러셀용 컴팩트 카드 - 높이 조절, 둥근 보더, 투명도
+    // 캐러셀용 컴팩트 카드 - 타이틀 아래 배치, 크기 확대
     return (
-      <div className="flex-shrink-0 w-[52px] h-[52px] p-1.5 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200/80 shadow-sm">
+      <div className="flex-shrink-0 w-[58px] p-1.5 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-300/80 shadow-sm">
         {/* 순번 + 삭제 */}
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold text-slate-600">{index + 1}</span>
+        <div className="flex items-center justify-between mb-0.5">
+          <span className="text-[10px] font-bold text-slate-700">{index + 1}</span>
           {onRemove && (
             <button
               onClick={(e) => {
@@ -42,10 +42,11 @@ export default function CargoSummaryCard({
             </button>
           )}
         </div>
-        {/* 세로 정보 - 콤팩트하게 */}
-        <div className="space-y-0 text-center mt-0.5">
-          <div className="text-[9px] font-semibold text-slate-700 truncate leading-tight">{moduleLabel}</div>
-          <div className="text-[8px] text-slate-500 truncate leading-tight">{category?.name || '-'}</div>
+        {/* 세로 정보 - 모듈/품목/중량 모두 표시 */}
+        <div className="space-y-0.5 text-center">
+          <div className="text-[10px] font-semibold text-slate-800 truncate leading-tight">{moduleLabel}모듈</div>
+          <div className="text-[9px] text-slate-600 truncate leading-tight">{category?.name}{subCategory ? `>${subCategory.name}` : ''}</div>
+          <div className="text-[9px] text-slate-500 truncate leading-tight">{weight?.label || '-'}</div>
         </div>
       </div>
     )

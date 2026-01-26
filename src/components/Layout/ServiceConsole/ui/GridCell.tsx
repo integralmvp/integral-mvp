@@ -48,8 +48,8 @@ export default function GridCell({
       onClick={onClick}
       disabled={disabled}
       className={`
-        relative w-full h-full min-h-0 p-2 rounded-2xl border border-slate-200/80 text-left transition-all overflow-hidden
-        bg-slate-50/60 hover:bg-slate-100/80 hover:border-slate-300
+        relative w-full h-full min-h-0 p-2 rounded-2xl border border-slate-400 text-left transition-all overflow-hidden
+        bg-slate-50/60 hover:bg-slate-100/80 hover:border-slate-600
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'}
         ${className}
       `}

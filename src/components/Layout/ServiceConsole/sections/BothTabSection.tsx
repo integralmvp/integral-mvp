@@ -238,7 +238,7 @@ export default function BothTabSection({
         {/* 쌍방 화살표 버튼 */}
         <button
           onClick={handleOrderSwap}
-          className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+          className="w-7 h-7 flex items-center justify-center text-blue-900 hover:text-blue-950 hover:bg-blue-50 rounded-full transition-colors"
           title="순서 전환"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -373,7 +373,7 @@ export default function BothTabSection({
 
               <button
                 onClick={handleSwapLocations}
-                className="flex-shrink-0 w-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                className="flex-shrink-0 w-7 flex items-center justify-center text-blue-900 hover:text-blue-950 hover:bg-blue-50 rounded-lg transition-colors"
                 title="출발지/도착지 교환"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
