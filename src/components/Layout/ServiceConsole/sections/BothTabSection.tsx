@@ -522,7 +522,7 @@ export default function BothTabSection({
           {tempStorageLocation && (
             <button
               onClick={confirmStorageLocation}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -557,7 +557,7 @@ export default function BothTabSection({
           {(tempStartDate || tempEndDate) && (
             <button
               onClick={confirmStorageDate}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -581,7 +581,7 @@ export default function BothTabSection({
           {tempOrigin && (
             <button
               onClick={confirmOrigin}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -605,7 +605,7 @@ export default function BothTabSection({
           {tempDestination && (
             <button
               onClick={confirmDestination}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -640,7 +640,7 @@ export default function BothTabSection({
               {tempTransportDate && (
                 <button
                   onClick={confirmTransportDate}
-                  className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
+                  className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
                 >
                   선택하시겠습니까?
                 </button>

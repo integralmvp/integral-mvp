@@ -27,8 +27,8 @@ export default function InputModal({
 
       {/* 모달 컨텐츠 */}
       <div className="relative w-full max-w-md max-h-[85vh] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
-        {/* 헤더 */}
-        <div className="bg-slate-800 px-4 py-3 flex items-center justify-between">
+        {/* 헤더 - Navy blue */}
+        <div className="bg-blue-900 px-4 py-3 flex items-center justify-between">
           <h3 className="text-base font-bold text-white">{title}</h3>
           <button
             onClick={onClose}

@@ -300,7 +300,7 @@ export default function StorageTabSection({
           {tempLocation && (
             <button
               onClick={confirmLocation}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -326,7 +326,7 @@ export default function StorageTabSection({
           {(tempStartDate || tempEndDate) && (
             <button
               onClick={confirmDate}
-              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
