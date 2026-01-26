@@ -105,11 +105,11 @@ export function areaPyeongToPalletsWithFactor(areaPyeong: number): number {
 /**
  * 큐브를 CBM(Cubic Meter)으로 변환
  * @param cubes 큐브 수
- * @returns CBM (소수점 3자리)
+ * @returns CBM (소수점 2자리)
  */
 export function cubesToCBM(cubes: number): number {
   if (cubes <= 0) return 0
-  return parseFloat((cubes * CUBE_SPEC.volumeM3).toFixed(3))
+  return parseFloat((cubes * CUBE_SPEC.volumeM3).toFixed(2))
 }
 
 /**
