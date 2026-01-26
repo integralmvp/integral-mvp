@@ -47,6 +47,7 @@ export function addPalletMarkers(map: mapboxgl.Map): void {
 
     const el = document.createElement('div')
     el.className = 'pallet-marker'
+    el.dataset.productId = storage.id  // PR4: 하이라이트용 ID
     el.style.width = `${size}px`
     el.style.height = `${size}px`
     el.style.cursor = 'pointer'

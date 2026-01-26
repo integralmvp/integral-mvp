@@ -11,6 +11,7 @@ import type {
   ProductCategory,
   LocationOption,
   WeightRange,
+  ModuleClassification,
 } from '../types/models'
 
 // ============ 제주도 좌표 ============
@@ -53,6 +54,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
+    // PR4 규정: 넉넉한 조건 (대부분 통과)
+    maxWeightKg: 25,
+    maxSumCm: 200,
+    tempSupported: true,
+    minCubes: 0,
   },
   {
     id: 'R2',
@@ -74,6 +80,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
+    // PR4 규정: 소형 화물 전용 (중량/규격 제한)
+    maxWeightKg: 10,
+    maxSumCm: 120,
+    allowedModuleClasses: ['소형', '중형'] as ModuleClassification[],
+    minCubes: 0,
   },
   {
     id: 'R3',
@@ -95,6 +106,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
+    // PR4 규정: 냉동 지원, 최소 물량 요구
+    tempSupported: true,
+    minCubes: 8,
+    maxWeightKg: 20,
+    maxSumCm: 170,
   },
   {
     id: 'R4',
@@ -116,6 +132,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
+    // PR4 규정: 소형 차량 제한 (엄격한 규격/중량)
+    maxWeightKg: 5,
+    maxSumCm: 100,
+    allowedModuleClasses: ['소형'] as ModuleClassification[],
+    minCubes: 0,
   },
 
   // 입도 경로 (2개)
@@ -141,6 +162,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     routeScope: 'SEA',
     direction: 'INBOUND',
     tripType: 'ONE_WAY',
+    // PR4 규정: 대용량 해상 운송 (넉넉, 최소 물량 요구)
+    maxWeightKg: 30,
+    maxSumCm: 250,
+    tempSupported: true,
+    minCubes: 16,
   },
   {
     id: 'R6',
@@ -164,6 +190,12 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     routeScope: 'SEA',
     direction: 'INBOUND',
     tripType: 'ROUND_TRIP',
+    // PR4 규정: 식품 전용 경로
+    allowedItemCodes: ['IC01', 'IC02', 'IC10', 'IC11', 'IC12', 'IC13', 'IC14'],
+    tempSupported: true,
+    maxWeightKg: 20,
+    maxSumCm: 170,
+    minCubes: 4,
   },
 
   // 출도 경로 (2개)
@@ -189,6 +221,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     routeScope: 'SEA',
     direction: 'OUTBOUND',
     tripType: 'ONE_WAY',
+    // PR4 규정: 일반 화물만, 대용량 최소 물량
+    maxWeightKg: 25,
+    maxSumCm: 200,
+    tempSupported: false,
+    minCubes: 32,
   },
   {
     id: 'R8',
@@ -212,6 +249,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     routeScope: 'SEA',
     direction: 'OUTBOUND',
     tripType: 'ONE_WAY',
+    // PR4 규정: 중소 규모 운송
+    maxWeightKg: 20,
+    maxSumCm: 170,
+    tempSupported: true,
+    minCubes: 0,
   },
 ]
 
@@ -231,6 +273,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     priceUnit: '일',
     features: ['24시간 입출고', '지게차 보유', 'CCTV'],
     regulationStatus: { allowed: true },
+    // PR4 규정: 일반 창고 (넉넉한 조건)
+    maxWeightKg: 25,
+    maxSumCm: 200,
+    tempSupported: false,
+    minCubes: 0,
   },
   {
     id: 'S2',
@@ -246,6 +293,12 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     priceUnit: '일',
     features: ['신선식품 특화', '온도 관리', '24시간 모니터링'],
     regulationStatus: { allowed: true },
+    // PR4 규정: 냉장 창고, 식품 전용
+    allowedItemCodes: ['IC10', 'IC11', 'IC12', 'IC13', 'IC14'],
+    maxWeightKg: 20,
+    maxSumCm: 170,
+    tempSupported: true,
+    minCubes: 4,
   },
   {
     id: 'S3',
@@ -261,6 +314,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     priceUnit: '일',
     features: ['대형 물량 가능', '주차 공간'],
     regulationStatus: { allowed: true },
+    // PR4 규정: 대형 화물 가능
+    maxWeightKg: 30,
+    maxSumCm: 250,
+    tempSupported: false,
+    minCubes: 8,
   },
   {
     id: 'S4',
@@ -276,6 +334,12 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     priceUnit: '일',
     features: ['수산물 특화', '-20도 유지', '급속 냉동'],
     regulationStatus: { allowed: true },
+    // PR4 규정: 냉동 창고, 수산물/냉동식품
+    allowedItemCodes: ['IC10', 'IC12', 'IC13'],
+    maxWeightKg: 25,
+    maxSumCm: 180,
+    tempSupported: true,
+    minCubes: 8,
   },
   {
     id: 'S5',
@@ -291,6 +355,12 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     priceUnit: '일',
     features: ['동부권 거점', '소량 보관'],
     regulationStatus: { allowed: true },
+    // PR4 규정: 소규모 창고 (제한적)
+    maxWeightKg: 15,
+    maxSumCm: 150,
+    tempSupported: false,
+    allowedModuleClasses: ['소형', '중형'] as ModuleClassification[],
+    minCubes: 0,
   },
   {
     id: 'S6',
@@ -306,6 +376,12 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     priceUnit: '일',
     features: ['서부권 거점', '농산물 특화'],
     regulationStatus: { allowed: true },
+    // PR4 규정: 농산물 냉장 창고
+    allowedItemCodes: ['IC10', 'IC11', 'IC14'],
+    maxWeightKg: 20,
+    maxSumCm: 170,
+    tempSupported: true,
+    minCubes: 0,
   },
   {
     id: 'S7',
@@ -321,6 +397,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     priceUnit: '일',
     features: ['서부권 거점', '도로 접근성 우수'],
     regulationStatus: { allowed: true },
+    // PR4 규정: 일반 창고
+    maxWeightKg: 20,
+    maxSumCm: 170,
+    tempSupported: false,
+    minCubes: 0,
   },
   {
     id: 'S8',
@@ -336,6 +417,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     priceUnit: '일',
     features: ['동부권 거점', '온도관리 시설'],
     regulationStatus: { allowed: true },
+    // PR4 규정: 냉장 창고, 중형 물량 요구
+    maxWeightKg: 20,
+    maxSumCm: 170,
+    tempSupported: true,
+    minCubes: 4,
   },
 ]
 
