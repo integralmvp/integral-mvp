@@ -1,7 +1,7 @@
 // 보관+운송 탭 섹션 - 3행 그리드 레이아웃 (1.35fr/1fr/1fr)
 // 상단: 순서 전환 UI (보관 ↔ 운송) - 순서에 따라 버튼 재정렬
 // 동일 영역에서 보관/운송 그리드 전환 렌더링
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type {
   CargoUI,
   RegisteredCargo,
@@ -85,6 +85,9 @@ export default function BothTabSection({
   )
   const [activeModal, setActiveModal] = useState<ModalType>(null)
 
+  // 자동 전환 완료 여부 추적 (한 번만 자동 전환)
+  const hasAutoSwitched = useRef(false)
+
   // 임시 상태
   const [tempStorageLocation, setTempStorageLocation] = useState<string | undefined>(storageCondition.location)
   const [tempStartDate, setTempStartDate] = useState<string | undefined>(storageCondition.startDate)
@@ -128,12 +131,16 @@ export default function BothTabSection({
     transportCondition.transportDate
   )
 
-  // 첫 순서 입력창 완료 시 자동 전환
+  // 첫 순서 입력창 완료 시 자동 전환 (한 번만)
   useEffect(() => {
+    if (hasAutoSwitched.current) return
+
     if (effectiveOrder === 'storage-first' && activeView === 'storage' && isStorageComplete) {
       setActiveView('transport')
+      hasAutoSwitched.current = true
     } else if (effectiveOrder === 'transport-first' && activeView === 'transport' && isTransportComplete) {
       setActiveView('storage')
+      hasAutoSwitched.current = true
     }
   }, [effectiveOrder, activeView, isStorageComplete, isTransportComplete])
 
@@ -142,6 +149,7 @@ export default function BothTabSection({
     const newOrder = effectiveOrder === 'storage-first' ? 'transport-first' : 'storage-first'
     onServiceOrderChange(newOrder)
     setActiveView(newOrder === 'storage-first' ? 'storage' : 'transport')
+    hasAutoSwitched.current = false // 순서 변경 시 자동 전환 리셋
   }
 
   // 뷰 전환 핸들러 (버튼 클릭)
@@ -468,6 +476,15 @@ export default function BothTabSection({
           >
             + 화물 추가하기
           </button>
+
+          {registeredCargos.length > 0 && pendingCargos.length === 0 && (
+            <button
+              onClick={() => setActiveModal(null)}
+              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
+            >
+              등록을 완료하시겠습니까?
+            </button>
+          )}
         </div>
       </InputModal>
 
