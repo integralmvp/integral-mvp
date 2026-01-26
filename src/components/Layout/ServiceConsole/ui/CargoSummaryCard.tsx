@@ -23,22 +23,30 @@ export default function CargoSummaryCard({
   const moduleLabel = cargo.moduleType === 'UNCLASSIFIED' ? '비표준' : cargo.moduleType
 
   if (compact) {
-    // 캐러셀용 컴팩트 카드
+    // 캐러셀용 컴팩트 카드 - 모듈/품목/중량 모두 표시
     return (
-      <div className="flex-shrink-0 w-[52px] h-[52px] p-1 bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col items-center justify-center">
-        <span className="text-[10px] font-bold text-slate-700">{index + 1}</span>
-        <span className="text-[9px] text-slate-600 truncate w-full text-center">{moduleLabel}</span>
-        {onRemove && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onRemove(cargo.id)
-            }}
-            className="text-[8px] text-slate-400 hover:text-red-500"
-          >
-            삭제
-          </button>
-        )}
+      <div className="flex-shrink-0 w-[56px] p-1 bg-white rounded-lg border border-slate-200 shadow-sm">
+        {/* 순번 + 삭제 */}
+        <div className="flex items-center justify-between mb-0.5">
+          <span className="text-[9px] font-bold text-slate-700">{index + 1}</span>
+          {onRemove && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onRemove(cargo.id)
+              }}
+              className="text-[8px] text-slate-400 hover:text-red-500"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        {/* 세로 정보 */}
+        <div className="space-y-0 text-center">
+          <div className="text-[9px] font-semibold text-slate-800 truncate">{moduleLabel}</div>
+          <div className="text-[8px] text-slate-600 truncate">{category?.name || '-'}</div>
+          <div className="text-[8px] text-slate-500 truncate">{weight?.label || '-'}</div>
+        </div>
       </div>
     )
   }
@@ -122,8 +130,8 @@ export function CargoCarousel({
 
   return (
     <div className="flex items-center gap-1">
-      {/* 카드들 - 좌측 정렬 */}
-      <div className="flex items-center gap-1">
+      {/* 카드들 - 좌측 정렬 (justify-start) */}
+      <div className="flex items-center justify-start gap-1 flex-1">
         {visibleCargos.map((cargo, idx) => (
           <CargoSummaryCard
             key={cargo.id}
