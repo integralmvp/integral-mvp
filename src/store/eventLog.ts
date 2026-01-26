@@ -75,7 +75,8 @@ export function logEvent(params: {
   saveEvents(events)
 
   // 디버깅용 콘솔 로그 (개발 모드에서만)
-  if (import.meta.env.DEV) {
+  // Node.js 환경에서 import.meta.env가 undefined일 수 있음
+  if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
     console.log(`[Event] ${event.eventType}`, {
       subject: event.subject,
       fields: event.fields,
