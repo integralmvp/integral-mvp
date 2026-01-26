@@ -14,6 +14,7 @@ import { JEJU_LOCATIONS } from '../../../../data/mockData'
 import {
   GridCell,
   CargoCarousel,
+  CargoAddButton,
   InputModal,
   CargoRegistrationCard,
   QuantityInputCard,
@@ -130,10 +131,8 @@ export default function BothTabSection({
   // 첫 순서 입력창 완료 시 자동 전환
   useEffect(() => {
     if (effectiveOrder === 'storage-first' && activeView === 'storage' && isStorageComplete) {
-      // 보관이 먼저이고 보관 완료 시 → 운송으로 전환
       setActiveView('transport')
     } else if (effectiveOrder === 'transport-first' && activeView === 'transport' && isTransportComplete) {
-      // 운송이 먼저이고 운송 완료 시 → 보관으로 전환
       setActiveView('storage')
     }
   }, [effectiveOrder, activeView, isStorageComplete, isTransportComplete])
@@ -142,7 +141,6 @@ export default function BothTabSection({
   const handleOrderSwap = () => {
     const newOrder = effectiveOrder === 'storage-first' ? 'transport-first' : 'storage-first'
     onServiceOrderChange(newOrder)
-    // 새 순서의 첫 번째 뷰로 전환
     setActiveView(newOrder === 'storage-first' ? 'storage' : 'transport')
   }
 
@@ -222,13 +220,13 @@ export default function BothTabSection({
   const secondButton = effectiveOrder === 'storage-first' ? 'transport' : 'storage'
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* 상단: 순서 전환 UI - 순서에 따라 버튼 재정렬 */}
-      <div className="flex items-center justify-center gap-2 py-2">
+      <div className="flex items-center justify-center gap-2 py-1">
         {/* 첫 번째 버튼 */}
         <button
           onClick={() => handleViewChange(firstButton)}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeView === firstButton
               ? firstButton === 'storage'
                 ? 'bg-blue-600 text-white shadow-md'
@@ -242,10 +240,10 @@ export default function BothTabSection({
         {/* 쌍방 화살표 버튼 */}
         <button
           onClick={handleOrderSwap}
-          className="w-10 h-10 flex items-center justify-center text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-full transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-full transition-colors"
           title="순서 전환"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
           </svg>
         </button>
@@ -253,7 +251,7 @@ export default function BothTabSection({
         {/* 두 번째 버튼 */}
         <button
           onClick={() => handleViewChange(secondButton)}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeView === secondButton
               ? secondButton === 'storage'
                 ? 'bg-blue-600 text-white shadow-md'
@@ -265,13 +263,8 @@ export default function BothTabSection({
         </button>
       </div>
 
-      {/* 현재 순서 표시 */}
-      <div className="text-center text-xs text-slate-500">
-        현재 순서: {effectiveOrder === 'storage-first' ? '보관 → 운송' : '운송 → 보관'}
-      </div>
-
       {/* 1행: 화물 정보 | 물량 정보 (공통) */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {/* 화물 정보 */}
         <GridCell
           label="화물 정보"
@@ -279,11 +272,16 @@ export default function BothTabSection({
           colorScheme="purple"
           onClick={() => setActiveModal('cargo')}
           tall
+          headerAction={
+            <CargoAddButton
+              onClick={() => setActiveModal('cargo')}
+              colorScheme="purple"
+            />
+          }
         >
           <CargoCarousel
             cargos={registeredCargos}
             onRemove={onRemoveCargo}
-            onAddClick={() => setActiveModal('cargo')}
             colorScheme="purple"
           />
         </GridCell>
@@ -298,15 +296,15 @@ export default function BothTabSection({
           tall
         >
           {registeredCargos.length === 0 ? (
-            <span className="text-slate-400">화물 등록 필요</span>
+            <span className="text-slate-400 text-xs">화물 등록 필요</span>
           ) : !allQuantitiesEntered ? (
-            <span className="text-purple-600">수량 입력하기</span>
+            <span className="text-purple-600 text-xs">수량 입력하기</span>
           ) : (
             <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">
+              <div className="text-xl font-bold text-slate-800">
                 {totalPallets}
               </div>
-              <div className="text-sm text-slate-500">파레트</div>
+              <div className="text-xs text-slate-500">파레트</div>
             </div>
           )}
         </GridCell>
@@ -323,14 +321,14 @@ export default function BothTabSection({
             onClick={() => openModal('storage-location')}
           >
             {storageCondition.location ? (
-              <span className="text-lg">{getLocationName(storageCondition.location)}</span>
+              <span className="text-base">{getLocationName(storageCondition.location)}</span>
             ) : (
-              <span className="text-slate-400">장소를 선택해주세요</span>
+              <span className="text-slate-400 text-xs">장소를 선택해주세요</span>
             )}
           </GridCell>
 
           {/* 3행: 보관 기간 */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <GridCell
               label={isStorageStartDateLocked ? '시작일 🔒' : '시작일'}
               emoji="📅"
@@ -340,13 +338,13 @@ export default function BothTabSection({
             >
               {getAutoStorageStartDate() ? (
                 <div className="text-center">
-                  <span className="text-lg">{formatDate(getAutoStorageStartDate())}</span>
+                  <span className="text-base">{formatDate(getAutoStorageStartDate())}</span>
                   {isStorageStartDateLocked && (
-                    <div className="text-[9px] text-blue-500">운송일 자동</div>
+                    <div className="text-[8px] text-blue-500">운송일 자동</div>
                   )}
                 </div>
               ) : (
-                <span className="text-slate-400">선택</span>
+                <span className="text-slate-400 text-xs">선택</span>
               )}
             </GridCell>
             <GridCell
@@ -356,9 +354,9 @@ export default function BothTabSection({
               onClick={() => openModal('storage-date')}
             >
               {storageCondition.endDate ? (
-                <span className="text-lg">{formatDate(storageCondition.endDate)}</span>
+                <span className="text-base">{formatDate(storageCondition.endDate)}</span>
               ) : (
-                <span className="text-slate-400">선택</span>
+                <span className="text-slate-400 text-xs">선택</span>
               )}
             </GridCell>
           </div>
@@ -369,7 +367,7 @@ export default function BothTabSection({
       {activeView === 'transport' && (
         <>
           {/* 2행: 출발지 ↔ 도착지 */}
-          <div className="flex items-stretch gap-2">
+          <div className="flex items-stretch gap-1">
             <div className="flex-1">
               <GridCell
                 label="출발지"
@@ -378,19 +376,19 @@ export default function BothTabSection({
                 onClick={() => openModal('transport-origin')}
               >
                 {transportCondition.origin ? (
-                  <span className="text-lg">{getLocationName(transportCondition.origin)}</span>
+                  <span className="text-base">{getLocationName(transportCondition.origin)}</span>
                 ) : (
-                  <span className="text-slate-400">선택</span>
+                  <span className="text-slate-400 text-xs">선택</span>
                 )}
               </GridCell>
             </div>
 
             <button
               onClick={handleSwapLocations}
-              className="flex-shrink-0 w-10 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+              className="flex-shrink-0 w-8 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
               title="출발지/도착지 교환"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
             </button>
@@ -403,9 +401,9 @@ export default function BothTabSection({
                 onClick={() => openModal('transport-destination')}
               >
                 {transportCondition.destination ? (
-                  <span className="text-lg">{getLocationName(transportCondition.destination)}</span>
+                  <span className="text-base">{getLocationName(transportCondition.destination)}</span>
                 ) : (
-                  <span className="text-slate-400">선택</span>
+                  <span className="text-slate-400 text-xs">선택</span>
                 )}
               </GridCell>
             </div>
@@ -421,13 +419,13 @@ export default function BothTabSection({
           >
             {getAutoTransportDate() ? (
               <div className="text-center">
-                <span className="text-lg">{formatDate(getAutoTransportDate())}</span>
+                <span className="text-base">{formatDate(getAutoTransportDate())}</span>
                 {isTransportDateLocked && (
-                  <div className="text-[9px] text-emerald-500">보관종료일 자동</div>
+                  <div className="text-[8px] text-emerald-500">보관종료일 자동</div>
                 )}
               </div>
             ) : (
-              <span className="text-slate-400">날짜를 선택해주세요</span>
+              <span className="text-slate-400 text-xs">날짜를 선택해주세요</span>
             )}
           </GridCell>
         </>
