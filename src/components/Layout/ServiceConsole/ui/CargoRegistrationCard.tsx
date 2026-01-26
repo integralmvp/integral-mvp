@@ -1,8 +1,17 @@
 // 화물 등록 카드 컴포넌트 - 박스 규격 + 품목 + 중량을 한 번에 입력
-import { useState } from 'react'
-import type { CargoUI, WeightRange } from '../../../../types/models'
+// Code Data System 연동: 품목 코드셋, 밴드 자동 계산
+import { useState, useMemo } from 'react'
+import type { CargoUI } from '../../../../types/models'
 import { classifyModule } from '../../../../engine'
-import { PRODUCT_CATEGORIES, WEIGHT_RANGES } from '../../../../data/mockData'
+import { getItemByCode } from '../../../../data/itemCodes'
+import {
+  getWeightBand,
+  getSizeBand,
+  calculateSumCm,
+  getWeightBandLabel,
+  getSizeBandLabel,
+} from '../../../../data/bands'
+import ItemCodeDropdown from './ItemCodeDropdown'
 
 interface CargoRegistrationCardProps {
   cargo: CargoUI
@@ -35,24 +44,46 @@ export default function CargoRegistrationCard({
     ? classifyModule({ widthMm: cargo.width, depthMm: cargo.depth, heightMm: cargo.height, count: 1 })
     : null
 
+  // 3변합 및 밴드 자동 계산
+  const calculatedBands = useMemo(() => {
+    if (!hasBoxDimensions) return null
+
+    const sumCm = calculateSumCm(cargo.width, cargo.depth, cargo.height)
+    const sizeBand = getSizeBand(sumCm)
+    const weightKg = cargo.weightKg || 0
+    const weightBand = getWeightBand(weightKg)
+
+    return { sumCm, sizeBand, weightBand }
+  }, [cargo.width, cargo.depth, cargo.height, cargo.weightKg, hasBoxDimensions])
+
   // 분류 결과 적용
   const handleClassify = () => {
-    if (classification) {
-      onChange(cargo.id, { moduleType: classification.module })
+    if (classification && calculatedBands) {
+      onChange(cargo.id, {
+        moduleType: classification.module,
+        sumCm: calculatedBands.sumCm,
+        sizeBand: calculatedBands.sizeBand,
+      })
       setShowClassifyResult(true)
     }
+  }
+
+  // 중량 변경 시 밴드 자동 업데이트
+  const handleWeightChange = (weightKg: number) => {
+    const weightBand = getWeightBand(weightKg)
+    onChange(cargo.id, { weightKg, weightBand })
   }
 
   // 모든 정보가 입력되었는지 확인
   const isComplete = hasBoxDimensions &&
     cargo.moduleType &&
-    cargo.productCategory &&
-    cargo.weightRange
+    cargo.itemCode &&
+    cargo.weightKg !== undefined && cargo.weightKg > 0
 
   const isConfirmed = cargo.completed === true
 
-  // 선택된 품목 카테고리
-  const selectedCategory = PRODUCT_CATEGORIES.find(c => c.code === cargo.productCategory)
+  // 선택된 품목
+  const selectedItem = cargo.itemCode ? getItemByCode(cargo.itemCode) : undefined
 
   return (
     <div className={`rounded-lg p-4 space-y-4 ${isConfirmed ? 'bg-green-50 border-2 border-green-300' : 'bg-slate-50 border border-slate-200'}`}>
@@ -123,6 +154,16 @@ export default function CargoRegistrationCard({
           </div>
         </div>
 
+        {/* 3변합 표시 */}
+        {hasBoxDimensions && calculatedBands && (
+          <div className="text-[10px] text-slate-500">
+            3변합: {calculatedBands.sumCm.toFixed(1)}cm
+            <span className="ml-2 px-1.5 py-0.5 bg-slate-100 rounded text-slate-600">
+              {getSizeBandLabel(calculatedBands.sizeBand)}
+            </span>
+          </div>
+        )}
+
         {/* 분류 버튼 */}
         {hasBoxDimensions && !showClassifyResult && !isConfirmed && (
           <button
@@ -133,7 +174,7 @@ export default function CargoRegistrationCard({
           </button>
         )}
 
-        {/* 분류 결과 표시 (기존 ModuleClassifyResult 스타일 재사용) */}
+        {/* 분류 결과 표시 */}
         {(showClassifyResult || isConfirmed) && cargo.moduleType && (
           <div className="border border-slate-200 rounded-lg p-3 bg-white">
             <div className="text-xs font-semibold text-slate-700 mb-2">
@@ -170,57 +211,52 @@ export default function CargoRegistrationCard({
         )}
       </div>
 
-      {/* 2. 품목 선택 */}
+      {/* 2. 품목 선택 (플랫폼 표준 코드셋) */}
       {(showClassifyResult || isConfirmed) && cargo.moduleType && (
         <div className="space-y-2">
           <label className="block text-xs font-semibold text-slate-700">품목</label>
-          <div className="grid grid-cols-2 gap-2">
-            <select
-              value={cargo.productCategory || ''}
-              onChange={(e) => onChange(cargo.id, { productCategory: e.target.value, productSubCategory: undefined })}
-              disabled={isConfirmed}
-              className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs disabled:bg-slate-100"
-            >
-              <option value="">대분류 선택</option>
-              {PRODUCT_CATEGORIES.map(cat => (
-                <option key={cat.code} value={cat.code}>{cat.name}</option>
-              ))}
-            </select>
-            <select
-              value={cargo.productSubCategory || ''}
-              onChange={(e) => onChange(cargo.id, { productSubCategory: e.target.value })}
-              disabled={isConfirmed || !cargo.productCategory}
-              className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs disabled:bg-slate-100"
-            >
-              <option value="">소분류 선택</option>
-              {selectedCategory?.subCategories?.map(sub => (
-                <option key={sub.code} value={sub.code}>{sub.name}</option>
-              ))}
-            </select>
-          </div>
+          <ItemCodeDropdown
+            value={cargo.itemCode}
+            onChange={(code) => onChange(cargo.id, { itemCode: code })}
+            disabled={isConfirmed}
+          />
+          {selectedItem?.flags && Object.keys(selectedItem.flags).length > 0 && (
+            <div className="text-[10px] text-orange-600 mt-1">
+              {selectedItem.flags.hazmatLike && '* 취급 주의 품목입니다'}
+              {selectedItem.flags.tempRequired && '* 온도 관리가 필요한 품목입니다'}
+            </div>
+          )}
         </div>
       )}
 
-      {/* 3. 중량 선택 */}
-      {(showClassifyResult || isConfirmed) && cargo.moduleType && cargo.productCategory && (
+      {/* 3. 중량 입력 (kg 실수) */}
+      {(showClassifyResult || isConfirmed) && cargo.moduleType && cargo.itemCode && (
         <div className="space-y-2">
-          <label className="block text-xs font-semibold text-slate-700">중량 구간</label>
-          <div className="flex flex-wrap gap-1.5">
-            {WEIGHT_RANGES.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => onChange(cargo.id, { weightRange: value as WeightRange })}
-                disabled={isConfirmed}
-                className={`px-3 py-1.5 border rounded text-xs transition-colors ${
-                  cargo.weightRange === value
-                    ? 'border-blue-500 bg-blue-50 text-blue-900 font-semibold'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400'
-                } disabled:cursor-not-allowed`}
-              >
-                {label}
-              </button>
-            ))}
+          <label className="block text-xs font-semibold text-slate-700">중량</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              value={cargo.weightKg || ''}
+              onChange={(e) => handleWeightChange(Number(e.target.value))}
+              onWheel={(e) => e.currentTarget.blur()}
+              disabled={isConfirmed}
+              className="flex-1 px-2 py-1.5 border border-slate-300 rounded text-xs disabled:bg-slate-100"
+              placeholder="중량 입력"
+            />
+            <span className="text-xs text-slate-600">kg</span>
           </div>
+          {cargo.weightKg !== undefined && cargo.weightKg > 0 && cargo.weightBand && (
+            <div className="text-[10px] text-slate-500">
+              <span className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-600">
+                {getWeightBandLabel(cargo.weightBand)}
+              </span>
+              {cargo.weightKg > 20 && (
+                <span className="ml-2 text-orange-600">* 일반 택배 기준(20kg) 초과</span>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -230,9 +266,36 @@ export default function CargoRegistrationCard({
           <div className="bg-blue-50 border border-blue-200 rounded p-3">
             <div className="text-xs font-semibold text-blue-900 mb-2">등록 정보 요약</div>
             <div className="text-xs text-blue-800 space-y-1">
-              <div>규격: {cargo.width}×{cargo.depth}×{cargo.height}mm ({cargo.moduleType})</div>
-              <div>품목: {selectedCategory?.name} - {selectedCategory?.subCategories?.find(s => s.code === cargo.productSubCategory)?.name || '-'}</div>
-              <div>중량: {WEIGHT_RANGES.find(w => w.value === cargo.weightRange)?.label}</div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600">규격:</span>
+                <span>{cargo.width}×{cargo.depth}×{cargo.height}mm</span>
+                <span className="px-1 py-0.5 bg-blue-100 rounded text-[10px]">
+                  {cargo.moduleType}
+                </span>
+                {cargo.sizeBand && (
+                  <span className="px-1 py-0.5 bg-slate-200 rounded text-[10px] text-slate-600">
+                    {cargo.sizeBand}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600">품목:</span>
+                {selectedItem && (
+                  <>
+                    <span className="text-[10px] text-slate-400 font-mono">{selectedItem.code}</span>
+                    <span>{selectedItem.label}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600">중량:</span>
+                <span>{cargo.weightKg}kg</span>
+                {cargo.weightBand && (
+                  <span className="px-1 py-0.5 bg-slate-200 rounded text-[10px] text-slate-600">
+                    {cargo.weightBand}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <button

@@ -1,14 +1,30 @@
 // 서비스 콘솔 상태 관리 훅 - 단일 진실 소스
 // PR3-3: UI 재설계 - 화물 등록 → 물량 입력 → 조건 입력 흐름 반영
-import { useState, useMemo } from 'react'
+// Code Data System MVP: CargoInfo, DemandSession, Event 연동
+import { useState, useMemo, useEffect } from 'react'
 import type {
   CargoUI,
   RegisteredCargo,
   StorageCondition,
   TransportCondition,
   ServiceOrder,
+  ServiceType as ServiceTypeModel,
 } from '../../../../types/models'
 import { computeDemand, type BoxInput, type DemandResult } from '../../../../engine'
+import { checkQuickRulesWithLogging } from '../../../../engine/rules'
+import {
+  addCargo as addCargoToStore,
+  removeCargo as removeCargoFromStore,
+  loadOrCreateActiveDemand,
+  addCargoToDemand,
+  removeCargoFromDemand,
+  setQuantitiesAndCubes,
+  setStorageCondition as setStorageConditionInStore,
+  setTransportCondition as setTransportConditionInStore,
+  recordSearchExecution,
+  resetActiveDemand,
+} from '../../../../store'
+import { CUBE_CONFIG } from '../../../../engine/cubeConfig'
 
 export type ServiceType = 'storage' | 'transport' | 'both'
 
@@ -17,6 +33,15 @@ export type FlowStep = 'cargo-registration' | 'quantity-input' | 'condition-inpu
 
 // 화물 ID 생성용 카운터
 let cargoIdCounter = 0
+
+// ServiceType 변환 (UI → Model)
+function toModelServiceType(uiType: ServiceType): ServiceTypeModel {
+  switch (uiType) {
+    case 'storage': return 'STORAGE'
+    case 'transport': return 'ROUTE'
+    case 'both': return 'BOTH'
+  }
+}
 
 export interface ServiceConsoleState {
   activeTab: ServiceType
@@ -43,6 +68,9 @@ export interface ServiceConsoleState {
 
   // 검색 가능 상품 건수 (더미)
   availableProductCount: number
+
+  // Code Data System: 현재 Demand ID
+  currentDemandId: string | null
 }
 
 export interface ServiceConsoleActions {
@@ -89,6 +117,15 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
 
   // 보관+운송 순서
   const [serviceOrder, setServiceOrder] = useState<ServiceOrder>(null)
+
+  // Code Data System: 현재 Demand ID
+  const [currentDemandId, setCurrentDemandId] = useState<string | null>(null)
+
+  // 탭 변경 시 DemandSession 초기화/로드
+  useEffect(() => {
+    const demand = loadOrCreateActiveDemand(toModelServiceType(activeTab))
+    setCurrentDemandId(demand.demandId)
+  }, [activeTab])
 
   // 물량 입력 결과 계산
   const { totalCubes, totalPallets, demandResult } = useMemo(() => {
@@ -151,6 +188,18 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
 
   // 화물 삭제
   const removeCargo = (cargoId: string) => {
+    const cargo = registeredCargos.find(c => c.id === cargoId)
+
+    // Code Data System: CargoInfo 삭제
+    if (cargo?.cargoInfoId) {
+      removeCargoFromStore(cargo.cargoInfoId)
+
+      // DemandSession에서도 제거
+      if (currentDemandId) {
+        removeCargoFromDemand(currentDemandId, cargo.cargoInfoId)
+      }
+    }
+
     setCargos(cargos.filter(c => c.id !== cargoId))
     setRegisteredCargos(registeredCargos.filter(c => c.id !== cargoId))
   }
@@ -167,9 +216,35 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     const cargo = cargos.find(c => c.id === cargoId)
     if (!cargo) return
 
+    // Code Data System: 규정 체크
+    checkQuickRulesWithLogging(
+      {
+        sumCm: cargo.sumCm || 0,
+        weightKg: cargo.weightKg || 0,
+        itemCode: cargo.itemCode || 'IC99',
+        moduleClass: cargo.moduleType || 'UNCLASSIFIED',
+      },
+      { kind: 'cargo', id: cargoId }
+    )
+
+    // Code Data System: CargoInfo 저장
+    const cargoInfo = addCargoToStore({
+      widthMm: cargo.width,
+      depthMm: cargo.depth,
+      heightMm: cargo.height,
+      moduleClass: cargo.moduleType || 'UNCLASSIFIED',
+      itemCode: cargo.itemCode || 'IC99',
+      weightKg: cargo.weightKg || 0,
+    })
+
+    // Code Data System: DemandSession에 화물 추가
+    if (currentDemandId) {
+      addCargoToDemand(currentDemandId, cargoInfo.id)
+    }
+
     // 완료 상태로 업데이트
     setCargos(cargos.map(c =>
-      c.id === cargoId ? { ...c, completed: true } : c
+      c.id === cargoId ? { ...c, completed: true, cargoInfoId: cargoInfo.id } : c
     ))
 
     // 등록된 화물 목록에 추가
@@ -177,6 +252,7 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
       ...cargo,
       completed: true,
       cargoNumber: registeredCargos.length + 1,
+      cargoInfoId: cargoInfo.id,
     }
     setRegisteredCargos([...registeredCargos, registeredCargo])
   }
@@ -190,18 +266,60 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
 
   // 물량 입력 확정 → 조건 입력 단계로 이동
   const confirmQuantityInput = () => {
+    // Code Data System: DemandSession 업데이트
+    if (currentDemandId && demandResult) {
+      const mode = activeTab === 'transport' ? 'ROUTE' : 'STORAGE'
+      const packingFactor = mode === 'STORAGE'
+        ? CUBE_CONFIG.packingFactor.STORAGE
+        : CUBE_CONFIG.packingFactor.ROUTE
+
+      // 화물별 수량 및 큐브 결과 생성
+      const quantitiesByCargoId: Record<string, number> = {}
+      const cubeResultByCargoId: Record<string, { mode: 'STORAGE' | 'ROUTE'; cubes: number }> = {}
+
+      registeredCargos.forEach(cargo => {
+        if (cargo.cargoInfoId && cargo.quantity) {
+          quantitiesByCargoId[cargo.cargoInfoId] = cargo.quantity
+          cubeResultByCargoId[cargo.cargoInfoId] = {
+            mode: mode,
+            cubes: cargo.estimatedCubes || 0,
+          }
+        }
+      })
+
+      setQuantitiesAndCubes(currentDemandId, {
+        quantitiesByCargoId,
+        cubeResultByCargoId,
+        totalCubes,
+        totalPallets: mode === 'STORAGE' ? totalPallets : undefined,
+        packingFactor,
+      })
+    }
+
     setCurrentStep('condition-input')
     setExpandedField('condition-input')
   }
 
   // 보관 조건 업데이트
   const updateStorageCondition = (updates: Partial<StorageCondition>) => {
-    setStorageCondition({ ...storageCondition, ...updates })
+    const newCondition = { ...storageCondition, ...updates }
+    setStorageCondition(newCondition)
+
+    // Code Data System: DemandSession 업데이트
+    if (currentDemandId) {
+      setStorageConditionInStore(currentDemandId, updates)
+    }
   }
 
   // 운송 조건 업데이트
   const updateTransportCondition = (updates: Partial<TransportCondition>) => {
-    setTransportCondition({ ...transportCondition, ...updates })
+    const newCondition = { ...transportCondition, ...updates }
+    setTransportCondition(newCondition)
+
+    // Code Data System: DemandSession 업데이트
+    if (currentDemandId) {
+      setTransportConditionInStore(currentDemandId, updates)
+    }
   }
 
   // 아코디언 필드 클릭
@@ -224,6 +342,10 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setStorageCondition({})
     setTransportCondition({})
     setServiceOrder(null)
+
+    // Code Data System: 새 DemandSession 시작
+    const demand = resetActiveDemand(toModelServiceType(tab))
+    setCurrentDemandId(demand.demandId)
   }
 
   // 검색
@@ -245,6 +367,13 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     }
 
     console.log('검색 가능 상품:', availableProductCount, '건')
+
+    // Code Data System: 검색 실행 이벤트 기록
+    if (currentDemandId) {
+      // PR4 전이므로 resultCount는 0 (TODO)
+      recordSearchExecution(currentDemandId, 0)
+    }
+
     console.log('=== 검색 완료 ===')
   }
 
@@ -261,6 +390,7 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     transportCondition,
     serviceOrder,
     availableProductCount,
+    currentDemandId,
   }
 
   const actions: ServiceConsoleActions = {
