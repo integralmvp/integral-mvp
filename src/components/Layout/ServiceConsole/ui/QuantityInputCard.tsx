@@ -105,15 +105,6 @@ export default function QuantityInputCard({
           <span className="text-sm text-slate-600">개</span>
         </div>
 
-        {/* 환산 결과 */}
-        {quantity > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="text-xs text-blue-800">
-              <span className="font-semibold">환산 결과:</span> {quantity}개 = <span className="font-bold text-blue-900">{estimatedCubes} 큐브</span>
-            </div>
-          </div>
-        )}
-
         {/* 확인 버튼 */}
         {!confirmed && quantity > 0 && (
           <button

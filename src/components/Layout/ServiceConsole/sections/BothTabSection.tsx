@@ -95,13 +95,7 @@ export default function BothTabSection({
   }
 
   // 요약 문구 생성
-  const getOrderSummary = () => {
-    if (!serviceOrder) return '서비스 순서를 선택해주세요.'
-    return serviceOrder === 'storage-first' ? '보관 후 운송' : '운송 후 보관'
-  }
-
   const getCargoSummary = () => {
-    if (!orderSelected) return '순서를 먼저 선택해주세요.'
     if (registeredCargos.length === 0) return '화물 정보를 등록해주세요.'
     return `${registeredCargos.length}건의 화물이 등록됨`
   }
@@ -218,30 +212,46 @@ export default function BothTabSection({
     </div>
   )
 
+  // 순서 선택 전: 순서 선택 UI만 표시
+  if (!orderSelected) {
+    return (
+      <div className="space-y-4">
+        <OrderSelector
+          value={serviceOrder}
+          onChange={(order) => {
+            onServiceOrderChange(order)
+            // 순서 선택 시 화물 등록 아코디언으로 이동
+            if (order) {
+              onFieldClick('cargo-registration')
+            }
+          }}
+        />
+      </div>
+    )
+  }
+
+  // 순서 선택 후: 화물 등록부터 입력란 표시
   return (
     <>
-      {/* 0. 순서 선택 */}
-      <AccordionField
-        id="order-selection"
-        label="서비스 순서"
-        placeholder="보관과 운송의 순서를 선택해주세요."
-        expanded={expandedField === 'order-selection'}
-        onToggle={() => onFieldClick('order-selection')}
-        summary={getOrderSummary()}
-      >
-        <div className="space-y-4">
-          <OrderSelector
-            value={serviceOrder}
-            onChange={(order) => {
-              onServiceOrderChange(order)
-              // 순서 선택 시 다음 단계로 이동
-              if (order) {
-                onFieldClick('cargo-registration')
-              }
-            }}
-          />
+      {/* 선택된 순서 표시 */}
+      <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 mb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">
+              {serviceOrder === 'storage-first' ? '📦 → 🚚' : '🚚 → 📦'}
+            </span>
+            <span className="text-sm font-semibold text-purple-700">
+              {serviceOrder === 'storage-first' ? '보관 후 운송' : '운송 후 보관'}
+            </span>
+          </div>
+          <button
+            onClick={() => onServiceOrderChange(null)}
+            className="text-xs text-purple-600 hover:text-purple-800"
+          >
+            변경
+          </button>
         </div>
-      </AccordionField>
+      </div>
 
       {/* 1. 화물 등록 */}
       <AccordionField
@@ -249,7 +259,7 @@ export default function BothTabSection({
         label="화물 등록"
         placeholder="화물 정보를 입력해주세요."
         expanded={expandedField === 'cargo-registration'}
-        onToggle={() => orderSelected && onFieldClick('cargo-registration')}
+        onToggle={() => onFieldClick('cargo-registration')}
         summary={getCargoSummary()}
       >
         <div className="space-y-4">
