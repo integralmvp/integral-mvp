@@ -1,4 +1,4 @@
-// 보관 탭 섹션 - 3행 그리드 레이아웃 재설계
+// 보관 탭 섹션 - 3행 그리드 레이아웃 (1.35fr/1fr/1fr)
 // 1행: 화물 정보 | 물량 정보
 // 2행: 보관 장소
 // 3행: 보관 기간 (시작일 | 종료일)
@@ -112,43 +112,35 @@ export default function StorageTabSection({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="grid grid-rows-[1.35fr_1fr_1fr] gap-3 h-full">
       {/* 1행: 화물 정보 | 물량 정보 */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 min-h-0">
         {/* 화물 정보 */}
         <GridCell
           label="화물 정보"
-          emoji="📦"
-          colorScheme="blue"
+          icon="cargo"
           onClick={() => openModal('cargo')}
-          tall
           headerAction={
-            <CargoAddButton
-              onClick={() => openModal('cargo')}
-              colorScheme="blue"
-            />
+            <CargoAddButton onClick={() => openModal('cargo')} />
           }
         >
           <CargoCarousel
             cargos={registeredCargos}
             onRemove={onRemoveCargo}
-            colorScheme="blue"
           />
         </GridCell>
 
         {/* 물량 정보 */}
         <GridCell
           label="물량 정보"
-          emoji="📊"
-          colorScheme="blue"
+          icon="volume"
           onClick={() => openModal('quantity')}
           disabled={registeredCargos.length === 0}
-          tall
         >
           {registeredCargos.length === 0 ? (
             <span className="text-slate-400 text-xs">화물 등록 필요</span>
           ) : !allQuantitiesEntered ? (
-            <span className="text-blue-600 text-xs">수량 입력하기</span>
+            <span className="text-slate-500 text-xs">수량 입력하기</span>
           ) : (
             <div className="text-center">
               <div className="text-xl font-bold text-slate-800">
@@ -161,41 +153,40 @@ export default function StorageTabSection({
       </div>
 
       {/* 2행: 보관 장소 */}
-      <GridCell
-        label="보관 장소"
-        emoji="📍"
-        colorScheme="blue"
-        onClick={() => openModal('location')}
-      >
-        {storageCondition.location ? (
-          <span className="text-sm">{getLocationName(storageCondition.location)}</span>
-        ) : (
-          <span className="text-slate-400 text-xs">장소를 선택해주세요</span>
-        )}
-      </GridCell>
+      <div className="min-h-0">
+        <GridCell
+          label="보관 장소"
+          icon="location"
+          onClick={() => openModal('location')}
+        >
+          {storageCondition.location ? (
+            <span className="text-sm font-medium">{getLocationName(storageCondition.location)}</span>
+          ) : (
+            <span className="text-slate-400 text-xs">장소를 선택해주세요</span>
+          )}
+        </GridCell>
+      </div>
 
       {/* 3행: 보관 기간 */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 min-h-0">
         <GridCell
           label="시작일"
-          emoji="📅"
-          colorScheme="blue"
+          icon="calendar"
           onClick={() => openModal('date')}
         >
           {storageCondition.startDate ? (
-            <span className="text-sm">{formatDate(storageCondition.startDate)}</span>
+            <span className="text-sm font-medium">{formatDate(storageCondition.startDate)}</span>
           ) : (
             <span className="text-slate-400 text-xs">선택</span>
           )}
         </GridCell>
         <GridCell
           label="종료일"
-          emoji="📅"
-          colorScheme="blue"
+          icon="calendar"
           onClick={() => openModal('date')}
         >
           {storageCondition.endDate ? (
-            <span className="text-sm">{formatDate(storageCondition.endDate)}</span>
+            <span className="text-sm font-medium">{formatDate(storageCondition.endDate)}</span>
           ) : (
             <span className="text-slate-400 text-xs">선택</span>
           )}
@@ -209,11 +200,10 @@ export default function StorageTabSection({
         isOpen={activeModal === 'cargo'}
         onClose={() => setActiveModal(null)}
         title="화물 등록"
-        colorScheme="blue"
       >
         <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-            <p className="text-xs text-blue-800">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+            <p className="text-xs text-slate-600">
               박스 규격, 품목, 중량을 입력하여 화물을 등록합니다.
             </p>
           </div>
@@ -250,7 +240,7 @@ export default function StorageTabSection({
           {/* 화물 추가 버튼 */}
           <button
             onClick={onAddCargo}
-            className="w-full py-3 border-2 border-dashed border-blue-300 rounded-lg text-blue-600 text-sm font-semibold hover:bg-blue-50 transition-colors"
+            className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
           >
             + 화물 추가하기
           </button>
@@ -262,11 +252,10 @@ export default function StorageTabSection({
         isOpen={activeModal === 'quantity'}
         onClose={() => setActiveModal(null)}
         title="물량 입력"
-        colorScheme="blue"
       >
         <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-            <p className="text-xs text-blue-800">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+            <p className="text-xs text-slate-600">
               등록된 화물별 수량을 입력하면 필요한 파레트 수가 자동으로 계산됩니다.
             </p>
           </div>
@@ -300,7 +289,6 @@ export default function StorageTabSection({
         isOpen={activeModal === 'location'}
         onClose={() => setActiveModal(null)}
         title="보관 장소 선택"
-        colorScheme="blue"
       >
         <div className="space-y-4">
           <LocationDropdown
@@ -312,7 +300,7 @@ export default function StorageTabSection({
           {tempLocation && (
             <button
               onClick={confirmLocation}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -325,7 +313,6 @@ export default function StorageTabSection({
         isOpen={activeModal === 'date'}
         onClose={() => setActiveModal(null)}
         title="보관 기간 선택"
-        colorScheme="blue"
       >
         <div className="space-y-4">
           <DatePicker
@@ -339,7 +326,7 @@ export default function StorageTabSection({
           {(tempStartDate || tempEndDate) && (
             <button
               onClick={confirmDate}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>

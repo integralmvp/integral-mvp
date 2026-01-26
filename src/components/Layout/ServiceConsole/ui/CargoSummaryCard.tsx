@@ -1,4 +1,5 @@
 // 화물 요약 카드 - 세로 배치 (캐러셀용)
+// 블랙/그레이 통일 스타일, 둥근 보더, 투명도 적용
 import { useState } from 'react'
 import type { RegisteredCargo } from '../../../../types/models'
 import { PRODUCT_CATEGORIES, WEIGHT_RANGES } from '../../../../data/mockData'
@@ -23,36 +24,35 @@ export default function CargoSummaryCard({
   const moduleLabel = cargo.moduleType === 'UNCLASSIFIED' ? '비표준' : cargo.moduleType
 
   if (compact) {
-    // 캐러셀용 컴팩트 카드 - 모듈/품목/중량 모두 표시
+    // 캐러셀용 컴팩트 카드 - 높이 조절, 둥근 보더, 투명도
     return (
-      <div className="flex-shrink-0 w-[56px] p-1 bg-white rounded-lg border border-slate-200 shadow-sm">
+      <div className="flex-shrink-0 w-[52px] h-[52px] p-1.5 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200/80 shadow-sm">
         {/* 순번 + 삭제 */}
-        <div className="flex items-center justify-between mb-0.5">
-          <span className="text-[9px] font-bold text-slate-700">{index + 1}</span>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold text-slate-600">{index + 1}</span>
           {onRemove && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
                 onRemove(cargo.id)
               }}
-              className="text-[8px] text-slate-400 hover:text-red-500"
+              className="text-[9px] text-slate-400 hover:text-red-500 transition-colors"
             >
               ✕
             </button>
           )}
         </div>
-        {/* 세로 정보 */}
-        <div className="space-y-0 text-center">
-          <div className="text-[9px] font-semibold text-slate-800 truncate">{moduleLabel}</div>
-          <div className="text-[8px] text-slate-600 truncate">{category?.name || '-'}</div>
-          <div className="text-[8px] text-slate-500 truncate">{weight?.label || '-'}</div>
+        {/* 세로 정보 - 콤팩트하게 */}
+        <div className="space-y-0 text-center mt-0.5">
+          <div className="text-[9px] font-semibold text-slate-700 truncate leading-tight">{moduleLabel}</div>
+          <div className="text-[8px] text-slate-500 truncate leading-tight">{category?.name || '-'}</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="relative flex-shrink-0 w-[90px] h-full py-2 px-2 bg-white rounded-lg border border-slate-200 shadow-sm">
+    <div className="relative flex-shrink-0 w-[90px] h-full py-2 px-2 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200/80 shadow-sm">
       {/* 순번 및 삭제 */}
       <div className="flex items-center justify-between mb-1">
         <span className="text-sm font-bold text-slate-700">{index + 1}</span>
@@ -96,13 +96,11 @@ export default function CargoSummaryCard({
 interface CargoCarouselProps {
   cargos: RegisteredCargo[]
   onRemove: (cargoId: string) => void
-  colorScheme?: 'blue' | 'emerald' | 'purple'
 }
 
 export function CargoCarousel({
   cargos,
   onRemove,
-  colorScheme = 'blue',
 }: CargoCarouselProps) {
   const [page, setPage] = useState(0)
   const itemsPerPage = 3
@@ -110,12 +108,6 @@ export function CargoCarousel({
 
   const visibleCargos = cargos.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
   const hasMore = totalPages > 1
-
-  const colorMap = {
-    blue: 'text-blue-600 hover:bg-blue-100',
-    emerald: 'text-emerald-600 hover:bg-emerald-100',
-    purple: 'text-purple-600 hover:bg-purple-100',
-  }
 
   const handleNextPage = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -147,7 +139,7 @@ export function CargoCarousel({
       {hasMore && (
         <button
           onClick={handleNextPage}
-          className={`flex-shrink-0 w-5 h-5 flex items-center justify-center rounded ${colorMap[colorScheme]} transition-colors`}
+          className="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 transition-colors"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -161,23 +153,16 @@ export function CargoCarousel({
 // 추가 버튼 컴포넌트 (GridCell headerAction 용)
 interface CargoAddButtonProps {
   onClick: () => void
-  colorScheme?: 'blue' | 'emerald' | 'purple'
 }
 
-export function CargoAddButton({ onClick, colorScheme = 'blue' }: CargoAddButtonProps) {
-  const colorMap = {
-    blue: 'text-blue-600 hover:bg-blue-100',
-    emerald: 'text-emerald-600 hover:bg-emerald-100',
-    purple: 'text-purple-600 hover:bg-purple-100',
-  }
-
+export function CargoAddButton({ onClick }: CargoAddButtonProps) {
   return (
     <button
       onClick={(e) => {
         e.stopPropagation()
         onClick()
       }}
-      className={`text-[10px] font-semibold ${colorMap[colorScheme]} px-1.5 py-0.5 rounded transition-colors`}
+      className="text-[10px] font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-100 px-1.5 py-0.5 rounded transition-colors"
     >
       +추가
     </button>

@@ -1,4 +1,4 @@
-// 보관+운송 탭 섹션 - 3행 그리드 레이아웃 재설계
+// 보관+운송 탭 섹션 - 3행 그리드 레이아웃 (1.35fr/1fr/1fr)
 // 상단: 순서 전환 UI (보관 ↔ 운송) - 순서에 따라 버튼 재정렬
 // 동일 영역에서 보관/운송 그리드 전환 렌더링
 import { useState, useEffect } from 'react'
@@ -220,27 +220,25 @@ export default function BothTabSection({
   const secondButton = effectiveOrder === 'storage-first' ? 'transport' : 'storage'
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col h-full">
       {/* 상단: 순서 전환 UI - 순서에 따라 버튼 재정렬 */}
-      <div className="flex items-center justify-center gap-2 py-1">
+      <div className="flex items-center justify-center gap-2 py-1.5 flex-shrink-0">
         {/* 첫 번째 버튼 */}
         <button
           onClick={() => handleViewChange(firstButton)}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeView === firstButton
-              ? firstButton === 'storage'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-emerald-600 text-white shadow-md'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ? 'bg-slate-800 text-white shadow-md'
+              : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
           }`}
         >
-          {firstButton === 'storage' ? '📦 보관' : '🚚 운송'}
+          {firstButton === 'storage' ? '보관' : '운송'}
         </button>
 
         {/* 쌍방 화살표 버튼 */}
         <button
           onClick={handleOrderSwap}
-          className="w-8 h-8 flex items-center justify-center text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-full transition-colors"
+          className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
           title="순서 전환"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,183 +251,174 @@ export default function BothTabSection({
           onClick={() => handleViewChange(secondButton)}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeView === secondButton
-              ? secondButton === 'storage'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-emerald-600 text-white shadow-md'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ? 'bg-slate-800 text-white shadow-md'
+              : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
           }`}
         >
-          {secondButton === 'storage' ? '📦 보관' : '🚚 운송'}
+          {secondButton === 'storage' ? '보관' : '운송'}
         </button>
       </div>
 
-      {/* 1행: 화물 정보 | 물량 정보 (공통) */}
-      <div className="grid grid-cols-2 gap-2">
-        {/* 화물 정보 */}
-        <GridCell
-          label="화물 정보"
-          emoji="📦"
-          colorScheme="purple"
-          onClick={() => setActiveModal('cargo')}
-          tall
-          headerAction={
-            <CargoAddButton
-              onClick={() => setActiveModal('cargo')}
-              colorScheme="purple"
+      {/* 그리드 영역 */}
+      <div className="grid grid-rows-[1.35fr_1fr_1fr] gap-3 flex-1 min-h-0">
+        {/* 1행: 화물 정보 | 물량 정보 (공통) */}
+        <div className="grid grid-cols-2 gap-2 min-h-0">
+          {/* 화물 정보 */}
+          <GridCell
+            label="화물 정보"
+            icon="cargo"
+            onClick={() => setActiveModal('cargo')}
+            headerAction={
+              <CargoAddButton onClick={() => setActiveModal('cargo')} />
+            }
+          >
+            <CargoCarousel
+              cargos={registeredCargos}
+              onRemove={onRemoveCargo}
             />
-          }
-        >
-          <CargoCarousel
-            cargos={registeredCargos}
-            onRemove={onRemoveCargo}
-            colorScheme="purple"
-          />
-        </GridCell>
-
-        {/* 물량 정보 */}
-        <GridCell
-          label="물량 정보"
-          emoji="📊"
-          colorScheme="purple"
-          onClick={() => setActiveModal('quantity')}
-          disabled={registeredCargos.length === 0}
-          tall
-        >
-          {registeredCargos.length === 0 ? (
-            <span className="text-slate-400 text-xs">화물 등록 필요</span>
-          ) : !allQuantitiesEntered ? (
-            <span className="text-purple-600 text-xs">수량 입력하기</span>
-          ) : (
-            <div className="text-center">
-              <div className="text-xl font-bold text-slate-800">
-                {totalPallets}
-              </div>
-              <div className="text-xs text-slate-500">파레트</div>
-            </div>
-          )}
-        </GridCell>
-      </div>
-
-      {/* === 보관 뷰 그리드 === */}
-      {activeView === 'storage' && (
-        <>
-          {/* 2행: 보관 장소 */}
-          <GridCell
-            label="보관 장소"
-            emoji="📍"
-            colorScheme="blue"
-            onClick={() => openModal('storage-location')}
-          >
-            {storageCondition.location ? (
-              <span className="text-sm">{getLocationName(storageCondition.location)}</span>
-            ) : (
-              <span className="text-slate-400 text-xs">장소를 선택해주세요</span>
-            )}
           </GridCell>
 
-          {/* 3행: 보관 기간 */}
-          <div className="grid grid-cols-2 gap-2">
-            <GridCell
-              label={isStorageStartDateLocked ? '시작일 🔒' : '시작일'}
-              emoji="📅"
-              colorScheme="blue"
-              onClick={() => !isStorageStartDateLocked && openModal('storage-date')}
-              disabled={isStorageStartDateLocked}
-            >
-              {getAutoStorageStartDate() ? (
-                <div className="text-center">
-                  <span className="text-sm">{formatDate(getAutoStorageStartDate())}</span>
-                  {isStorageStartDateLocked && (
-                    <div className="text-[8px] text-blue-500">운송일 자동</div>
-                  )}
-                </div>
-              ) : (
-                <span className="text-slate-400 text-xs">선택</span>
-              )}
-            </GridCell>
-            <GridCell
-              label="종료일"
-              emoji="📅"
-              colorScheme="blue"
-              onClick={() => openModal('storage-date')}
-            >
-              {storageCondition.endDate ? (
-                <span className="text-sm">{formatDate(storageCondition.endDate)}</span>
-              ) : (
-                <span className="text-slate-400 text-xs">선택</span>
-              )}
-            </GridCell>
-          </div>
-        </>
-      )}
-
-      {/* === 운송 뷰 그리드 === */}
-      {activeView === 'transport' && (
-        <>
-          {/* 2행: 출발지 ↔ 도착지 */}
-          <div className="flex items-center gap-1">
-            <div className="flex-1">
-              <GridCell
-                label="출발지"
-                emoji="🚚"
-                colorScheme="emerald"
-                onClick={() => openModal('transport-origin')}
-              >
-                {transportCondition.origin ? (
-                  <span className="text-sm">{getLocationName(transportCondition.origin)}</span>
-                ) : (
-                  <span className="text-slate-400 text-xs">선택</span>
-                )}
-              </GridCell>
-            </div>
-
-            <button
-              onClick={handleSwapLocations}
-              className="flex-shrink-0 w-7 h-7 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
-              title="출발지/도착지 교환"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
-            </button>
-
-            <div className="flex-1">
-              <GridCell
-                label="도착지"
-                emoji="📍"
-                colorScheme="emerald"
-                onClick={() => openModal('transport-destination')}
-              >
-                {transportCondition.destination ? (
-                  <span className="text-sm">{getLocationName(transportCondition.destination)}</span>
-                ) : (
-                  <span className="text-slate-400 text-xs">선택</span>
-                )}
-              </GridCell>
-            </div>
-          </div>
-
-          {/* 3행: 운송 날짜 */}
+          {/* 물량 정보 */}
           <GridCell
-            label={isTransportDateLocked ? '운송 날짜 🔒' : '운송 날짜'}
-            emoji="📅"
-            colorScheme="emerald"
-            onClick={() => !isTransportDateLocked && openModal('transport-date')}
-            disabled={isTransportDateLocked}
+            label="물량 정보"
+            icon="volume"
+            onClick={() => setActiveModal('quantity')}
+            disabled={registeredCargos.length === 0}
           >
-            {getAutoTransportDate() ? (
+            {registeredCargos.length === 0 ? (
+              <span className="text-slate-400 text-xs">화물 등록 필요</span>
+            ) : !allQuantitiesEntered ? (
+              <span className="text-slate-500 text-xs">수량 입력하기</span>
+            ) : (
               <div className="text-center">
-                <span className="text-sm">{formatDate(getAutoTransportDate())}</span>
-                {isTransportDateLocked && (
-                  <div className="text-[8px] text-emerald-500">보관종료일 자동</div>
-                )}
+                <div className="text-xl font-bold text-slate-800">
+                  {totalPallets}
+                </div>
+                <div className="text-xs text-slate-500">파레트</div>
               </div>
-            ) : (
-              <span className="text-slate-400 text-xs">날짜를 선택해주세요</span>
             )}
           </GridCell>
-        </>
-      )}
+        </div>
+
+        {/* === 보관 뷰 그리드 === */}
+        {activeView === 'storage' && (
+          <>
+            {/* 2행: 보관 장소 */}
+            <div className="min-h-0">
+              <GridCell
+                label="보관 장소"
+                icon="location"
+                onClick={() => openModal('storage-location')}
+              >
+                {storageCondition.location ? (
+                  <span className="text-sm font-medium">{getLocationName(storageCondition.location)}</span>
+                ) : (
+                  <span className="text-slate-400 text-xs">장소를 선택해주세요</span>
+                )}
+              </GridCell>
+            </div>
+
+            {/* 3행: 보관 기간 */}
+            <div className="grid grid-cols-2 gap-2 min-h-0">
+              <GridCell
+                label={isStorageStartDateLocked ? '시작일 (자동)' : '시작일'}
+                icon="calendar"
+                onClick={() => !isStorageStartDateLocked && openModal('storage-date')}
+                disabled={isStorageStartDateLocked}
+              >
+                {getAutoStorageStartDate() ? (
+                  <div className="text-center">
+                    <span className="text-sm font-medium">{formatDate(getAutoStorageStartDate())}</span>
+                    {isStorageStartDateLocked && (
+                      <div className="text-[8px] text-slate-500">운송일 연동</div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-slate-400 text-xs">선택</span>
+                )}
+              </GridCell>
+              <GridCell
+                label="종료일"
+                icon="calendar"
+                onClick={() => openModal('storage-date')}
+              >
+                {storageCondition.endDate ? (
+                  <span className="text-sm font-medium">{formatDate(storageCondition.endDate)}</span>
+                ) : (
+                  <span className="text-slate-400 text-xs">선택</span>
+                )}
+              </GridCell>
+            </div>
+          </>
+        )}
+
+        {/* === 운송 뷰 그리드 === */}
+        {activeView === 'transport' && (
+          <>
+            {/* 2행: 출발지 ↔ 도착지 */}
+            <div className="flex items-stretch gap-1 min-h-0">
+              <div className="flex-1">
+                <GridCell
+                  label="출발지"
+                  icon="origin"
+                  onClick={() => openModal('transport-origin')}
+                >
+                  {transportCondition.origin ? (
+                    <span className="text-sm font-medium">{getLocationName(transportCondition.origin)}</span>
+                  ) : (
+                    <span className="text-slate-400 text-xs">선택</span>
+                  )}
+                </GridCell>
+              </div>
+
+              <button
+                onClick={handleSwapLocations}
+                className="flex-shrink-0 w-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                title="출발지/도착지 교환"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </button>
+
+              <div className="flex-1">
+                <GridCell
+                  label="도착지"
+                  icon="destination"
+                  onClick={() => openModal('transport-destination')}
+                >
+                  {transportCondition.destination ? (
+                    <span className="text-sm font-medium">{getLocationName(transportCondition.destination)}</span>
+                  ) : (
+                    <span className="text-slate-400 text-xs">선택</span>
+                  )}
+                </GridCell>
+              </div>
+            </div>
+
+            {/* 3행: 운송 날짜 */}
+            <div className="min-h-0">
+              <GridCell
+                label={isTransportDateLocked ? '운송 날짜 (자동)' : '운송 날짜'}
+                icon="calendar"
+                onClick={() => !isTransportDateLocked && openModal('transport-date')}
+                disabled={isTransportDateLocked}
+              >
+                {getAutoTransportDate() ? (
+                  <div className="text-center">
+                    <span className="text-sm font-medium">{formatDate(getAutoTransportDate())}</span>
+                    {isTransportDateLocked && (
+                      <div className="text-[8px] text-slate-500">보관종료일 연동</div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-slate-400 text-xs">날짜를 선택해주세요</span>
+                )}
+              </GridCell>
+            </div>
+          </>
+        )}
+      </div>
 
       {/* === 모달들 === */}
 
@@ -438,11 +427,10 @@ export default function BothTabSection({
         isOpen={activeModal === 'cargo'}
         onClose={() => setActiveModal(null)}
         title="화물 등록"
-        colorScheme="purple"
       >
         <div className="space-y-4">
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
-            <p className="text-xs text-purple-800">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+            <p className="text-xs text-slate-600">
               박스 규격, 품목, 중량을 입력하여 화물을 등록합니다.
             </p>
           </div>
@@ -476,7 +464,7 @@ export default function BothTabSection({
 
           <button
             onClick={onAddCargo}
-            className="w-full py-3 border-2 border-dashed border-purple-300 rounded-lg text-purple-600 text-sm font-semibold hover:bg-purple-50 transition-colors"
+            className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
           >
             + 화물 추가하기
           </button>
@@ -488,11 +476,10 @@ export default function BothTabSection({
         isOpen={activeModal === 'quantity'}
         onClose={() => setActiveModal(null)}
         title="물량 입력"
-        colorScheme="purple"
       >
         <div className="space-y-4">
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
-            <p className="text-xs text-purple-800">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+            <p className="text-xs text-slate-600">
               등록된 화물별 수량을 입력하면 필요한 파레트/큐브 수가 자동으로 계산됩니다.
             </p>
           </div>
@@ -524,7 +511,6 @@ export default function BothTabSection({
         isOpen={activeModal === 'storage-location'}
         onClose={() => setActiveModal(null)}
         title="보관 장소 선택"
-        colorScheme="blue"
       >
         <div className="space-y-4">
           <LocationDropdown
@@ -536,7 +522,7 @@ export default function BothTabSection({
           {tempStorageLocation && (
             <button
               onClick={confirmStorageLocation}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -549,13 +535,12 @@ export default function BothTabSection({
         isOpen={activeModal === 'storage-date'}
         onClose={() => setActiveModal(null)}
         title="보관 기간 선택"
-        colorScheme="blue"
       >
         <div className="space-y-4">
           {isStorageStartDateLocked && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-              <p className="text-xs text-blue-800">
-                🔒 시작일은 운송 날짜로 자동 설정됩니다.
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+              <p className="text-xs text-slate-600">
+                시작일은 운송 날짜로 자동 설정됩니다.
               </p>
             </div>
           )}
@@ -572,7 +557,7 @@ export default function BothTabSection({
           {(tempStartDate || tempEndDate) && (
             <button
               onClick={confirmStorageDate}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -585,7 +570,6 @@ export default function BothTabSection({
         isOpen={activeModal === 'transport-origin'}
         onClose={() => setActiveModal(null)}
         title="출발지 선택"
-        colorScheme="emerald"
       >
         <div className="space-y-4">
           <LocationDropdown
@@ -597,7 +581,7 @@ export default function BothTabSection({
           {tempOrigin && (
             <button
               onClick={confirmOrigin}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -610,7 +594,6 @@ export default function BothTabSection({
         isOpen={activeModal === 'transport-destination'}
         onClose={() => setActiveModal(null)}
         title="도착지 선택"
-        colorScheme="emerald"
       >
         <div className="space-y-4">
           <LocationDropdown
@@ -622,7 +605,7 @@ export default function BothTabSection({
           {tempDestination && (
             <button
               onClick={confirmDestination}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -635,15 +618,14 @@ export default function BothTabSection({
         isOpen={activeModal === 'transport-date'}
         onClose={() => setActiveModal(null)}
         title="운송 날짜 선택"
-        colorScheme="emerald"
       >
         <div className="space-y-4">
           {isTransportDateLocked ? (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-              <p className="text-sm text-emerald-800">
-                🔒 운송 날짜는 보관 종료일로 자동 설정됩니다.
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <p className="text-sm text-slate-700">
+                운송 날짜는 보관 종료일로 자동 설정됩니다.
               </p>
-              <p className="text-xs text-emerald-600 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 {formatDate(getAutoTransportDate())}
               </p>
             </div>
@@ -658,7 +640,7 @@ export default function BothTabSection({
               {tempTransportDate && (
                 <button
                   onClick={confirmTransportDate}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors"
+                  className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
                 >
                   선택하시겠습니까?
                 </button>
