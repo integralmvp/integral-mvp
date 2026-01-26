@@ -17,6 +17,7 @@ import {
   DatePicker,
   ConversionResult,
   CargoSummaryCard,
+  ResetButton,
 } from '../ui'
 
 interface StorageTabSectionProps {
@@ -38,6 +39,10 @@ interface StorageTabSectionProps {
   // 조건 입력
   storageCondition: StorageCondition
   onUpdateCondition: (updates: Partial<StorageCondition>) => void
+
+  // PR4: 초기화 액션
+  onResetQuantities?: () => void
+  onResetStorageCondition?: () => void
 }
 
 // 모달 타입 정의
@@ -57,6 +62,8 @@ export default function StorageTabSection({
   demandResult,
   storageCondition,
   onUpdateCondition,
+  onResetQuantities,
+  onResetStorageCondition,
 }: StorageTabSectionProps) {
   const [activeModal, setActiveModal] = useState<ModalType>(null)
 
@@ -136,6 +143,12 @@ export default function StorageTabSection({
           icon="volume"
           onClick={() => openModal('quantity')}
           disabled={registeredCargos.length === 0}
+          headerAction={
+            <ResetButton
+              onClick={() => onResetQuantities?.()}
+              disabled={!allQuantitiesEntered}
+            />
+          }
         >
           {registeredCargos.length === 0 ? (
             <span className="text-slate-400 text-xs">화물 등록 필요</span>
@@ -158,6 +171,12 @@ export default function StorageTabSection({
           label="보관 장소"
           icon="location"
           onClick={() => openModal('location')}
+          headerAction={
+            <ResetButton
+              onClick={() => onResetStorageCondition?.()}
+              disabled={!storageCondition.location && !storageCondition.startDate && !storageCondition.endDate}
+            />
+          }
         >
           {storageCondition.location ? (
             <span className="text-sm font-medium">{getLocationName(storageCondition.location)}</span>

@@ -22,6 +22,7 @@ import {
   DatePicker,
   ConversionResult,
   CargoSummaryCard,
+  ResetButton,
 } from '../ui'
 
 interface BothTabSectionProps {
@@ -49,6 +50,11 @@ interface BothTabSectionProps {
   transportCondition: TransportCondition
   onUpdateStorageCondition: (updates: Partial<StorageCondition>) => void
   onUpdateTransportCondition: (updates: Partial<TransportCondition>) => void
+
+  // PR4: 초기화 액션
+  onResetQuantities?: () => void
+  onResetStorageCondition?: () => void
+  onResetTransportCondition?: () => void
 }
 
 // 현재 보고 있는 서비스 타입
@@ -75,6 +81,9 @@ export default function BothTabSection({
   transportCondition,
   onUpdateStorageCondition,
   onUpdateTransportCondition,
+  onResetQuantities,
+  onResetStorageCondition,
+  onResetTransportCondition,
 }: BothTabSectionProps) {
   // 기본 순서: 보관 → 운송 (storage-first)
   const effectiveOrder = serviceOrder || 'storage-first'
@@ -292,6 +301,12 @@ export default function BothTabSection({
             icon="volume"
             onClick={() => setActiveModal('quantity')}
             disabled={registeredCargos.length === 0}
+            headerAction={
+              <ResetButton
+                onClick={() => onResetQuantities?.()}
+                disabled={!allQuantitiesEntered}
+              />
+            }
           >
             {registeredCargos.length === 0 ? (
               <span className="text-slate-400 text-xs">화물 등록 필요</span>
@@ -317,6 +332,12 @@ export default function BothTabSection({
                 label="보관 장소"
                 icon="location"
                 onClick={() => openModal('storage-location')}
+                headerAction={
+                  <ResetButton
+                    onClick={() => onResetStorageCondition?.()}
+                    disabled={!storageCondition.location && !storageCondition.startDate && !storageCondition.endDate}
+                  />
+                }
               >
                 {storageCondition.location ? (
                   <span className="text-sm font-medium">{getLocationName(storageCondition.location)}</span>
@@ -370,6 +391,12 @@ export default function BothTabSection({
                   label="출발지"
                   icon="origin"
                   onClick={() => openModal('transport-origin')}
+                  headerAction={
+                    <ResetButton
+                      onClick={() => onResetTransportCondition?.()}
+                      disabled={!transportCondition.origin && !transportCondition.destination && !transportCondition.transportDate}
+                    />
+                  }
                 >
                   {transportCondition.origin ? (
                     <span className="text-sm font-medium">{getLocationName(transportCondition.origin)}</span>

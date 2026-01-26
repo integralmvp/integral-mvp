@@ -114,6 +114,11 @@ export interface ServiceConsoleActions {
   updateStorageCondition: (updates: Partial<StorageCondition>) => void
   updateTransportCondition: (updates: Partial<TransportCondition>) => void
 
+  // PR4: 초기화 액션
+  resetQuantities: () => void
+  resetStorageCondition: () => void
+  resetTransportCondition: () => void
+
   // 보관+운송 순서
   setServiceOrder: (order: ServiceOrder) => void
 
@@ -347,6 +352,31 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     }
   }
 
+  // PR4: 물량 초기화
+  const resetQuantities = () => {
+    setRegisteredCargos(registeredCargos.map(c => ({
+      ...c,
+      quantity: undefined,
+      estimatedCubes: undefined,
+    })))
+  }
+
+  // PR4: 보관 조건 초기화
+  const resetStorageCondition = () => {
+    setStorageCondition({})
+    if (currentDemandId) {
+      setStorageConditionInStore(currentDemandId, { location: undefined, startDate: undefined, endDate: undefined })
+    }
+  }
+
+  // PR4: 운송 조건 초기화
+  const resetTransportCondition = () => {
+    setTransportCondition({})
+    if (currentDemandId) {
+      setTransportConditionInStore(currentDemandId, { origin: undefined, destination: undefined, transportDate: undefined })
+    }
+  }
+
   // 아코디언 필드 클릭
   const handleFieldClick = (fieldId: string) => {
     setExpandedField(expandedField === fieldId ? null : fieldId)
@@ -519,6 +549,9 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     confirmQuantityInput,
     updateStorageCondition,
     updateTransportCondition,
+    resetQuantities,
+    resetStorageCondition,
+    resetTransportCondition,
     setServiceOrder,
     handleSearch,
   }

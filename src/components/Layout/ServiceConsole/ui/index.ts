@@ -4,6 +4,7 @@ export { default as GridCell } from './GridCell'
 export { default as CargoSummaryCard, CargoCarousel, CargoAddButton } from './CargoSummaryCard'
 export { default as SlotCounter } from './SlotCounter'
 export { default as InputModal } from './InputModal'
+export { default as ResetButton } from './ResetButton'
 
 // 화물 등록/물량/조건 입력 컴포넌트
 export { default as CargoRegistrationCard } from './CargoRegistrationCard'
@@ -12,5 +13,6 @@ export { default as LocationDropdown } from './LocationDropdown'
 export { default as DatePicker } from './DatePicker'
 export { default as ConversionResult } from './ConversionResult'
 
-// PR4: 검색 결과 리스트
+// PR4: 검색 결과
 export { default as SearchResultList } from './SearchResultList'
+export { default as SearchResultModal } from './SearchResultModal'
