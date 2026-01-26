@@ -1,4 +1,5 @@
 // 입력 모달 래퍼 - 기존 입력 UI를 모달로 호출
+// 블랙/그레이 통일 스타일
 import type { ReactNode } from 'react'
 
 interface InputModalProps {
@@ -6,13 +7,6 @@ interface InputModalProps {
   onClose: () => void
   title: string
   children: ReactNode
-  colorScheme?: 'blue' | 'emerald' | 'purple'
-}
-
-const headerColors = {
-  blue: 'bg-blue-600',
-  emerald: 'bg-emerald-600',
-  purple: 'bg-purple-600',
 }
 
 export default function InputModal({
@@ -20,7 +14,6 @@ export default function InputModal({
   onClose,
   title,
   children,
-  colorScheme = 'blue',
 }: InputModalProps) {
   if (!isOpen) return null
 
@@ -35,7 +28,7 @@ export default function InputModal({
       {/* 모달 컨텐츠 */}
       <div className="relative w-full max-w-md max-h-[85vh] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
         {/* 헤더 */}
-        <div className={`${headerColors[colorScheme]} px-4 py-3 flex items-center justify-between`}>
+        <div className="bg-slate-800 px-4 py-3 flex items-center justify-between">
           <h3 className="text-base font-bold text-white">{title}</h3>
           <button
             onClick={onClose}

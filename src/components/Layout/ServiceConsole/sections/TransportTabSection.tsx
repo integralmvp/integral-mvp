@@ -1,4 +1,4 @@
-// 운송 탭 섹션 - 3행 그리드 레이아웃 재설계
+// 운송 탭 섹션 - 3행 그리드 레이아웃 (1.35fr/1fr/1fr)
 // 1행: 화물 정보 | 물량 정보
 // 2행: 출발지 ↔ 도착지
 // 3행: 운송 날짜
@@ -131,43 +131,35 @@ export default function TransportTabSection({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="grid grid-rows-[1.35fr_1fr_1fr] gap-3 h-full">
       {/* 1행: 화물 정보 | 물량 정보 */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 min-h-0">
         {/* 화물 정보 */}
         <GridCell
           label="화물 정보"
-          emoji="📦"
-          colorScheme="emerald"
+          icon="cargo"
           onClick={() => openModal('cargo')}
-          tall
           headerAction={
-            <CargoAddButton
-              onClick={() => openModal('cargo')}
-              colorScheme="emerald"
-            />
+            <CargoAddButton onClick={() => openModal('cargo')} />
           }
         >
           <CargoCarousel
             cargos={registeredCargos}
             onRemove={onRemoveCargo}
-            colorScheme="emerald"
           />
         </GridCell>
 
         {/* 물량 정보 */}
         <GridCell
           label="물량 정보"
-          emoji="📊"
-          colorScheme="emerald"
+          icon="volume"
           onClick={() => openModal('quantity')}
           disabled={registeredCargos.length === 0}
-          tall
         >
           {registeredCargos.length === 0 ? (
             <span className="text-slate-400 text-xs">화물 등록 필요</span>
           ) : !allQuantitiesEntered ? (
-            <span className="text-emerald-600 text-xs">수량 입력하기</span>
+            <span className="text-slate-500 text-xs">수량 입력하기</span>
           ) : (
             <div className="text-center">
               <div className="text-xl font-bold text-slate-800">
@@ -180,17 +172,16 @@ export default function TransportTabSection({
       </div>
 
       {/* 2행: 출발지 ↔ 도착지 */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-stretch gap-1 min-h-0">
         {/* 출발지 */}
         <div className="flex-1">
           <GridCell
             label="출발지"
-            emoji="🚚"
-            colorScheme="emerald"
+            icon="origin"
             onClick={() => openModal('origin')}
           >
             {transportCondition.origin ? (
-              <span className="text-sm">{getLocationName(transportCondition.origin)}</span>
+              <span className="text-sm font-medium">{getLocationName(transportCondition.origin)}</span>
             ) : (
               <span className="text-slate-400 text-xs">선택</span>
             )}
@@ -200,7 +191,7 @@ export default function TransportTabSection({
         {/* 양방향 화살표 버튼 */}
         <button
           onClick={handleSwapLocations}
-          className="flex-shrink-0 w-7 h-7 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+          className="flex-shrink-0 w-7 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
           title="출발지/도착지 교환"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,12 +203,11 @@ export default function TransportTabSection({
         <div className="flex-1">
           <GridCell
             label="도착지"
-            emoji="📍"
-            colorScheme="emerald"
+            icon="destination"
             onClick={() => openModal('destination')}
           >
             {transportCondition.destination ? (
-              <span className="text-sm">{getLocationName(transportCondition.destination)}</span>
+              <span className="text-sm font-medium">{getLocationName(transportCondition.destination)}</span>
             ) : (
               <span className="text-slate-400 text-xs">선택</span>
             )}
@@ -226,18 +216,19 @@ export default function TransportTabSection({
       </div>
 
       {/* 3행: 운송 날짜 */}
-      <GridCell
-        label="운송 날짜"
-        emoji="📅"
-        colorScheme="emerald"
-        onClick={() => openModal('date')}
-      >
-        {transportCondition.transportDate ? (
-          <span className="text-sm">{formatDate(transportCondition.transportDate)}</span>
-        ) : (
-          <span className="text-slate-400 text-xs">날짜를 선택해주세요</span>
-        )}
-      </GridCell>
+      <div className="min-h-0">
+        <GridCell
+          label="운송 날짜"
+          icon="calendar"
+          onClick={() => openModal('date')}
+        >
+          {transportCondition.transportDate ? (
+            <span className="text-sm font-medium">{formatDate(transportCondition.transportDate)}</span>
+          ) : (
+            <span className="text-slate-400 text-xs">날짜를 선택해주세요</span>
+          )}
+        </GridCell>
+      </div>
 
       {/* === 모달들 === */}
 
@@ -246,11 +237,10 @@ export default function TransportTabSection({
         isOpen={activeModal === 'cargo'}
         onClose={() => setActiveModal(null)}
         title="화물 등록"
-        colorScheme="emerald"
       >
         <div className="space-y-4">
-          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2">
-            <p className="text-xs text-emerald-800">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+            <p className="text-xs text-slate-600">
               박스 규격, 품목, 중량을 입력하여 화물을 등록합니다.
             </p>
           </div>
@@ -287,7 +277,7 @@ export default function TransportTabSection({
           {/* 화물 추가 버튼 */}
           <button
             onClick={onAddCargo}
-            className="w-full py-3 border-2 border-dashed border-emerald-300 rounded-lg text-emerald-600 text-sm font-semibold hover:bg-emerald-50 transition-colors"
+            className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
           >
             + 화물 추가하기
           </button>
@@ -299,11 +289,10 @@ export default function TransportTabSection({
         isOpen={activeModal === 'quantity'}
         onClose={() => setActiveModal(null)}
         title="물량 입력"
-        colorScheme="emerald"
       >
         <div className="space-y-4">
-          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2">
-            <p className="text-xs text-emerald-800">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
+            <p className="text-xs text-slate-600">
               등록된 화물별 수량을 입력하면 필요한 큐브 수가 자동으로 계산됩니다.
             </p>
           </div>
@@ -337,7 +326,6 @@ export default function TransportTabSection({
         isOpen={activeModal === 'origin'}
         onClose={() => setActiveModal(null)}
         title="출발지 선택"
-        colorScheme="emerald"
       >
         <div className="space-y-4">
           <LocationDropdown
@@ -349,7 +337,7 @@ export default function TransportTabSection({
           {tempOrigin && (
             <button
               onClick={confirmOrigin}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -362,7 +350,6 @@ export default function TransportTabSection({
         isOpen={activeModal === 'destination'}
         onClose={() => setActiveModal(null)}
         title="도착지 선택"
-        colorScheme="emerald"
       >
         <div className="space-y-4">
           <LocationDropdown
@@ -374,7 +361,7 @@ export default function TransportTabSection({
           {tempDestination && (
             <button
               onClick={confirmDestination}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -387,7 +374,6 @@ export default function TransportTabSection({
         isOpen={activeModal === 'date'}
         onClose={() => setActiveModal(null)}
         title="운송 날짜 선택"
-        colorScheme="emerald"
       >
         <div className="space-y-4">
           <DatePicker
@@ -399,7 +385,7 @@ export default function TransportTabSection({
           {tempTransportDate && (
             <button
               onClick={confirmDate}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
