@@ -4,6 +4,10 @@
 // PR1: 기본 구조만 정의
 // PR2: 상세 타입 확장 예정
 
+// Code Data System 타입 import
+import type { WeightBand, SizeBand } from '../data/bands'
+export type { WeightBand, SizeBand }
+
 // ============ 기본 위치 타입 ============
 export interface Location {
   name: string;
@@ -234,11 +238,19 @@ export interface CargoUI {
   height: number  // mm
   // 분류 결과
   moduleType?: '소형' | '중형' | '대형' | 'UNCLASSIFIED'
-  // 품목
-  productCategory?: string
-  productSubCategory?: string
+  // 품목 (Code Data System)
+  itemCode?: string                    // ICxx (플랫폼 표준 코드)
+  productCategory?: string             // 기존 호환용 (deprecated)
+  productSubCategory?: string          // 기존 호환용 (deprecated)
   // 중량
-  weightRange?: WeightRange
+  weightKg?: number                    // 실제 중량 (kg)
+  weightRange?: WeightRange            // 기존 호환용 (deprecated)
+  // 자동 계산 밴드 (Code Data System)
+  weightBand?: WeightBand
+  sizeBand?: SizeBand
+  sumCm?: number                       // 3변합 (cm)
+  // 저장된 CargoInfo ID (Code Data System)
+  cargoInfoId?: string
   // 상태
   completed: boolean
 }
@@ -278,3 +290,191 @@ export type ServiceOrder = 'storage-first' | 'transport-first' | null
 // - DealRequest/Response
 // - RegulationRule
 // - RegionHeatmap
+
+// ============ Code Data System - Info 타입 ============
+// PR: Code Data System MVP - 정보 데이터 타입
+
+/**
+ * CargoInfo - 화물 정보 데이터
+ *
+ * 정보 데이터의 핵심. 화물의 정적 정보를 저장.
+ * - ID: prefix+ULID (의미 압축 금지)
+ * - signature: 매칭/필터/집계용 핵심 분류 키
+ * - fields: 상세 수치/텍스트/원본 정보
+ */
+export interface CargoInfo {
+  // 식별
+  id: string              // cargo_{ULID}
+  ownerId: string         // 소유자 ID (MVP: 'demo-user')
+
+  // 시그니처 (분류 키)
+  signature: {
+    moduleClass: ModuleClassification  // 포장모듈 분류 (기존 분류 결과 사용)
+    itemCode: string                   // ICxx (품목 코드)
+    weightBand: WeightBand             // WBX|WBY|WBZ|WBH
+    sizeBand: SizeBand                 // SB1|SB2|SB3|SB4|SBX
+  }
+
+  // 상세 필드
+  fields: {
+    dimsMm: { w: number; d: number; h: number }  // 규격 (mm)
+    sumCm: number                                 // 3변합 (cm)
+    weightKg: number                              // 중량 (kg)
+    notes?: string                                // 비고
+  }
+
+  // 메타
+  createdAt: string       // ISO 8601
+}
+
+/**
+ * DemandStatus - 수요 세션 상태
+ */
+export type DemandStatus =
+  | 'DRAFT'           // 초안 (화물 등록 중)
+  | 'RULES_PASSED'    // 규정 통과
+  | 'RESOURCE_READY'  // 자원(큐브) 계산 완료
+  | 'SEARCHED'        // 검색 실행됨
+  | 'DEAL_STARTED'    // 거래 시작
+
+/**
+ * ServiceType - 서비스 유형
+ */
+export type ServiceType = 'STORAGE' | 'ROUTE' | 'BOTH'
+
+/**
+ * DemandSession - 수요 세션
+ *
+ * 규정→자원 흐름의 "접착제" 역할
+ * 사용자가 입력한 조건과 계산된 큐브/파렛트 결과를 저장
+ */
+export interface DemandSession {
+  // 식별
+  demandId: string        // demand_{ULID}
+  ownerId: string         // 소유자 ID
+
+  // 서비스 유형
+  serviceType: ServiceType
+  order?: ServiceOrder    // BOTH일 때 순서
+
+  // 화물 연결
+  cargoIds: string[]                                    // 연결된 화물 ID 목록
+  quantitiesByCargoId: Record<string, number>           // 화물별 수량
+
+  // 큐브 계산 결과
+  cubeResultByCargoId?: Record<string, {
+    mode: 'STORAGE' | 'ROUTE'
+    cubes: number
+  }>
+  totalCubes?: number
+  totalPallets?: number   // Storage/Both에서만 사용
+
+  // 조건 입력
+  storageCondition?: StorageCondition
+  transportCondition?: TransportCondition
+
+  // 상태
+  status: DemandStatus
+
+  // 메타
+  createdAt: string
+  updatedAt: string
+}
+
+// ============ Code Data System - Event 타입 ============
+// PR: Code Data System MVP - 사건 데이터 타입 (append-only)
+
+/**
+ * EventSubject - 사건 대상
+ */
+export interface EventSubject {
+  kind: 'cargo' | 'demand' | 'offer' | 'deal'
+  id: string
+}
+
+/**
+ * EventSignature - 사건 시그니처 (선택적)
+ */
+export interface EventSignature {
+  itemCode?: string
+  weightBand?: string
+  sizeBand?: string
+  moduleClass?: string
+  serviceType?: string
+}
+
+/**
+ * PlatformEventType - MVP 이벤트 타입
+ */
+export type PlatformEventType =
+  // 화물 관련
+  | 'CARGO_CREATED'
+  | 'CARGO_REMOVED'
+  | 'CARGO_SIGNATURE_UPDATED'
+  // 규정 관련
+  | 'RULE_CHECKED'
+  | 'RULES_PASSED'
+  // 물량 관련
+  | 'QUANTITY_SET'
+  | 'CUBE_CALCULATED'
+  | 'RESOURCE_READY'
+  // 조건 관련 - 보관
+  | 'STORAGE_LOCATION_SET'
+  | 'STORAGE_PERIOD_SET'
+  // 조건 관련 - 운송
+  | 'TRANSPORT_ORIGIN_SET'
+  | 'TRANSPORT_DESTINATION_SET'
+  | 'TRANSPORT_DATE_SET'
+  // 검색 관련
+  | 'SEARCH_EXECUTED'
+
+/**
+ * PlatformEvent - 플랫폼 사건 데이터
+ *
+ * Info에 일어난 사건을 "append-only"로 기록
+ * 분석/추적용
+ */
+export interface PlatformEvent {
+  // 식별
+  eventId: string         // evt_{ULID}
+  ts: string              // ISO 8601 타임스탬프
+
+  // 이벤트 정보
+  eventType: PlatformEventType
+  actorId: string         // 행위자 ID (MVP: 'demo-user')
+
+  // 대상
+  subject: EventSubject
+
+  // 시그니처 (선택적)
+  signature?: EventSignature
+
+  // 상세 필드 (이벤트별 상이)
+  fields?: Record<string, unknown>
+}
+
+// ============ Event Fields 상세 타입 (타입 안전성 향상) ============
+
+/**
+ * RULE_CHECKED 이벤트 필드
+ */
+export interface RuleCheckedFields {
+  passed: boolean
+  reasons: string[]
+}
+
+/**
+ * CUBE_CALCULATED 이벤트 필드
+ */
+export interface CubeCalculatedFields {
+  mode: 'STORAGE' | 'ROUTE'
+  cubes: number
+  packingFactor: number
+}
+
+/**
+ * SEARCH_EXECUTED 이벤트 필드
+ */
+export interface SearchExecutedFields {
+  resultCount: number
+}

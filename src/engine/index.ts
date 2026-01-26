@@ -47,6 +47,19 @@ export {
   searchStorageOffers, searchRouteOffers,
 } from './matchingEngine'
 
+// 규정 체크 (Code Data System)
+export {
+  checkCargoRules,
+  checkCargoRulesWithLogging,
+  checkQuickRules,
+  checkQuickRulesWithLogging,
+  getRuleReasonMessage,
+  getRuleResultMessages,
+  hasWarnings,
+  getPlatformLimits,
+} from './rules'
+export type { RuleCheckResult, RuleReason } from './rules'
+
 // ============ 통합 인터페이스 ============
 
 import { calcCubeDemand, type DemandMode, type CubeDemand } from './cubeEngine'

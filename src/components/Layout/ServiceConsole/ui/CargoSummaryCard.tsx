@@ -1,7 +1,9 @@
 // 화물 요약 카드 - 세로 배치 (캐러셀용)
-// 블랙/그레이 통일 스타일, 둥근 보더, 투명도 적용
+// Code Data System 연동: 품목 코드, 밴드 표시
 import { useState } from 'react'
 import type { RegisteredCargo } from '../../../../types/models'
+import { getItemByCode } from '../../../../data/itemCodes'
+// 기존 호환용 (deprecated)
 import { PRODUCT_CATEGORIES, WEIGHT_RANGES } from '../../../../data/mockData'
 
 interface CargoSummaryCardProps {
@@ -17,11 +19,19 @@ export default function CargoSummaryCard({
   onRemove,
   compact = false,
 }: CargoSummaryCardProps) {
-  const category = PRODUCT_CATEGORIES.find(c => c.code === cargo.productCategory)
-  const subCategory = category?.subCategories?.find(s => s.code === cargo.productSubCategory)
-  const weight = WEIGHT_RANGES.find(w => w.value === cargo.weightRange)
+  // Code Data System: 품목 코드 사용
+  const item = cargo.itemCode ? getItemByCode(cargo.itemCode) : undefined
 
+  // 기존 호환용 fallback
+  const category = !item ? PRODUCT_CATEGORIES.find(c => c.code === cargo.productCategory) : undefined
+  const weightRange = WEIGHT_RANGES.find(w => w.value === cargo.weightRange)
+
+  // 표시 문자열
   const moduleLabel = cargo.moduleType === 'UNCLASSIFIED' ? '비표준' : cargo.moduleType
+  const itemLabel = item ? item.label : (category?.name || '미지정')
+  const weightLabel = cargo.weightKg !== undefined
+    ? `${cargo.weightKg}kg`
+    : (weightRange?.label || '-')
 
   if (compact) {
     // 캐러셀용 컴팩트 카드 - 타이틀 아래 배치, 크기 확대
@@ -44,9 +54,29 @@ export default function CargoSummaryCard({
         </div>
         {/* 세로 정보 - 모듈/품목/중량 모두 표시 */}
         <div className="space-y-0.5 text-center">
-          <div className="text-[10px] font-semibold text-slate-800 truncate leading-tight">{moduleLabel}모듈</div>
-          <div className="text-[9px] text-slate-600 truncate leading-tight">{category?.name}{subCategory ? `>${subCategory.name}` : ''}</div>
-          <div className="text-[9px] text-slate-500 truncate leading-tight">{weight?.label || '-'}</div>
+          <div className="text-[10px] font-semibold text-slate-800 truncate leading-tight">
+            {moduleLabel}
+          </div>
+          {/* 품목 코드 표시 */}
+          {cargo.itemCode && (
+            <div className="text-[8px] text-slate-400 font-mono">{cargo.itemCode}</div>
+          )}
+          <div className="text-[9px] text-slate-600 truncate leading-tight">
+            {item ? item.label.split('/')[0].split('(')[0] : (category?.name || '')}
+          </div>
+          {/* 밴드 표시 */}
+          <div className="flex justify-center gap-0.5">
+            {cargo.weightBand && (
+              <span className="text-[8px] px-0.5 bg-slate-100 rounded text-slate-500">
+                {cargo.weightBand}
+              </span>
+            )}
+            {cargo.sizeBand && (
+              <span className="text-[8px] px-0.5 bg-slate-100 rounded text-slate-500">
+                {cargo.sizeBand}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -79,14 +109,33 @@ export default function CargoSummaryCard({
           {moduleLabel}모듈
         </div>
 
-        {/* 품목 */}
+        {/* 품목 코드 (작게) */}
+        {cargo.itemCode && (
+          <div className="text-[9px] text-slate-400 font-mono">{cargo.itemCode}</div>
+        )}
+
+        {/* 품목명 */}
         <div className="text-[10px] text-slate-600 truncate">
-          {category?.name}{subCategory ? `>${subCategory.name}` : ''}
+          {itemLabel}
         </div>
 
         {/* 중량 */}
         <div className="text-[10px] text-slate-500">
-          {weight?.label}
+          {weightLabel}
+        </div>
+
+        {/* 밴드 표시 */}
+        <div className="flex justify-center gap-1 mt-1">
+          {cargo.weightBand && (
+            <span className="text-[8px] px-1 py-0.5 bg-slate-100 rounded text-slate-500">
+              {cargo.weightBand}
+            </span>
+          )}
+          {cargo.sizeBand && (
+            <span className="text-[8px] px-1 py-0.5 bg-slate-100 rounded text-slate-500">
+              {cargo.sizeBand}
+            </span>
+          )}
         </div>
       </div>
     </div>
