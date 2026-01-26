@@ -23,7 +23,7 @@ export default function CommandLayout() {
             className="cursor-pointer hover:opacity-70 transition-opacity inline-block"
             onClick={() => window.location.reload()}
           >
-            <span className="text-black text-3xl font-black tracking-tight drop-shadow-lg">
+            <span className="text-blue-900 text-3xl font-black tracking-tight drop-shadow-lg">
               INTEGRAL
             </span>
           </div>

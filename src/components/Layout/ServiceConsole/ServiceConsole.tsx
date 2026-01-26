@@ -12,11 +12,11 @@ interface TabButtonProps {
   onClick: () => void
 }
 
-// Tailwind는 동적 클래스를 지원하지 않으므로 전체 클래스 문자열 매핑
+// Navy blue 통일 스타일 (플랫폼 상징 컬러)
 const tabActiveStyles: Record<ServiceType, string> = {
-  storage: 'text-blue-600 border-b-2 border-blue-600',
-  transport: 'text-emerald-600 border-b-2 border-emerald-600',
-  both: 'text-purple-600 border-b-2 border-purple-600',
+  storage: 'text-blue-900 border-b-2 border-blue-900',
+  transport: 'text-blue-900 border-b-2 border-blue-900',
+  both: 'text-blue-900 border-b-2 border-blue-900',
 }
 
 function TabButton({ label, isActive, tabType, onClick }: TabButtonProps) {
@@ -41,17 +41,11 @@ interface SearchButtonProps {
   onClick: () => void
 }
 
-function SearchButton({ activeTab, productCount, onClick }: SearchButtonProps) {
-  const gradientMap: Record<ServiceType, string> = {
-    storage: 'from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700',
-    transport: 'from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700',
-    both: 'from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700',
-  }
-
+function SearchButton({ activeTab: _activeTab, productCount, onClick }: SearchButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`w-full py-4 rounded-xl text-white font-bold text-lg transition-all hover:shadow-lg bg-gradient-to-r ${gradientMap[activeTab]}`}
+      className="w-full py-4 rounded-xl text-white font-bold text-lg transition-all hover:shadow-lg bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950"
     >
       <SlotCounter value={productCount} className="font-bold" />
       건의 상품 검색하기
