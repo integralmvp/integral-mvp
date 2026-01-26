@@ -1,5 +1,7 @@
-// 보관+운송 탭 섹션 - PR3-3 UI 재설계
-// 순서 선택 → 화물 등록 → 물량 입력 → 조건 입력 흐름
+// 보관+운송 탭 섹션 - 3행 그리드 레이아웃 재설계
+// 상단: 순서 전환 UI (보관 ↔ 운송)
+// 동일 영역에서 보관/운송 그리드 전환 렌더링
+import { useState } from 'react'
 import type {
   CargoUI,
   RegisteredCargo,
@@ -9,20 +11,17 @@ import type {
 } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine'
 import {
-  AccordionField,
+  GridCell,
+  CargoSummaryCard,
+  InputModal,
   CargoRegistrationCard,
-  RegisteredCargoCard,
   QuantityInputCard,
   LocationDropdown,
   DatePicker,
-  OrderSelector,
   ConversionResult,
 } from '../ui'
 
 interface BothTabSectionProps {
-  expandedField: string | null
-  onFieldClick: (fieldId: string) => void
-
   // 순서 선택
   serviceOrder: ServiceOrder
   onServiceOrderChange: (order: ServiceOrder) => void
@@ -49,9 +48,13 @@ interface BothTabSectionProps {
   onUpdateTransportCondition: (updates: Partial<TransportCondition>) => void
 }
 
+// 현재 보고 있는 서비스 타입
+type ActiveView = 'storage' | 'transport'
+
+// 모달 타입 정의
+type ModalType = 'cargo' | 'quantity' | 'storage-location' | 'storage-date' | 'transport-origin' | 'transport-destination' | 'transport-date' | null
+
 export default function BothTabSection({
-  expandedField,
-  onFieldClick,
   serviceOrder,
   onServiceOrderChange,
   cargos,
@@ -70,16 +73,54 @@ export default function BothTabSection({
   onUpdateStorageCondition,
   onUpdateTransportCondition,
 }: BothTabSectionProps) {
+  // 현재 보고 있는 서비스 뷰 (보관/운송)
+  const [activeView, setActiveView] = useState<ActiveView>(
+    serviceOrder === 'transport-first' ? 'transport' : 'storage'
+  )
+  const [activeModal, setActiveModal] = useState<ModalType>(null)
+  const [showAllCargos, setShowAllCargos] = useState(false)
+
   // 등록 대기 중인 화물 (미완료)
   const pendingCargos = cargos.filter(c => !c.completed)
 
-  // 단계별 완료 여부
-  const orderSelected = serviceOrder !== null
-  const hasRegisteredCargos = registeredCargos.length > 0
+  // 물량 입력 완료 여부
   const allQuantitiesEntered = registeredCargos.length > 0 &&
     registeredCargos.every(c => c.quantity !== undefined && c.quantity > 0)
 
-  // 자동 지정 로직 (보관 후 운송: 운송날짜 = 보관종료일, 운송 후 보관: 보관시작일 = 운송날짜)
+  // 화물 표시 (기본 2개, 확장 시 전체)
+  const visibleCargos = showAllCargos ? registeredCargos : registeredCargos.slice(0, 2)
+  const hiddenCargoCount = registeredCargos.length - 2
+
+  // 날짜 포맷
+  const formatDate = (date?: string) => {
+    if (!date) return null
+    const d = new Date(date)
+    return `${d.getMonth() + 1}/${d.getDate()}`
+  }
+
+  // 순서 전환 핸들러
+  const handleOrderSwap = () => {
+    if (serviceOrder === 'storage-first') {
+      onServiceOrderChange('transport-first')
+      setActiveView('transport')
+    } else {
+      onServiceOrderChange('storage-first')
+      setActiveView('storage')
+    }
+  }
+
+  // 뷰 전환 핸들러
+  const handleViewChange = (view: ActiveView) => {
+    setActiveView(view)
+    // 순서도 함께 업데이트
+    if (view === 'storage' && serviceOrder !== 'storage-first') {
+      onServiceOrderChange('storage-first')
+    } else if (view === 'transport' && serviceOrder !== 'transport-first') {
+      onServiceOrderChange('transport-first')
+    }
+  }
+
+  // 자동 지정 날짜 계산
   const getAutoTransportDate = () => {
     if (serviceOrder === 'storage-first' && storageCondition.endDate) {
       return storageCondition.endDate
@@ -94,193 +135,315 @@ export default function BothTabSection({
     return storageCondition.startDate
   }
 
-  // 요약 문구 생성
-  const getCargoSummary = () => {
-    if (registeredCargos.length === 0) return '화물 정보를 등록해주세요.'
-    return `${registeredCargos.length}건의 화물이 등록됨`
+  // 잠금 상태 체크
+  const isTransportDateLocked = serviceOrder === 'storage-first' && !!storageCondition.endDate
+  const isStorageStartDateLocked = serviceOrder === 'transport-first' && !!transportCondition.transportDate
+
+  // 출발지/도착지 토글
+  const handleSwapLocations = () => {
+    onUpdateTransportCondition({
+      origin: transportCondition.destination,
+      destination: transportCondition.origin,
+    })
   }
 
-  const getQuantitySummary = () => {
-    if (!hasRegisteredCargos) return '화물을 먼저 등록해주세요.'
-    if (!allQuantitiesEntered) return '화물별 수량을 입력해주세요.'
-    return `총 ${totalPallets} 파렛트 (${totalCubes} 큐브)`
-  }
-
-  const getConditionSummary = () => {
-    if (!allQuantitiesEntered) return '물량을 먼저 입력해주세요.'
-    const parts = []
-    if (storageCondition.location) parts.push('보관장소')
-    if (storageCondition.startDate && storageCondition.endDate) parts.push('보관기간')
-    if (transportCondition.origin) parts.push('출발지')
-    if (transportCondition.destination) parts.push('도착지')
-    return parts.length > 0 ? `${parts.join(', ')} 설정됨` : '조건을 입력해주세요.'
-  }
-
-  // 보관 조건 섹션 렌더링
-  const renderStorageCondition = () => (
-    <div className="space-y-4 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
-      <div className="text-xs font-semibold text-blue-700 flex items-center gap-1">
-        <span>📦</span> 보관 조건
-      </div>
-
-      {/* 보관 장소 */}
-      <div className="space-y-2">
-        <label className="block text-xs font-semibold text-slate-700">보관 장소</label>
-        <LocationDropdown
-          value={storageCondition.location}
-          onChange={(location) => onUpdateStorageCondition({ location })}
-          placeholder="보관 장소 선택"
-        />
-      </div>
-
-      {/* 보관 기간 */}
-      <div className="space-y-2">
-        <label className="block text-xs font-semibold text-slate-700">보관 기간</label>
-        {serviceOrder === 'transport-first' ? (
-          // 운송 후 보관: 시작일 자동 지정
-          <DatePicker
-            mode="range"
-            startDate={getAutoStorageStartDate()}
-            endDate={storageCondition.endDate}
-            locked={!!transportCondition.transportDate}
-            lockedLabel={transportCondition.transportDate ? `${transportCondition.transportDate} (운송일 자동 지정)` : undefined}
-            onEndDateChange={(date) => onUpdateStorageCondition({ endDate: date })}
-          />
-        ) : (
-          <DatePicker
-            mode="range"
-            startDate={storageCondition.startDate}
-            endDate={storageCondition.endDate}
-            onStartDateChange={(date) => onUpdateStorageCondition({ startDate: date })}
-            onEndDateChange={(date) => onUpdateStorageCondition({ endDate: date })}
-          />
-        )}
-      </div>
-    </div>
-  )
-
-  // 운송 조건 섹션 렌더링
-  const renderTransportCondition = () => (
-    <div className="space-y-4 p-3 bg-emerald-50/50 rounded-lg border border-emerald-100">
-      <div className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
-        <span>🚚</span> 운송 조건
-      </div>
-
-      {/* 출발지 */}
-      <div className="space-y-2">
-        <label className="block text-xs font-semibold text-slate-700">출발지</label>
-        <LocationDropdown
-          value={transportCondition.origin}
-          onChange={(origin) => onUpdateTransportCondition({ origin })}
-          placeholder="출발지 선택"
-          locked={serviceOrder === 'storage-first' && !!storageCondition.location}
-          lockedValue={serviceOrder === 'storage-first' && storageCondition.location ? '보관장소 (자동 지정)' : undefined}
-        />
-      </div>
-
-      {/* 도착지 */}
-      <div className="space-y-2">
-        <label className="block text-xs font-semibold text-slate-700">도착지</label>
-        <LocationDropdown
-          value={transportCondition.destination}
-          onChange={(destination) => onUpdateTransportCondition({ destination })}
-          placeholder="도착지 선택"
-          locked={serviceOrder === 'transport-first' && !!storageCondition.location}
-          lockedValue={serviceOrder === 'transport-first' && storageCondition.location ? '보관장소 (자동 지정)' : undefined}
-        />
-      </div>
-
-      {/* 운송 날짜 */}
-      <div className="space-y-2">
-        <label className="block text-xs font-semibold text-slate-700">운송 날짜</label>
-        {serviceOrder === 'storage-first' ? (
-          // 보관 후 운송: 날짜 자동 지정
-          <DatePicker
-            mode="single"
-            date={getAutoTransportDate()}
-            locked={!!storageCondition.endDate}
-            lockedLabel={storageCondition.endDate ? `${storageCondition.endDate} (보관종료일 자동 지정)` : undefined}
-          />
-        ) : (
-          <DatePicker
-            mode="single"
-            date={transportCondition.transportDate}
-            onDateChange={(date) => onUpdateTransportCondition({ transportDate: date })}
-          />
-        )}
-      </div>
-    </div>
-  )
-
-  // 순서 선택 전: 순서 선택 UI만 표시
-  if (!orderSelected) {
+  // 순서 선택 전 UI
+  if (!serviceOrder) {
     return (
       <div className="space-y-4">
-        <OrderSelector
-          value={serviceOrder}
-          onChange={(order) => {
-            onServiceOrderChange(order)
-            // 순서 선택 시 화물 등록 아코디언으로 이동
-            if (order) {
-              onFieldClick('cargo-registration')
-            }
-          }}
-        />
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+          <div className="text-sm font-semibold text-purple-800 mb-3">
+            서비스 순서를 선택해주세요
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => {
+                onServiceOrderChange('storage-first')
+                setActiveView('storage')
+              }}
+              className="py-4 px-3 border-2 border-purple-200 rounded-xl bg-white hover:border-purple-400 hover:bg-purple-50 transition-all"
+            >
+              <div className="text-lg mb-1">📦 → 🚚</div>
+              <div className="text-sm font-semibold text-purple-800">보관 후 운송</div>
+            </button>
+            <button
+              onClick={() => {
+                onServiceOrderChange('transport-first')
+                setActiveView('transport')
+              }}
+              className="py-4 px-3 border-2 border-purple-200 rounded-xl bg-white hover:border-purple-400 hover:bg-purple-50 transition-all"
+            >
+              <div className="text-lg mb-1">🚚 → 📦</div>
+              <div className="text-sm font-semibold text-purple-800">운송 후 보관</div>
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
 
-  // 순서 선택 후: 화물 등록부터 입력란 표시
   return (
-    <>
-      {/* 선택된 순서 표시 */}
-      <div className="bg-purple-50 border border-purple-200 rounded-xl p-3 mb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">
-              {serviceOrder === 'storage-first' ? '📦 → 🚚' : '🚚 → 📦'}
-            </span>
-            <span className="text-sm font-semibold text-purple-700">
-              {serviceOrder === 'storage-first' ? '보관 후 운송' : '운송 후 보관'}
-            </span>
-          </div>
-          <button
-            onClick={() => onServiceOrderChange(null)}
-            className="text-xs text-purple-600 hover:text-purple-800"
-          >
-            변경
-          </button>
-        </div>
+    <div className="space-y-3">
+      {/* 상단: 순서 전환 UI */}
+      <div className="flex items-center justify-center gap-2 py-2">
+        <button
+          onClick={() => handleViewChange('storage')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeView === 'storage'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          }`}
+        >
+          📦 보관
+        </button>
+
+        {/* 쌍방 화살표 버튼 */}
+        <button
+          onClick={handleOrderSwap}
+          className="w-10 h-10 flex items-center justify-center text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-full transition-colors"
+          title="순서 전환"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+        </button>
+
+        <button
+          onClick={() => handleViewChange('transport')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+            activeView === 'transport'
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          }`}
+        >
+          🚚 운송
+        </button>
       </div>
 
-      {/* 1. 화물 등록 */}
-      <AccordionField
-        id="cargo-registration"
-        label="화물 등록"
-        placeholder="화물 정보를 입력해주세요."
-        expanded={expandedField === 'cargo-registration'}
-        onToggle={() => onFieldClick('cargo-registration')}
-        summary={getCargoSummary()}
+      {/* 현재 순서 표시 */}
+      <div className="text-center text-xs text-slate-500">
+        현재 순서: {serviceOrder === 'storage-first' ? '보관 → 운송' : '운송 → 보관'}
+      </div>
+
+      {/* 1행: 화물 정보 | 물량 정보 (공통) */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* 화물 정보 */}
+        <GridCell
+          label="화물 정보"
+          colorScheme="purple"
+          onClick={() => setActiveModal('cargo')}
+        >
+          {registeredCargos.length === 0 ? (
+            <div className="flex items-center gap-1 text-purple-600">
+              <span className="text-lg">+</span>
+              <span>화물 추가</span>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {visibleCargos.map((cargo, idx) => (
+                <CargoSummaryCard
+                  key={cargo.id}
+                  cargo={cargo}
+                  index={idx}
+                  onRemove={onRemoveCargo}
+                  compact
+                />
+              ))}
+              {hiddenCargoCount > 0 && !showAllCargos && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowAllCargos(true)
+                  }}
+                  className="w-full py-1 text-[10px] text-purple-600 hover:text-purple-800"
+                >
+                  화물 {hiddenCargoCount}개 더 보기 ▾
+                </button>
+              )}
+              {showAllCargos && hiddenCargoCount > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowAllCargos(false)
+                  }}
+                  className="w-full py-1 text-[10px] text-purple-600 hover:text-purple-800"
+                >
+                  접기 ▴
+                </button>
+              )}
+            </div>
+          )}
+        </GridCell>
+
+        {/* 물량 정보 */}
+        <GridCell
+          label="물량 정보"
+          colorScheme="purple"
+          onClick={() => setActiveModal('quantity')}
+          disabled={registeredCargos.length === 0}
+        >
+          {registeredCargos.length === 0 ? (
+            <span className="text-slate-400 text-xs">화물 등록 필요</span>
+          ) : !allQuantitiesEntered ? (
+            <span className="text-purple-600 text-xs">수량 입력하기</span>
+          ) : (
+            <div className="space-y-0.5">
+              <div className="text-lg font-bold text-slate-800">
+                {totalPallets} <span className="text-xs font-normal text-slate-500">Pallet</span>
+              </div>
+              <div className="text-xs text-slate-500">
+                {totalCubes} Cube
+              </div>
+            </div>
+          )}
+        </GridCell>
+      </div>
+
+      {/* === 보관 뷰 그리드 === */}
+      {activeView === 'storage' && (
+        <>
+          {/* 2행: 보관 장소 */}
+          <GridCell
+            label="보관 장소"
+            colorScheme="blue"
+            onClick={() => setActiveModal('storage-location')}
+          >
+            {storageCondition.location ? (
+              <span className="text-slate-800">{storageCondition.location}</span>
+            ) : (
+              <span className="text-slate-400">장소를 선택해주세요</span>
+            )}
+          </GridCell>
+
+          {/* 3행: 보관 기간 */}
+          <div className="grid grid-cols-2 gap-3">
+            <GridCell
+              label={isStorageStartDateLocked ? '시작일 🔒' : '시작일'}
+              colorScheme="blue"
+              onClick={() => !isStorageStartDateLocked && setActiveModal('storage-date')}
+              disabled={isStorageStartDateLocked}
+            >
+              {getAutoStorageStartDate() ? (
+                <div>
+                  <span className="text-slate-800">{formatDate(getAutoStorageStartDate())}</span>
+                  {isStorageStartDateLocked && (
+                    <div className="text-[9px] text-blue-500 mt-0.5">운송일 자동 설정</div>
+                  )}
+                </div>
+              ) : (
+                <span className="text-slate-400">선택</span>
+              )}
+            </GridCell>
+            <GridCell
+              label="종료일"
+              colorScheme="blue"
+              onClick={() => setActiveModal('storage-date')}
+            >
+              {storageCondition.endDate ? (
+                <span className="text-slate-800">{formatDate(storageCondition.endDate)}</span>
+              ) : (
+                <span className="text-slate-400">선택</span>
+              )}
+            </GridCell>
+          </div>
+        </>
+      )}
+
+      {/* === 운송 뷰 그리드 === */}
+      {activeView === 'transport' && (
+        <>
+          {/* 2행: 출발지 ↔ 도착지 */}
+          <div className="flex items-stretch gap-2">
+            <div className="flex-1">
+              <GridCell
+                label="출발지"
+                colorScheme="emerald"
+                onClick={() => setActiveModal('transport-origin')}
+              >
+                {transportCondition.origin ? (
+                  <span className="text-slate-800">{transportCondition.origin}</span>
+                ) : (
+                  <span className="text-slate-400">선택</span>
+                )}
+              </GridCell>
+            </div>
+
+            <button
+              onClick={handleSwapLocations}
+              className="flex-shrink-0 w-10 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+              title="출발지/도착지 교환"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </button>
+
+            <div className="flex-1">
+              <GridCell
+                label="도착지"
+                colorScheme="emerald"
+                onClick={() => setActiveModal('transport-destination')}
+              >
+                {transportCondition.destination ? (
+                  <span className="text-slate-800">{transportCondition.destination}</span>
+                ) : (
+                  <span className="text-slate-400">선택</span>
+                )}
+              </GridCell>
+            </div>
+          </div>
+
+          {/* 3행: 운송 날짜 */}
+          <GridCell
+            label={isTransportDateLocked ? '운송 날짜 🔒' : '운송 날짜'}
+            colorScheme="emerald"
+            onClick={() => !isTransportDateLocked && setActiveModal('transport-date')}
+            disabled={isTransportDateLocked}
+          >
+            {getAutoTransportDate() ? (
+              <div>
+                <span className="text-slate-800">{formatDate(getAutoTransportDate())}</span>
+                {isTransportDateLocked && (
+                  <div className="text-[9px] text-emerald-500 mt-0.5">보관종료일 자동 설정</div>
+                )}
+              </div>
+            ) : (
+              <span className="text-slate-400">날짜를 선택해주세요</span>
+            )}
+          </GridCell>
+        </>
+      )}
+
+      {/* === 모달들 === */}
+
+      {/* 화물 등록 모달 */}
+      <InputModal
+        isOpen={activeModal === 'cargo'}
+        onClose={() => setActiveModal(null)}
+        title="화물 등록"
+        colorScheme="purple"
       >
         <div className="space-y-4">
-          {/* 안내 문구 */}
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
             <p className="text-xs text-purple-800">
-              박스 규격, 품목, 중량을 입력하여 화물을 등록합니다. 여러 종류의 화물을 등록할 수 있습니다.
+              박스 규격, 품목, 중량을 입력하여 화물을 등록합니다.
             </p>
           </div>
 
-          {/* 등록된 화물 목록 */}
           {registeredCargos.length > 0 && (
             <div className="space-y-2">
               <div className="text-xs font-semibold text-slate-700">등록된 화물</div>
-              {registeredCargos.map(cargo => (
-                <RegisteredCargoCard key={cargo.id} cargo={cargo} />
+              {registeredCargos.map((cargo, idx) => (
+                <CargoSummaryCard
+                  key={cargo.id}
+                  cargo={cargo}
+                  index={idx}
+                  onRemove={onRemoveCargo}
+                />
               ))}
             </div>
           )}
 
-          {/* 등록 대기 중인 화물 카드 */}
           {pendingCargos.map((cargo, index) => (
             <CargoRegistrationCard
               key={cargo.id}
@@ -292,44 +455,29 @@ export default function BothTabSection({
             />
           ))}
 
-          {/* 화물 추가 버튼 */}
           <button
             onClick={onAddCargo}
             className="w-full py-3 border-2 border-dashed border-purple-300 rounded-lg text-purple-600 text-sm font-semibold hover:bg-purple-50 transition-colors"
           >
             + 화물 추가하기
           </button>
-
-          {/* 다음 단계로 버튼 */}
-          {hasRegisteredCargos && pendingCargos.length === 0 && (
-            <button
-              onClick={() => onFieldClick('quantity-input')}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              물량 입력으로 이동
-            </button>
-          )}
         </div>
-      </AccordionField>
+      </InputModal>
 
-      {/* 2. 물량 입력 */}
-      <AccordionField
-        id="quantity-input"
-        label="물량 입력"
-        placeholder="화물별 수량을 입력해주세요."
-        expanded={expandedField === 'quantity-input'}
-        onToggle={() => hasRegisteredCargos && onFieldClick('quantity-input')}
-        summary={getQuantitySummary()}
+      {/* 물량 입력 모달 */}
+      <InputModal
+        isOpen={activeModal === 'quantity'}
+        onClose={() => setActiveModal(null)}
+        title="물량 입력"
+        colorScheme="purple"
       >
         <div className="space-y-4">
-          {/* 안내 문구 */}
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
             <p className="text-xs text-purple-800">
               등록된 화물별 수량을 입력하면 필요한 파렛트/큐브 수가 자동으로 계산됩니다.
             </p>
           </div>
 
-          {/* 화물별 수량 입력 */}
           {registeredCargos.map(cargo => (
             <QuantityInputCard
               key={cargo.id}
@@ -338,51 +486,133 @@ export default function BothTabSection({
             />
           ))}
 
-          {/* 총 환산 결과 */}
           {allQuantitiesEntered && demandResult && (
             <ConversionResult
               result={demandResult}
               mode="STORAGE"
-              onSelectConfirm={onConfirmQuantity}
+              onSelectConfirm={() => {
+                onConfirmQuantity()
+                setActiveModal(null)
+              }}
               isButtonDisabled={!allQuantitiesEntered}
             />
           )}
         </div>
-      </AccordionField>
+      </InputModal>
 
-      {/* 3. 조건 입력 (순서에 따라 배치) */}
-      <AccordionField
-        id="condition-input"
-        label="보관+운송 조건"
-        placeholder="보관과 운송 조건을 입력해주세요."
-        expanded={expandedField === 'condition-input'}
-        onToggle={() => allQuantitiesEntered && onFieldClick('condition-input')}
-        summary={getConditionSummary()}
+      {/* 보관 장소 선택 모달 */}
+      <InputModal
+        isOpen={activeModal === 'storage-location'}
+        onClose={() => setActiveModal(null)}
+        title="보관 장소 선택"
+        colorScheme="blue"
       >
         <div className="space-y-4">
-          {/* 안내 문구 */}
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-2">
-            <p className="text-xs text-purple-800">
-              {serviceOrder === 'storage-first'
-                ? '보관 조건을 먼저 입력하면 운송 날짜가 자동 지정됩니다.'
-                : '운송 조건을 먼저 입력하면 보관 시작일이 자동 지정됩니다.'}
-            </p>
-          </div>
+          <LocationDropdown
+            value={storageCondition.location}
+            onChange={(location) => {
+              onUpdateStorageCondition({ location })
+              setActiveModal(null)
+            }}
+            placeholder="보관 장소 선택"
+          />
+        </div>
+      </InputModal>
 
-          {/* 순서에 따라 조건 섹션 배치 */}
-          {serviceOrder === 'storage-first' ? (
-            <>
-              {renderStorageCondition()}
-              {renderTransportCondition()}
-            </>
+      {/* 보관 기간 선택 모달 */}
+      <InputModal
+        isOpen={activeModal === 'storage-date'}
+        onClose={() => setActiveModal(null)}
+        title="보관 기간 선택"
+        colorScheme="blue"
+      >
+        <div className="space-y-4">
+          {isStorageStartDateLocked && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+              <p className="text-xs text-blue-800">
+                🔒 시작일은 운송 날짜로 자동 설정됩니다.
+              </p>
+            </div>
+          )}
+          <DatePicker
+            mode="range"
+            startDate={getAutoStorageStartDate()}
+            endDate={storageCondition.endDate}
+            locked={isStorageStartDateLocked}
+            lockedLabel={isStorageStartDateLocked ? `${formatDate(getAutoStorageStartDate())} (운송일)` : undefined}
+            onStartDateChange={(date) => !isStorageStartDateLocked && onUpdateStorageCondition({ startDate: date })}
+            onEndDateChange={(date) => onUpdateStorageCondition({ endDate: date })}
+          />
+        </div>
+      </InputModal>
+
+      {/* 출발지 선택 모달 */}
+      <InputModal
+        isOpen={activeModal === 'transport-origin'}
+        onClose={() => setActiveModal(null)}
+        title="출발지 선택"
+        colorScheme="emerald"
+      >
+        <div className="space-y-4">
+          <LocationDropdown
+            value={transportCondition.origin}
+            onChange={(origin) => {
+              onUpdateTransportCondition({ origin })
+              setActiveModal(null)
+            }}
+            placeholder="출발지 선택"
+          />
+        </div>
+      </InputModal>
+
+      {/* 도착지 선택 모달 */}
+      <InputModal
+        isOpen={activeModal === 'transport-destination'}
+        onClose={() => setActiveModal(null)}
+        title="도착지 선택"
+        colorScheme="emerald"
+      >
+        <div className="space-y-4">
+          <LocationDropdown
+            value={transportCondition.destination}
+            onChange={(destination) => {
+              onUpdateTransportCondition({ destination })
+              setActiveModal(null)
+            }}
+            placeholder="도착지 선택"
+          />
+        </div>
+      </InputModal>
+
+      {/* 운송 날짜 선택 모달 */}
+      <InputModal
+        isOpen={activeModal === 'transport-date'}
+        onClose={() => setActiveModal(null)}
+        title="운송 날짜 선택"
+        colorScheme="emerald"
+      >
+        <div className="space-y-4">
+          {isTransportDateLocked ? (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+              <p className="text-sm text-emerald-800">
+                🔒 운송 날짜는 보관 종료일로 자동 설정됩니다.
+              </p>
+              <p className="text-xs text-emerald-600 mt-1">
+                {formatDate(getAutoTransportDate())}
+              </p>
+            </div>
           ) : (
-            <>
-              {renderTransportCondition()}
-              {renderStorageCondition()}
-            </>
+            <DatePicker
+              mode="single"
+              date={transportCondition.transportDate}
+              onDateChange={(date) => {
+                onUpdateTransportCondition({ transportDate: date })
+                setActiveModal(null)
+              }}
+            />
           )}
         </div>
-      </AccordionField>
-    </>
+      </InputModal>
+    </div>
   )
 }
