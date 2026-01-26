@@ -11,6 +11,8 @@ interface GridCellProps {
   colorScheme?: 'blue' | 'emerald' | 'purple' | 'slate'
   // 1행 화물/물량 칸용 확장 높이
   tall?: boolean
+  // 타이틀 우측 상단 액션 버튼
+  headerAction?: ReactNode
 }
 
 const colorStyles = {
@@ -45,8 +47,12 @@ export default function GridCell({
   disabled = false,
   colorScheme = 'slate',
   tall = false,
+  headerAction,
 }: GridCellProps) {
   const colors = colorStyles[colorScheme]
+
+  // 고정 높이: tall=true면 100px, 아니면 64px
+  const heightClass = tall ? 'h-[100px]' : 'h-[64px]'
 
   return (
     <button
@@ -54,21 +60,27 @@ export default function GridCell({
       onClick={onClick}
       disabled={disabled}
       className={`
-        w-full p-3 rounded-xl border-2 text-left transition-all
-        ${tall ? 'min-h-[140px]' : 'min-h-[80px]'}
+        relative w-full ${heightClass} p-2 rounded-xl border-2 text-left transition-all overflow-hidden
         ${colors.border} ${colors.bg}
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'}
         ${className}
       `}
     >
-      {/* 라벨 + 이모지 (좌상단) */}
-      <div className="flex items-center gap-1.5 mb-2">
-        {emoji && <span className="text-lg">{emoji}</span>}
-        <span className={`text-sm font-bold ${colors.label}`}>{label}</span>
+      {/* 헤더: 라벨 + 이모지 (좌상단 고정) + 액션 버튼 (우상단) */}
+      <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
+        <div className="flex items-center gap-1">
+          {emoji && <span className="text-sm">{emoji}</span>}
+          <span className={`text-xs font-bold ${colors.label}`}>{label}</span>
+        </div>
+        {headerAction && (
+          <div onClick={(e) => e.stopPropagation()}>
+            {headerAction}
+          </div>
+        )}
       </div>
 
-      {/* 콘텐츠 (중앙 정렬) */}
-      <div className="flex items-center justify-center text-base font-medium text-slate-800 min-h-[40px]">
+      {/* 콘텐츠 영역 (수직/수평 중앙 정렬) */}
+      <div className="absolute inset-0 top-6 flex items-center justify-center text-sm font-medium text-slate-800 px-2">
         {children}
       </div>
     </button>

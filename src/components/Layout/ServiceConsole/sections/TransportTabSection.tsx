@@ -9,6 +9,7 @@ import { JEJU_LOCATIONS } from '../../../../data/mockData'
 import {
   GridCell,
   CargoCarousel,
+  CargoAddButton,
   InputModal,
   CargoRegistrationCard,
   QuantityInputCard,
@@ -130,9 +131,9 @@ export default function TransportTabSection({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* 1행: 화물 정보 | 물량 정보 */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {/* 화물 정보 */}
         <GridCell
           label="화물 정보"
@@ -140,11 +141,16 @@ export default function TransportTabSection({
           colorScheme="emerald"
           onClick={() => openModal('cargo')}
           tall
+          headerAction={
+            <CargoAddButton
+              onClick={() => openModal('cargo')}
+              colorScheme="emerald"
+            />
+          }
         >
           <CargoCarousel
             cargos={registeredCargos}
             onRemove={onRemoveCargo}
-            onAddClick={() => openModal('cargo')}
             colorScheme="emerald"
           />
         </GridCell>
@@ -159,22 +165,22 @@ export default function TransportTabSection({
           tall
         >
           {registeredCargos.length === 0 ? (
-            <span className="text-slate-400">화물 등록 필요</span>
+            <span className="text-slate-400 text-xs">화물 등록 필요</span>
           ) : !allQuantitiesEntered ? (
-            <span className="text-emerald-600">수량 입력하기</span>
+            <span className="text-emerald-600 text-xs">수량 입력하기</span>
           ) : (
             <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">
+              <div className="text-xl font-bold text-slate-800">
                 {totalCubes}
               </div>
-              <div className="text-sm text-slate-500">큐브</div>
+              <div className="text-xs text-slate-500">큐브</div>
             </div>
           )}
         </GridCell>
       </div>
 
       {/* 2행: 출발지 ↔ 도착지 */}
-      <div className="flex items-stretch gap-2">
+      <div className="flex items-stretch gap-1">
         {/* 출발지 */}
         <div className="flex-1">
           <GridCell
@@ -184,9 +190,9 @@ export default function TransportTabSection({
             onClick={() => openModal('origin')}
           >
             {transportCondition.origin ? (
-              <span className="text-lg">{getLocationName(transportCondition.origin)}</span>
+              <span className="text-base">{getLocationName(transportCondition.origin)}</span>
             ) : (
-              <span className="text-slate-400">선택</span>
+              <span className="text-slate-400 text-xs">선택</span>
             )}
           </GridCell>
         </div>
@@ -194,10 +200,10 @@ export default function TransportTabSection({
         {/* 양방향 화살표 버튼 */}
         <button
           onClick={handleSwapLocations}
-          className="flex-shrink-0 w-10 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+          className="flex-shrink-0 w-8 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
           title="출발지/도착지 교환"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
           </svg>
         </button>
@@ -211,9 +217,9 @@ export default function TransportTabSection({
             onClick={() => openModal('destination')}
           >
             {transportCondition.destination ? (
-              <span className="text-lg">{getLocationName(transportCondition.destination)}</span>
+              <span className="text-base">{getLocationName(transportCondition.destination)}</span>
             ) : (
-              <span className="text-slate-400">선택</span>
+              <span className="text-slate-400 text-xs">선택</span>
             )}
           </GridCell>
         </div>
@@ -227,9 +233,9 @@ export default function TransportTabSection({
         onClick={() => openModal('date')}
       >
         {transportCondition.transportDate ? (
-          <span className="text-lg">{formatDate(transportCondition.transportDate)}</span>
+          <span className="text-base">{formatDate(transportCondition.transportDate)}</span>
         ) : (
-          <span className="text-slate-400">날짜를 선택해주세요</span>
+          <span className="text-slate-400 text-xs">날짜를 선택해주세요</span>
         )}
       </GridCell>
 

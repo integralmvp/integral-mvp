@@ -9,6 +9,7 @@ import { JEJU_LOCATIONS } from '../../../../data/mockData'
 import {
   GridCell,
   CargoCarousel,
+  CargoAddButton,
   InputModal,
   CargoRegistrationCard,
   QuantityInputCard,
@@ -111,9 +112,9 @@ export default function StorageTabSection({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* 1행: 화물 정보 | 물량 정보 */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {/* 화물 정보 */}
         <GridCell
           label="화물 정보"
@@ -121,11 +122,16 @@ export default function StorageTabSection({
           colorScheme="blue"
           onClick={() => openModal('cargo')}
           tall
+          headerAction={
+            <CargoAddButton
+              onClick={() => openModal('cargo')}
+              colorScheme="blue"
+            />
+          }
         >
           <CargoCarousel
             cargos={registeredCargos}
             onRemove={onRemoveCargo}
-            onAddClick={() => openModal('cargo')}
             colorScheme="blue"
           />
         </GridCell>
@@ -140,15 +146,15 @@ export default function StorageTabSection({
           tall
         >
           {registeredCargos.length === 0 ? (
-            <span className="text-slate-400">화물 등록 필요</span>
+            <span className="text-slate-400 text-xs">화물 등록 필요</span>
           ) : !allQuantitiesEntered ? (
-            <span className="text-blue-600">수량 입력하기</span>
+            <span className="text-blue-600 text-xs">수량 입력하기</span>
           ) : (
             <div className="text-center">
-              <div className="text-2xl font-bold text-slate-800">
+              <div className="text-xl font-bold text-slate-800">
                 {totalPallets}
               </div>
-              <div className="text-sm text-slate-500">파레트</div>
+              <div className="text-xs text-slate-500">파레트</div>
             </div>
           )}
         </GridCell>
@@ -162,14 +168,14 @@ export default function StorageTabSection({
         onClick={() => openModal('location')}
       >
         {storageCondition.location ? (
-          <span className="text-lg">{getLocationName(storageCondition.location)}</span>
+          <span className="text-base">{getLocationName(storageCondition.location)}</span>
         ) : (
-          <span className="text-slate-400">장소를 선택해주세요</span>
+          <span className="text-slate-400 text-xs">장소를 선택해주세요</span>
         )}
       </GridCell>
 
       {/* 3행: 보관 기간 */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         <GridCell
           label="시작일"
           emoji="📅"
@@ -177,9 +183,9 @@ export default function StorageTabSection({
           onClick={() => openModal('date')}
         >
           {storageCondition.startDate ? (
-            <span className="text-lg">{formatDate(storageCondition.startDate)}</span>
+            <span className="text-base">{formatDate(storageCondition.startDate)}</span>
           ) : (
-            <span className="text-slate-400">선택</span>
+            <span className="text-slate-400 text-xs">선택</span>
           )}
         </GridCell>
         <GridCell
@@ -189,9 +195,9 @@ export default function StorageTabSection({
           onClick={() => openModal('date')}
         >
           {storageCondition.endDate ? (
-            <span className="text-lg">{formatDate(storageCondition.endDate)}</span>
+            <span className="text-base">{formatDate(storageCondition.endDate)}</span>
           ) : (
-            <span className="text-slate-400">선택</span>
+            <span className="text-slate-400 text-xs">선택</span>
           )}
         </GridCell>
       </div>

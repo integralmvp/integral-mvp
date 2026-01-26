@@ -7,18 +7,41 @@ interface CargoSummaryCardProps {
   cargo: RegisteredCargo
   index: number
   onRemove?: (cargoId: string) => void
+  compact?: boolean
 }
 
 export default function CargoSummaryCard({
   cargo,
   index,
   onRemove,
+  compact = false,
 }: CargoSummaryCardProps) {
   const category = PRODUCT_CATEGORIES.find(c => c.code === cargo.productCategory)
   const subCategory = category?.subCategories?.find(s => s.code === cargo.productSubCategory)
   const weight = WEIGHT_RANGES.find(w => w.value === cargo.weightRange)
 
   const moduleLabel = cargo.moduleType === 'UNCLASSIFIED' ? '비표준' : cargo.moduleType
+
+  if (compact) {
+    // 캐러셀용 컴팩트 카드
+    return (
+      <div className="flex-shrink-0 w-[52px] h-[52px] p-1 bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col items-center justify-center">
+        <span className="text-[10px] font-bold text-slate-700">{index + 1}</span>
+        <span className="text-[9px] text-slate-600 truncate w-full text-center">{moduleLabel}</span>
+        {onRemove && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove(cargo.id)
+            }}
+            className="text-[8px] text-slate-400 hover:text-red-500"
+          >
+            삭제
+          </button>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="relative flex-shrink-0 w-[90px] h-full py-2 px-2 bg-white rounded-lg border border-slate-200 shadow-sm">
@@ -61,23 +84,21 @@ export default function CargoSummaryCard({
   )
 }
 
-// 캐러셀 컨테이너 컴포넌트
+// 캐러셀 컨테이너 컴포넌트 - 콘텐츠만 (추가 버튼은 GridCell headerAction으로 이동)
 interface CargoCarouselProps {
   cargos: RegisteredCargo[]
   onRemove: (cargoId: string) => void
-  onAddClick: () => void
   colorScheme?: 'blue' | 'emerald' | 'purple'
 }
 
 export function CargoCarousel({
   cargos,
   onRemove,
-  onAddClick,
   colorScheme = 'blue',
 }: CargoCarouselProps) {
   const [page, setPage] = useState(0)
   const itemsPerPage = 3
-  const totalPages = Math.ceil(cargos.length / itemsPerPage)
+  const totalPages = Math.max(1, Math.ceil(cargos.length / itemsPerPage))
 
   const visibleCargos = cargos.slice(page * itemsPerPage, (page + 1) * itemsPerPage)
   const hasMore = totalPages > 1
@@ -93,57 +114,64 @@ export function CargoCarousel({
     setPage((prev) => (prev + 1) % totalPages)
   }
 
+  if (cargos.length === 0) {
+    return (
+      <span className="text-slate-400 text-xs">화물을 추가해주세요</span>
+    )
+  }
+
   return (
-    <div className="h-full flex flex-col">
-      {/* 상단: 추가 버튼 */}
-      <div className="flex justify-end mb-1">
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onAddClick()
-          }}
-          className={`text-xs font-semibold ${colorMap[colorScheme]} px-2 py-0.5 rounded transition-colors`}
-        >
-          + 추가
-        </button>
+    <div className="flex items-center gap-1">
+      {/* 카드들 - 좌측 정렬 */}
+      <div className="flex items-center gap-1">
+        {visibleCargos.map((cargo, idx) => (
+          <CargoSummaryCard
+            key={cargo.id}
+            cargo={cargo}
+            index={page * itemsPerPage + idx}
+            onRemove={onRemove}
+            compact
+          />
+        ))}
       </div>
 
-      {/* 카드 영역 */}
-      <div className="flex-1 flex items-center gap-2">
-        {cargos.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
-            화물을 추가해주세요
-          </div>
-        ) : (
-          <>
-            {visibleCargos.map((cargo, idx) => (
-              <CargoSummaryCard
-                key={cargo.id}
-                cargo={cargo}
-                index={page * itemsPerPage + idx}
-                onRemove={onRemove}
-              />
-            ))}
-          </>
-        )}
-      </div>
-
-      {/* 하단: 페이지 표시 + 다음 버튼 */}
+      {/* 페이지 네비게이션 */}
       {hasMore && (
-        <div className="flex items-center justify-end mt-1 gap-2">
-          <span className="text-[10px] text-slate-500">
-            {page + 1}/{totalPages}
-          </span>
-          <button
-            onClick={handleNextPage}
-            className={`w-6 h-6 flex items-center justify-center rounded ${colorMap[colorScheme]} transition-colors`}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
+        <button
+          onClick={handleNextPage}
+          className={`flex-shrink-0 w-5 h-5 flex items-center justify-center rounded ${colorMap[colorScheme]} transition-colors`}
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
       )}
     </div>
+  )
+}
+
+// 추가 버튼 컴포넌트 (GridCell headerAction 용)
+interface CargoAddButtonProps {
+  onClick: () => void
+  colorScheme?: 'blue' | 'emerald' | 'purple'
+}
+
+export function CargoAddButton({ onClick, colorScheme = 'blue' }: CargoAddButtonProps) {
+  const colorMap = {
+    blue: 'text-blue-600 hover:bg-blue-100',
+    emerald: 'text-emerald-600 hover:bg-emerald-100',
+    purple: 'text-purple-600 hover:bg-purple-100',
+  }
+
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick()
+      }}
+      className={`text-[10px] font-semibold ${colorMap[colorScheme]} px-1.5 py-0.5 rounded transition-colors`}
+    >
+      +추가
+    </button>
   )
 }
