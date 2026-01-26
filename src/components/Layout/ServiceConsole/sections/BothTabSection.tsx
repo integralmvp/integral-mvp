@@ -222,7 +222,7 @@ export default function BothTabSection({
   return (
     <div className="flex flex-col h-full">
       {/* 상단: 순서 전환 UI - 순서에 따라 버튼 재정렬 */}
-      <div className="flex items-center justify-center gap-2 py-1.5 flex-shrink-0">
+      <div className="flex items-center justify-center gap-2 py-0.5 flex-shrink-0">
         {/* 첫 번째 버튼 */}
         <button
           onClick={() => handleViewChange(firstButton)}
