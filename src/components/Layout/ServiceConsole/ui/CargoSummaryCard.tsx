@@ -115,6 +115,11 @@ export function CargoCarousel({
     setPage((prev) => (prev + 1) % totalPages)
   }
 
+  const handlePrevPage = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setPage((prev) => (prev - 1 + totalPages) % totalPages)
+  }
+
   if (cargos.length === 0) {
     return (
       <span className="text-slate-400 text-xs">화물을 추가해주세요</span>
@@ -123,6 +128,18 @@ export function CargoCarousel({
 
   return (
     <div className="flex items-center gap-1">
+      {/* 이전 페이지 버튼 */}
+      {page > 0 && (
+        <button
+          onClick={handlePrevPage}
+          className="flex-shrink-0 mt-6 w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 transition-colors"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+
       {/* 카드들 - 좌측 정렬 (justify-start) */}
       <div className="flex items-center justify-start gap-1 flex-1">
         {visibleCargos.map((cargo, idx) => (
@@ -136,8 +153,8 @@ export function CargoCarousel({
         ))}
       </div>
 
-      {/* 페이지 네비게이션 */}
-      {hasMore && (
+      {/* 다음 페이지 버튼 */}
+      {hasMore && page < totalPages - 1 && (
         <button
           onClick={handleNextPage}
           className="flex-shrink-0 mt-6 w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 transition-colors"
