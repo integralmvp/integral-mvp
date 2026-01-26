@@ -1,7 +1,8 @@
 // 서비스 콘솔 상태 관리 훅 - 단일 진실 소스
 // PR3-3: UI 재설계 - 화물 등록 → 물량 입력 → 조건 입력 흐름 반영
 // Code Data System MVP: CargoInfo, DemandSession, Event 연동
-import { useState, useMemo, useEffect } from 'react'
+// PR4: Regulation Engine 연동 - 검색 시 규정 필터링
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import type {
   CargoUI,
   RegisteredCargo,
@@ -9,9 +10,16 @@ import type {
   TransportCondition,
   ServiceOrder,
   ServiceType as ServiceTypeModel,
+  StorageProduct,
+  RouteProduct,
 } from '../../../../types/models'
 import { computeDemand, type BoxInput, type DemandResult } from '../../../../engine'
 import { checkQuickRulesWithLogging } from '../../../../engine/rules'
+import {
+  filterOffersByRegulation,
+  adaptCargoForRegulation,
+  type RegulationSummary,
+} from '../../../../engine/regulation'
 import {
   addCargo as addCargoToStore,
   removeCargo as removeCargoFromStore,
@@ -25,6 +33,7 @@ import {
   resetActiveDemand,
 } from '../../../../store'
 import { CUBE_CONFIG } from '../../../../engine/cubeConfig'
+import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../../data/mockData'
 
 export type ServiceType = 'storage' | 'transport' | 'both'
 
@@ -41,6 +50,14 @@ function toModelServiceType(uiType: ServiceType): ServiceTypeModel {
     case 'transport': return 'ROUTE'
     case 'both': return 'BOTH'
   }
+}
+
+// PR4: 검색 결과 타입
+export interface SearchResult {
+  storageProducts: StorageProduct[]
+  routeProducts: RouteProduct[]
+  summary: RegulationSummary | null
+  searchedAt: string
 }
 
 export interface ServiceConsoleState {
@@ -71,6 +88,10 @@ export interface ServiceConsoleState {
 
   // Code Data System: 현재 Demand ID
   currentDemandId: string | null
+
+  // PR4: 검색 결과
+  searchResult: SearchResult | null
+  isSearching: boolean
 }
 
 export interface ServiceConsoleActions {
@@ -120,6 +141,10 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
 
   // Code Data System: 현재 Demand ID
   const [currentDemandId, setCurrentDemandId] = useState<string | null>(null)
+
+  // PR4: 검색 결과 상태
+  const [searchResult, setSearchResult] = useState<SearchResult | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
 
   // 탭 변경 시 DemandSession 초기화/로드
   useEffect(() => {
@@ -342,40 +367,126 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setStorageCondition({})
     setTransportCondition({})
     setServiceOrder(null)
+    // PR4: 검색 결과 리셋
+    setSearchResult(null)
+    setIsSearching(false)
 
     // Code Data System: 새 DemandSession 시작
     const demand = resetActiveDemand(toModelServiceType(tab))
     setCurrentDemandId(demand.demandId)
   }
 
-  // 검색
-  const handleSearch = () => {
-    console.log('=== 검색 시작 ===')
+  // PR4: 검색 (규정 필터링 적용)
+  const handleSearch = useCallback(() => {
+    console.log('=== PR4 검색 시작 ===')
     console.log('활성 탭:', activeTab)
     console.log('등록된 화물:', registeredCargos)
     console.log('총 큐브:', totalCubes)
     console.log('총 파렛트:', totalPallets)
 
-    if (activeTab === 'storage') {
-      console.log('보관 조건:', storageCondition)
-    } else if (activeTab === 'transport') {
-      console.log('운송 조건:', transportCondition)
-    } else if (activeTab === 'both') {
-      console.log('서비스 순서:', serviceOrder)
-      console.log('보관 조건:', storageCondition)
-      console.log('운송 조건:', transportCondition)
+    setIsSearching(true)
+
+    // 화물이 없으면 빈 결과 반환
+    if (registeredCargos.length === 0) {
+      console.log('등록된 화물 없음 - 전체 상품 표시')
+      setSearchResult({
+        storageProducts: activeTab !== 'transport' ? STORAGE_PRODUCTS : [],
+        routeProducts: activeTab !== 'storage' ? ROUTE_PRODUCTS : [],
+        summary: null,
+        searchedAt: new Date().toISOString(),
+      })
+      setIsSearching(false)
+
+      if (currentDemandId) {
+        const count = activeTab === 'storage' ? STORAGE_PRODUCTS.length
+          : activeTab === 'transport' ? ROUTE_PRODUCTS.length
+          : STORAGE_PRODUCTS.length + ROUTE_PRODUCTS.length
+        recordSearchExecution(currentDemandId, count)
+      }
+      return
     }
 
-    console.log('검색 가능 상품:', availableProductCount, '건')
+    // 화물 데이터를 규정 엔진 입력으로 변환
+    const cargosForRegulation = registeredCargos.map(cargo => adaptCargoForRegulation({
+      id: cargo.id,
+      sumCm: cargo.sumCm,
+      weightKg: cargo.weightKg,
+      moduleType: cargo.moduleType,
+      itemCode: cargo.itemCode,
+      weightBand: cargo.weightBand,
+      sizeBand: cargo.sizeBand,
+    }))
+
+    const demand = { totalCubes, totalPallets }
+    let passedStorage: StorageProduct[] = []
+    let passedRoutes: RouteProduct[] = []
+    let combinedSummary: RegulationSummary | null = null
+
+    // 탭별 필터링
+    if (activeTab === 'storage' || activeTab === 'both') {
+      console.log('보관 조건:', storageCondition)
+      const storageResult = filterOffersByRegulation(
+        cargosForRegulation,
+        STORAGE_PRODUCTS,
+        'STORAGE',
+        demand
+      )
+      passedStorage = storageResult.passed
+      combinedSummary = storageResult.summary
+      console.log('보관 상품 필터링:', storageResult.summary)
+    }
+
+    if (activeTab === 'transport' || activeTab === 'both') {
+      console.log('운송 조건:', transportCondition)
+      const routeResult = filterOffersByRegulation(
+        cargosForRegulation,
+        ROUTE_PRODUCTS,
+        'ROUTE',
+        demand
+      )
+      passedRoutes = routeResult.passed
+      if (!combinedSummary) {
+        combinedSummary = routeResult.summary
+      } else {
+        // 두 결과 합산
+        combinedSummary = {
+          totalOffers: combinedSummary.totalOffers + routeResult.summary.totalOffers,
+          passedCount: combinedSummary.passedCount + routeResult.summary.passedCount,
+          failedCount: combinedSummary.failedCount + routeResult.summary.failedCount,
+          failuresByReason: {
+            ...combinedSummary.failuresByReason,
+            ...routeResult.summary.failuresByReason,
+          },
+        }
+      }
+      console.log('운송 상품 필터링:', routeResult.summary)
+    }
+
+    if (activeTab === 'both') {
+      console.log('서비스 순서:', serviceOrder)
+    }
+
+    // 검색 결과 저장
+    const result: SearchResult = {
+      storageProducts: passedStorage,
+      routeProducts: passedRoutes,
+      summary: combinedSummary,
+      searchedAt: new Date().toISOString(),
+    }
+    setSearchResult(result)
+    setIsSearching(false)
+
+    const totalResultCount = passedStorage.length + passedRoutes.length
+    console.log('검색 결과:', totalResultCount, '건')
+    console.log('상세:', { 보관: passedStorage.length, 운송: passedRoutes.length })
 
     // Code Data System: 검색 실행 이벤트 기록
     if (currentDemandId) {
-      // PR4 전이므로 resultCount는 0 (TODO)
-      recordSearchExecution(currentDemandId, 0)
+      recordSearchExecution(currentDemandId, totalResultCount)
     }
 
-    console.log('=== 검색 완료 ===')
-  }
+    console.log('=== PR4 검색 완료 ===')
+  }, [activeTab, registeredCargos, totalCubes, totalPallets, storageCondition, transportCondition, serviceOrder, currentDemandId])
 
   const state: ServiceConsoleState = {
     activeTab,
@@ -391,6 +502,8 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     serviceOrder,
     availableProductCount,
     currentDemandId,
+    searchResult,
+    isSearching,
   }
 
   const actions: ServiceConsoleActions = {

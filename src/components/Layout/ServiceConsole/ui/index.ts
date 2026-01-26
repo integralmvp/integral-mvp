@@ -11,3 +11,6 @@ export { default as QuantityInputCard } from './QuantityInputCard'
 export { default as LocationDropdown } from './LocationDropdown'
 export { default as DatePicker } from './DatePicker'
 export { default as ConversionResult } from './ConversionResult'
+
+// PR4: 검색 결과 리스트
+export { default as SearchResultList } from './SearchResultList'

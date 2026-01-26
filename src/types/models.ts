@@ -47,6 +47,14 @@ export interface RouteProduct {
   routeScope: RouteScope;
   direction?: Direction;  // routeScope === "SEA"일 때만 사용
   tripType?: TripType;     // 표현용 필드
+  // PR4 규정 필드
+  allowedItemCodes?: string[];           // 허용 품목 코드 (없으면 전체 허용)
+  maxWeightKg?: number;                  // 최대 중량 (default: 20kg)
+  maxSumCm?: number;                     // 최대 3변합 (default: 170cm)
+  minCubes?: number;                     // 최소 큐브 수 (default: 0)
+  tempSupported?: boolean;               // 냉장/냉동 지원
+  hazmatSupported?: boolean;             // 위험물 지원
+  allowedModuleClasses?: ModuleClassification[];  // 허용 모듈
 }
 
 // ============ 공간 상품 (PR2에서 확장) ============
@@ -60,6 +68,14 @@ export interface StorageProduct {
   features: string[];
   connectedRoutes?: string[];
   regulationStatus: RegulationStatus;
+  // PR4 규정 필드
+  allowedItemCodes?: string[];           // 허용 품목 코드 (없으면 전체 허용)
+  maxWeightKg?: number;                  // 최대 중량 (default: 20kg)
+  maxSumCm?: number;                     // 최대 3변합 (default: 170cm)
+  minCubes?: number;                     // 최소 큐브 수 (default: 0, Pallet 기준으로도 환산 가능)
+  tempSupported?: boolean;               // 냉장/냉동 지원 (냉장/냉동 창고는 true)
+  hazmatSupported?: boolean;             // 위험물 지원
+  allowedModuleClasses?: ModuleClassification[];  // 허용 모듈
 }
 
 // ============ ProductCard Props (PR1 용도) ============

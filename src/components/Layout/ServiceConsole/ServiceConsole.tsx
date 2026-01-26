@@ -1,8 +1,11 @@
 // 서비스 콘솔 - 조립 컴포넌트
 // 3행 그리드 레이아웃 UI 재설계
+// PR4: 검색 결과 Context 연동 + 결과 리스트 표시
+import { useEffect } from 'react'
 import { useServiceConsoleState, type ServiceType } from './hooks'
 import { StorageTabSection, TransportTabSection, BothTabSection } from './sections'
-import { SlotCounter } from './ui'
+import { SlotCounter, SearchResultList } from './ui'
+import { useSearchResult } from '../../../contexts/SearchResultContext'
 
 // 탭 버튼 컴포넌트
 interface TabButtonProps {
@@ -55,6 +58,24 @@ function SearchButton({ activeTab: _activeTab, productCount, onClick }: SearchBu
 
 export default function ServiceConsole() {
   const [state, actions] = useServiceConsoleState()
+  const { setSearchResult, searchResult } = useSearchResult()
+
+  // PR4: 검색 결과가 변경되면 Context에 반영
+  useEffect(() => {
+    if (state.searchResult) {
+      setSearchResult({
+        storageProducts: state.searchResult.storageProducts,
+        routeProducts: state.searchResult.routeProducts,
+        summary: state.searchResult.summary,
+        searchedAt: state.searchResult.searchedAt,
+      })
+    }
+  }, [state.searchResult, setSearchResult])
+
+  // 검색 결과가 있으면 결과 건수 표시
+  const resultCount = searchResult
+    ? searchResult.storageProducts.length + searchResult.routeProducts.length
+    : state.availableProductCount
 
   return (
     <div
@@ -155,11 +176,23 @@ export default function ServiceConsole() {
         )}
       </div>
 
+      {/* PR4: 검색 결과 리스트 */}
+      {searchResult && (
+        <div className="border-t border-slate-200 max-h-[200px] overflow-y-auto">
+          <SearchResultList
+            storageProducts={searchResult.storageProducts}
+            routeProducts={searchResult.routeProducts}
+            activeTab={state.activeTab}
+            summary={searchResult.summary}
+          />
+        </div>
+      )}
+
       {/* 검색 버튼 - 하단 고정 */}
       <div className="p-4 border-t border-slate-200">
         <SearchButton
           activeTab={state.activeTab}
-          productCount={state.availableProductCount}
+          productCount={resultCount}
           onClick={actions.handleSearch}
         />
       </div>

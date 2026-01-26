@@ -1,8 +1,37 @@
 // 전체 지도 배경 + 좌측 블러 오버레이 레이아웃
+// PR4: 검색 결과 하이라이트 연동
+import { useEffect } from 'react'
 import ServiceConsole from './ServiceConsole'
 import MapboxContainer from '../Map/MapboxContainer'
+import { useSearchResult } from '../../contexts/SearchResultContext'
 
 export default function CommandLayout() {
+  const { highlightedIds, searchResult } = useSearchResult()
+
+  // PR4: 검색 결과에 따라 마커 하이라이트 적용
+  useEffect(() => {
+    const markers = document.querySelectorAll('.pallet-marker')
+
+    markers.forEach((marker) => {
+      const el = marker as HTMLElement
+      const productId = el.dataset.productId
+
+      if (!searchResult) {
+        // 검색 결과가 없으면 모든 마커 표시
+        el.style.opacity = '1'
+        el.style.filter = ''
+      } else if (productId && highlightedIds.has(productId)) {
+        // 하이라이트된 마커
+        el.style.opacity = '1'
+        el.style.filter = 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.8))'
+      } else {
+        // 필터링된 마커 (흐리게)
+        el.style.opacity = '0.3'
+        el.style.filter = 'grayscale(80%)'
+      }
+    })
+  }, [highlightedIds, searchResult])
+
   return (
     <div className="h-screen relative overflow-hidden">
       {/* 배경: 전체 지도 */}
