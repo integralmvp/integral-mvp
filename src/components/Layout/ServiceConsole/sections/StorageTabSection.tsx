@@ -168,7 +168,7 @@ export default function StorageTabSection({
         onClick={() => openModal('location')}
       >
         {storageCondition.location ? (
-          <span className="text-base">{getLocationName(storageCondition.location)}</span>
+          <span className="text-sm">{getLocationName(storageCondition.location)}</span>
         ) : (
           <span className="text-slate-400 text-xs">장소를 선택해주세요</span>
         )}
@@ -183,7 +183,7 @@ export default function StorageTabSection({
           onClick={() => openModal('date')}
         >
           {storageCondition.startDate ? (
-            <span className="text-base">{formatDate(storageCondition.startDate)}</span>
+            <span className="text-sm">{formatDate(storageCondition.startDate)}</span>
           ) : (
             <span className="text-slate-400 text-xs">선택</span>
           )}
@@ -195,7 +195,7 @@ export default function StorageTabSection({
           onClick={() => openModal('date')}
         >
           {storageCondition.endDate ? (
-            <span className="text-base">{formatDate(storageCondition.endDate)}</span>
+            <span className="text-sm">{formatDate(storageCondition.endDate)}</span>
           ) : (
             <span className="text-slate-400 text-xs">선택</span>
           )}

@@ -51,8 +51,8 @@ export default function GridCell({
 }: GridCellProps) {
   const colors = colorStyles[colorScheme]
 
-  // 고정 높이: tall=true면 100px, 아니면 64px
-  const heightClass = tall ? 'h-[100px]' : 'h-[64px]'
+  // 높이: tall=80px (1행 화물/물량), 기본=52px (2,3행)
+  const heightClass = tall ? 'h-[80px]' : 'h-[52px]'
 
   return (
     <button
@@ -66,22 +66,22 @@ export default function GridCell({
         ${className}
       `}
     >
-      {/* 헤더: 라벨 + 이모지 (좌상단 고정) + 액션 버튼 (우상단) */}
-      <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          {emoji && <span className="text-sm">{emoji}</span>}
-          <span className={`text-xs font-bold ${colors.label}`}>{label}</span>
+      {/* 콘텐츠 영역 - 전체 칸 기준 수직/수평 중앙 정렬 */}
+      <div className="absolute inset-0 flex items-center justify-center text-sm font-medium text-slate-800 px-2">
+        {children}
+      </div>
+
+      {/* 헤더: 라벨 + 이모지 (좌상단 오버레이) + 액션 버튼 (우상단) */}
+      <div className="absolute top-1 left-1.5 right-1.5 flex items-center justify-between z-10">
+        <div className="flex items-center gap-0.5 bg-white/80 rounded px-1">
+          {emoji && <span className="text-[10px]">{emoji}</span>}
+          <span className={`text-[9px] font-bold ${colors.label}`}>{label}</span>
         </div>
         {headerAction && (
-          <div onClick={(e) => e.stopPropagation()}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-white/80 rounded">
             {headerAction}
           </div>
         )}
-      </div>
-
-      {/* 콘텐츠 영역 (수직/수평 중앙 정렬) */}
-      <div className="absolute inset-0 top-6 flex items-center justify-center text-sm font-medium text-slate-800 px-2">
-        {children}
       </div>
     </button>
   )

@@ -180,7 +180,7 @@ export default function TransportTabSection({
       </div>
 
       {/* 2행: 출발지 ↔ 도착지 */}
-      <div className="flex items-stretch gap-1">
+      <div className="flex items-center gap-1">
         {/* 출발지 */}
         <div className="flex-1">
           <GridCell
@@ -190,7 +190,7 @@ export default function TransportTabSection({
             onClick={() => openModal('origin')}
           >
             {transportCondition.origin ? (
-              <span className="text-base">{getLocationName(transportCondition.origin)}</span>
+              <span className="text-sm">{getLocationName(transportCondition.origin)}</span>
             ) : (
               <span className="text-slate-400 text-xs">선택</span>
             )}
@@ -200,7 +200,7 @@ export default function TransportTabSection({
         {/* 양방향 화살표 버튼 */}
         <button
           onClick={handleSwapLocations}
-          className="flex-shrink-0 w-8 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+          className="flex-shrink-0 w-7 h-7 flex items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
           title="출발지/도착지 교환"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,7 +217,7 @@ export default function TransportTabSection({
             onClick={() => openModal('destination')}
           >
             {transportCondition.destination ? (
-              <span className="text-base">{getLocationName(transportCondition.destination)}</span>
+              <span className="text-sm">{getLocationName(transportCondition.destination)}</span>
             ) : (
               <span className="text-slate-400 text-xs">선택</span>
             )}
@@ -233,7 +233,7 @@ export default function TransportTabSection({
         onClick={() => openModal('date')}
       >
         {transportCondition.transportDate ? (
-          <span className="text-base">{formatDate(transportCondition.transportDate)}</span>
+          <span className="text-sm">{formatDate(transportCondition.transportDate)}</span>
         ) : (
           <span className="text-slate-400 text-xs">날짜를 선택해주세요</span>
         )}
