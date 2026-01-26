@@ -52,30 +52,16 @@ export default function CargoSummaryCard({
             </button>
           )}
         </div>
-        {/* 세로 정보 - 모듈/품목/중량 모두 표시 */}
+        {/* 세로 정보 - 모듈/품목/중량 표시 (라벨만) */}
         <div className="space-y-0.5 text-center">
           <div className="text-[10px] font-semibold text-slate-800 truncate leading-tight">
             {moduleLabel}
           </div>
-          {/* 품목 코드 표시 */}
-          {cargo.itemCode && (
-            <div className="text-[8px] text-slate-400 font-mono">{cargo.itemCode}</div>
-          )}
           <div className="text-[9px] text-slate-600 truncate leading-tight">
             {item ? item.label.split('/')[0].split('(')[0] : (category?.name || '')}
           </div>
-          {/* 밴드 표시 */}
-          <div className="flex justify-center gap-0.5">
-            {cargo.weightBand && (
-              <span className="text-[8px] px-0.5 bg-slate-100 rounded text-slate-500">
-                {cargo.weightBand}
-              </span>
-            )}
-            {cargo.sizeBand && (
-              <span className="text-[8px] px-0.5 bg-slate-100 rounded text-slate-500">
-                {cargo.sizeBand}
-              </span>
-            )}
+          <div className="text-[9px] text-slate-500">
+            {weightLabel}
           </div>
         </div>
       </div>
@@ -102,17 +88,12 @@ export default function CargoSummaryCard({
         )}
       </div>
 
-      {/* 세로 정보 배치 */}
+      {/* 세로 정보 배치 (라벨만 표시) */}
       <div className="space-y-0.5 text-center">
         {/* 모듈 타입 */}
         <div className="text-xs font-semibold text-slate-800">
           {moduleLabel}모듈
         </div>
-
-        {/* 품목 코드 (작게) */}
-        {cargo.itemCode && (
-          <div className="text-[9px] text-slate-400 font-mono">{cargo.itemCode}</div>
-        )}
 
         {/* 품목명 */}
         <div className="text-[10px] text-slate-600 truncate">
@@ -122,20 +103,6 @@ export default function CargoSummaryCard({
         {/* 중량 */}
         <div className="text-[10px] text-slate-500">
           {weightLabel}
-        </div>
-
-        {/* 밴드 표시 */}
-        <div className="flex justify-center gap-1 mt-1">
-          {cargo.weightBand && (
-            <span className="text-[8px] px-1 py-0.5 bg-slate-100 rounded text-slate-500">
-              {cargo.weightBand}
-            </span>
-          )}
-          {cargo.sizeBand && (
-            <span className="text-[8px] px-1 py-0.5 bg-slate-100 rounded text-slate-500">
-              {cargo.sizeBand}
-            </span>
-          )}
         </div>
       </div>
     </div>
