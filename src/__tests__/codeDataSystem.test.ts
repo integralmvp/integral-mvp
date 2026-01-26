@@ -21,7 +21,6 @@ globalThis.localStorage = mockLocalStorage
 
 import {
   addCargo,
-  listCargosByOwner,
   getEvents,
   clearAllData,
   loadOrCreateActiveDemand,
@@ -31,7 +30,7 @@ import {
 } from '../store'
 import { checkQuickRulesWithLogging } from '../engine/rules'
 import { computeDemand } from '../engine'
-import { calculateSumCm, getWeightBand, getSizeBand } from '../data/bands'
+import { calculateSumCm } from '../data/bands'
 
 console.log('='.repeat(60))
 console.log('Code Data System 배선 테스트')
@@ -206,7 +205,7 @@ if (test1Passed && test2Passed) {
   console.log('🎉 Code Data System + Cube Engine 구조 연결 정상')
 } else {
   console.log('⚠️ 연결 문제 발견 - 위 결과 확인 필요')
-  process.exit(1)
+  throw new Error('Test failed')
 }
 
 // 이벤트 로그 전체 출력 (디버깅용)

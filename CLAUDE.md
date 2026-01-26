@@ -75,11 +75,66 @@ VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
 
 ---
 
+## Code Data System (Local-first)
+
+플랫폼의 두 번째 핵심 축. "선 규정, 후 거래" 원칙을 데이터 구조로 구현.
+
+### 데이터 분류
+
+| 분류 | 타입 | 역할 |
+|------|------|------|
+| Info Data | `CargoInfo`, `DemandSession` | 정보 저장 (CRUD 가능) |
+| Event Data | `PlatformEvent` | 사건 기록 (append-only) |
+
+### 플랫폼 표준 코드셋
+
+| 코드 | 범위 | 용도 |
+|------|------|------|
+| ItemCode | IC01~IC99 | 품목 분류 (일반잡화, 농수산물 등) |
+| WeightBand | WBX/WBY/WBZ/WBH | 중량대 (5kg/10kg/20kg/초과) |
+| SizeBand | SB1~SBX | 크기대 (3변합 기준) |
+
+### 핵심 플로우
+
+```
+CargoInfo 생성 → signature 부여 → 규정 체크 → DemandSession 연결 → 큐브 계산 → 자원 준비
+```
+
+### 이벤트 로그 (append-only)
+
+모든 플랫폼 행위는 이벤트로 기록:
+- `CARGO_CREATED`, `CARGO_SIGNATURE_UPDATED`, `CARGO_REMOVED`
+- `RULE_CHECKED`, `RULES_PASSED`
+- `QUANTITY_SET`, `CUBE_CALCULATED`, `RESOURCE_READY`
+- `STORAGE_*`, `TRANSPORT_*`, `SEARCH_EXECUTED`
+
+### 저장소 구조
+
+| 파일 | 역할 |
+|------|------|
+| `store/cargoStore.ts` | CargoInfo CRUD |
+| `store/demandStore.ts` | DemandSession 관리 |
+| `store/eventLog.ts` | 이벤트 기록/조회 |
+| `store/id.ts` | ULID 스타일 ID 생성 |
+| `engine/rules/ruleCheck.ts` | MVP 규정 체크 (크기/중량/제한품목) |
+
+---
+
 ## 프로젝트 구조
 
 ```
 src/
 ├── engine/                    # 플랫폼 통합 엔진 (순수 함수만)
+│   └── rules/                # 규정 체크 로직
+├── store/                     # Code Data System (localStorage 기반)
+│   ├── cargoStore.ts         # CargoInfo CRUD
+│   ├── demandStore.ts        # DemandSession 관리
+│   ├── eventLog.ts           # 이벤트 로그 (append-only)
+│   └── id.ts                 # ULID 스타일 ID 생성
+├── data/
+│   ├── mockData.ts           # 더미 데이터
+│   ├── itemCodes.ts          # 플랫폼 품목 코드 (IC01~IC99)
+│   └── bands.ts              # 중량/크기 밴드 정의
 ├── components/
 │   ├── Layout/
 │   │   ├── CommandLayout.tsx
@@ -96,8 +151,7 @@ src/
 │   └── storages/
 ├── assets/icons/console/     # 입력칸 아이콘 (SVG)
 ├── types/models.ts
-├── styles/fonts.css
-└── data/mockData.ts
+└── styles/fonts.css
 ```
 
 ---
@@ -269,10 +323,11 @@ UI 변경 시:
 |----|------|------|
 | PR1~PR3-2.5 | 초기 설정, UI 개편, 통합 엔진, 구조 리팩토링 | ✅ 완료 |
 | PR3-3 | ServiceConsole 3행 그리드 UI + Navy blue 통일 | ✅ 완료 |
+| PR3-4 | Code Data System MVP (Local-first / 규정→자원 플로우) | ✅ 완료 |
 | PR4 | 검색 매칭 + 지도 연동 | 📋 예정 |
 | PR5 | 거래 모달 + 규정 매칭 | 📋 예정 |
 | PR6 | 마무리 + 최적화 | 📋 예정 |
 
 ---
 
-**최종 수정**: 2025.01.26 (PR3-3 ServiceConsole UI 재설계 완료)
+**최종 수정**: 2025.01.26 (PR3-4 Code Data System MVP 완료)
