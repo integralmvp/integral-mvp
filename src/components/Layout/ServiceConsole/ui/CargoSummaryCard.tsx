@@ -38,7 +38,7 @@ export default function CargoSummaryCard({
     return (
       <div className="flex-shrink-0 w-[68px] mt-6 p-1 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-300/80 shadow-sm">
         {/* 순번 + 삭제 */}
-        <div className="flex items-center justify-between -mt-2 mb-0">
+        <div className="flex items-center justify-between -mt-1 -mb-1">
           <span className="text-[10px] font-bold text-slate-700">{index + 1}</span>
           {onRemove && (
             <button
