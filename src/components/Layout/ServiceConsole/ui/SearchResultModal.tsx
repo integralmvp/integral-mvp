@@ -12,6 +12,14 @@ import { useState } from 'react'
 import type { StorageProduct, RouteProduct, StorageCondition, TransportCondition, RegisteredCargo, ServiceOrder } from '../../../../types/models'
 import type { RegulationSummary } from '../../../../engine/regulation'
 import type { ServiceType } from '../hooks/useServiceConsoleState'
+import { JEJU_LOCATIONS } from '../../../../data/mockData'
+
+// 장소 ID를 한글 이름으로 변환
+const getLocationName = (locationId?: string): string => {
+  if (!locationId) return '전체'
+  const location = JEJU_LOCATIONS.find(l => l.id === locationId)
+  return location?.name || locationId
+}
 
 interface SearchResultModalProps {
   isOpen: boolean
@@ -201,7 +209,7 @@ function ConditionSummary({
             <div className="bg-white rounded-lg p-3 border border-slate-200">
               <div className="text-xs text-slate-400 mb-1">보관 장소</div>
               <div className="font-medium text-slate-900">
-                {storageCondition.location || '전체'}
+                {getLocationName(storageCondition.location)}
               </div>
             </div>
             <div className="bg-white rounded-lg p-3 border border-slate-200">
@@ -222,8 +230,8 @@ function ConditionSummary({
               <div className="text-xs text-slate-400 mb-1">출발지 → 도착지</div>
               <div className="font-medium text-slate-900">
                 {transportCondition.origin && transportCondition.destination
-                  ? `${transportCondition.origin} → ${transportCondition.destination}`
-                  : transportCondition.origin || transportCondition.destination || '전체'}
+                  ? `${getLocationName(transportCondition.origin)} → ${getLocationName(transportCondition.destination)}`
+                  : getLocationName(transportCondition.origin) || getLocationName(transportCondition.destination) || '전체'}
               </div>
             </div>
             <div className="bg-white rounded-lg p-3 border border-slate-200">
@@ -331,11 +339,96 @@ export default function SearchResultModal({
           </div>
         </div>
 
-        {/* 보관+운송일 경우: 입력 조건 요약 → 안내문구 → 탭 순서 */}
-        {activeTab === 'both' && (
-          <>
-            {/* 입력 조건 요약 */}
-            <div className="px-6 pt-4">
+        {/* 컨텐츠 영역 - 모달 전체 스크롤 */}
+        <div className="flex-1 overflow-y-auto">
+          {/* 보관+운송일 경우: 입력 조건 요약 → 안내문구 → 탭 → 상품 리스트 (전체 스크롤) */}
+          {activeTab === 'both' && (
+            <>
+              {/* 입력 조건 요약 */}
+              <div className="px-6 pt-4">
+                <ConditionSummary
+                  activeTab={activeTab}
+                  registeredCargos={registeredCargos}
+                  totalCubes={totalCubes}
+                  totalPallets={totalPallets}
+                  storageCondition={storageCondition}
+                  transportCondition={transportCondition}
+                  serviceOrder={serviceOrder}
+                />
+
+                {/* 안내 문구 */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-blue-800">{getBothGuideMessage()}</p>
+                </div>
+              </div>
+
+              {/* 내부 탭 (순서에 따라 탭 순서 변경) - sticky로 스크롤 시 상단 고정 */}
+              <div className="flex border-b border-slate-200 bg-white sticky top-0 z-10">
+                <button
+                  onClick={() => setBothTab('integrated')}
+                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                    bothTab === 'integrated'
+                      ? 'text-blue-900 border-b-2 border-blue-900'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  연계
+                </button>
+                {effectiveOrder === 'storage-first' ? (
+                  <>
+                    <button
+                      onClick={() => setBothTab('storage')}
+                      className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                        bothTab === 'storage'
+                          ? 'text-blue-900 border-b-2 border-blue-900'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      보관
+                    </button>
+                    <button
+                      onClick={() => setBothTab('transport')}
+                      className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                        bothTab === 'transport'
+                          ? 'text-blue-900 border-b-2 border-blue-900'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      운송
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setBothTab('transport')}
+                      className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                        bothTab === 'transport'
+                          ? 'text-blue-900 border-b-2 border-blue-900'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      운송
+                    </button>
+                    <button
+                      onClick={() => setBothTab('storage')}
+                      className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                        bothTab === 'storage'
+                          ? 'text-blue-900 border-b-2 border-blue-900'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      보관
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* 상품 리스트 영역 */}
+          <div className="p-6">
+            {/* 보관/운송 단일 탭일 경우 입력 조건 요약 */}
+            {activeTab !== 'both' && (
               <ConditionSummary
                 activeTab={activeTab}
                 registeredCargos={registeredCargos}
@@ -345,138 +438,56 @@ export default function SearchResultModal({
                 transportCondition={transportCondition}
                 serviceOrder={serviceOrder}
               />
+            )}
 
-              {/* 안내 문구 */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                <p className="text-sm text-blue-800">{getBothGuideMessage()}</p>
+            {/* 상품 리스트 */}
+            {filteredCount === 0 ? (
+              <div className="text-center py-12 text-slate-400">
+                {activeTab === 'both' && bothTab === 'integrated' ? (
+                  <>
+                    <div className="text-4xl mb-3">📦</div>
+                    <div>연계 상품은 준비 중입니다.</div>
+                    <div className="text-sm mt-1">보관 또는 운송 탭에서 개별 상품을 확인하세요.</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-4xl mb-3">🔍</div>
+                    <div>조건에 맞는 상품이 없습니다.</div>
+                  </>
+                )}
               </div>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                {/* 보관 상품 */}
+                {filtered.storage.length > 0 && (
+                  <>
+                    {activeTab === 'both' && bothTab !== 'storage' && (
+                      <div className="text-sm font-semibold text-slate-700 mt-4 mb-2">
+                        공간상품 ({filtered.storage.length})
+                      </div>
+                    )}
+                    {filtered.storage.map(product => (
+                      <StorageProductCard key={product.id} product={product} />
+                    ))}
+                  </>
+                )}
 
-            {/* 내부 탭 (순서에 따라 탭 순서 변경) */}
-            <div className="flex border-b border-slate-200">
-              <button
-                onClick={() => setBothTab('integrated')}
-                className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                  bothTab === 'integrated'
-                    ? 'text-blue-900 border-b-2 border-blue-900'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                연계
-              </button>
-              {effectiveOrder === 'storage-first' ? (
-                <>
-                  <button
-                    onClick={() => setBothTab('storage')}
-                    className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                      bothTab === 'storage'
-                        ? 'text-blue-900 border-b-2 border-blue-900'
-                        : 'text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    보관
-                  </button>
-                  <button
-                    onClick={() => setBothTab('transport')}
-                    className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                      bothTab === 'transport'
-                        ? 'text-blue-900 border-b-2 border-blue-900'
-                        : 'text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    운송
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setBothTab('transport')}
-                    className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                      bothTab === 'transport'
-                        ? 'text-blue-900 border-b-2 border-blue-900'
-                        : 'text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    운송
-                  </button>
-                  <button
-                    onClick={() => setBothTab('storage')}
-                    className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                      bothTab === 'storage'
-                        ? 'text-blue-900 border-b-2 border-blue-900'
-                        : 'text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    보관
-                  </button>
-                </>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* 컨텐츠 영역 */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* 보관/운송 단일 탭일 경우 입력 조건 요약 */}
-          {activeTab !== 'both' && (
-            <ConditionSummary
-              activeTab={activeTab}
-              registeredCargos={registeredCargos}
-              totalCubes={totalCubes}
-              totalPallets={totalPallets}
-              storageCondition={storageCondition}
-              transportCondition={transportCondition}
-              serviceOrder={serviceOrder}
-            />
-          )}
-
-          {/* 상품 리스트 */}
-          {filteredCount === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              {activeTab === 'both' && bothTab === 'integrated' ? (
-                <>
-                  <div className="text-4xl mb-3">📦</div>
-                  <div>연계 상품은 준비 중입니다.</div>
-                  <div className="text-sm mt-1">보관 또는 운송 탭에서 개별 상품을 확인하세요.</div>
-                </>
-              ) : (
-                <>
-                  <div className="text-4xl mb-3">🔍</div>
-                  <div>조건에 맞는 상품이 없습니다.</div>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {/* 보관 상품 */}
-              {filtered.storage.length > 0 && (
-                <>
-                  {activeTab === 'both' && bothTab !== 'storage' && (
-                    <div className="text-sm font-semibold text-slate-700 mt-4 mb-2">
-                      공간상품 ({filtered.storage.length})
-                    </div>
-                  )}
-                  {filtered.storage.map(product => (
-                    <StorageProductCard key={product.id} product={product} />
-                  ))}
-                </>
-              )}
-
-              {/* 운송 상품 */}
-              {filtered.route.length > 0 && (
-                <>
-                  {activeTab === 'both' && bothTab !== 'transport' && (
-                    <div className="text-sm font-semibold text-slate-700 mt-4 mb-2">
-                      경로상품 ({filtered.route.length})
-                    </div>
-                  )}
-                  {filtered.route.map(product => (
-                    <RouteProductCard key={product.id} product={product} />
-                  ))}
-                </>
-              )}
-            </div>
-          )}
+                {/* 운송 상품 */}
+                {filtered.route.length > 0 && (
+                  <>
+                    {activeTab === 'both' && bothTab !== 'transport' && (
+                      <div className="text-sm font-semibold text-slate-700 mt-4 mb-2">
+                        경로상품 ({filtered.route.length})
+                      </div>
+                    )}
+                    {filtered.route.map(product => (
+                      <RouteProductCard key={product.id} product={product} />
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
