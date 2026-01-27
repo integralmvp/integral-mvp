@@ -9,7 +9,7 @@
  */
 
 import { useState } from 'react'
-import type { StorageProduct, RouteProduct, StorageCondition, TransportCondition, RegisteredCargo } from '../../../../types/models'
+import type { StorageProduct, RouteProduct, StorageCondition, TransportCondition, RegisteredCargo, ServiceOrder } from '../../../../types/models'
 import type { RegulationSummary } from '../../../../engine/regulation'
 import type { ServiceType } from '../hooks/useServiceConsoleState'
 
@@ -26,6 +26,8 @@ interface SearchResultModalProps {
   totalPallets: number
   storageCondition: StorageCondition
   transportCondition: TransportCondition
+  // 보관+운송 순서
+  serviceOrder?: ServiceOrder
 }
 
 // 탭별 헤더 정보
@@ -142,6 +144,7 @@ function ConditionSummary({
   totalPallets,
   storageCondition,
   transportCondition,
+  serviceOrder,
 }: {
   activeTab: ServiceType
   registeredCargos: RegisteredCargo[]
@@ -149,7 +152,21 @@ function ConditionSummary({
   totalPallets: number
   storageCondition: StorageCondition
   transportCondition: TransportCondition
+  serviceOrder?: ServiceOrder
 }) {
+  // 자동 연계 날짜 계산 (보관+운송 탭에서 사용)
+  const effectiveOrder = serviceOrder || 'storage-first'
+
+  // 보관 시작일: transport-first인 경우 운송일과 연동
+  const effectiveStorageStartDate = activeTab === 'both' && effectiveOrder === 'transport-first' && transportCondition.transportDate
+    ? transportCondition.transportDate
+    : storageCondition.startDate
+
+  // 운송일: storage-first인 경우 보관 종료일과 연동
+  const effectiveTransportDate = activeTab === 'both' && effectiveOrder === 'storage-first' && storageCondition.endDate
+    ? storageCondition.endDate
+    : transportCondition.transportDate
+
   return (
     <div className="bg-slate-50 rounded-xl p-4 mb-4">
       <div className="text-xs font-semibold text-slate-500 mb-2">입력 조건 요약</div>
@@ -170,8 +187,10 @@ function ConditionSummary({
           <div className="font-medium text-slate-900">
             {totalCubes > 0
               ? activeTab === 'storage'
-                ? `${totalPallets} Pallet`
-                : `${totalCubes} Cube`
+                ? `${totalPallets} 파레트`
+                : activeTab === 'transport'
+                  ? `${totalCubes} 큐브`
+                  : `${totalPallets} 파레트 / ${totalCubes} 큐브`
               : '-'}
           </div>
         </div>
@@ -188,9 +207,9 @@ function ConditionSummary({
             <div className="bg-white rounded-lg p-3 border border-slate-200">
               <div className="text-xs text-slate-400 mb-1">보관 기간</div>
               <div className="font-medium text-slate-900">
-                {storageCondition.startDate && storageCondition.endDate
-                  ? `${storageCondition.startDate} ~ ${storageCondition.endDate}`
-                  : '-'}
+                {effectiveStorageStartDate && storageCondition.endDate
+                  ? `${effectiveStorageStartDate} ~ ${storageCondition.endDate}`
+                  : effectiveStorageStartDate || storageCondition.endDate || '-'}
               </div>
             </div>
           </>
@@ -200,7 +219,7 @@ function ConditionSummary({
         {(activeTab === 'transport' || activeTab === 'both') && (
           <>
             <div className="bg-white rounded-lg p-3 border border-slate-200">
-              <div className="text-xs text-slate-400 mb-1">경로</div>
+              <div className="text-xs text-slate-400 mb-1">출발지 → 도착지</div>
               <div className="font-medium text-slate-900">
                 {transportCondition.origin && transportCondition.destination
                   ? `${transportCondition.origin} → ${transportCondition.destination}`
@@ -210,7 +229,7 @@ function ConditionSummary({
             <div className="bg-white rounded-lg p-3 border border-slate-200">
               <div className="text-xs text-slate-400 mb-1">운송일</div>
               <div className="font-medium text-slate-900">
-                {transportCondition.transportDate || '-'}
+                {effectiveTransportDate || '-'}
               </div>
             </div>
           </>
@@ -232,6 +251,7 @@ export default function SearchResultModal({
   totalPallets,
   storageCondition,
   transportCondition,
+  serviceOrder,
 }: SearchResultModalProps) {
   // 보관+운송 모달 내부 탭
   const [bothTab, setBothTab] = useState<BothModalTab>('integrated')
@@ -240,6 +260,7 @@ export default function SearchResultModal({
 
   const header = TAB_HEADERS[activeTab]
   const totalCount = storageProducts.length + routeProducts.length
+  const effectiveOrder = serviceOrder || 'storage-first'
 
   // 보관+운송 탭일 때 내부 탭에 따른 상품 필터링
   const getFilteredProducts = () => {
@@ -262,6 +283,15 @@ export default function SearchResultModal({
 
   const filtered = getFilteredProducts()
   const filteredCount = filtered.storage.length + filtered.route.length
+
+  // 보관+운송 안내 문구 (순서에 따라 변경)
+  const getBothGuideMessage = () => {
+    if (effectiveOrder === 'storage-first') {
+      return '연계 상품을 구매하시는 경우가 아니면, 공간 상품 구매 완료 후 경로 상품 구매가 진행됩니다.'
+    } else {
+      return '연계 상품을 구매하시는 경우가 아니면, 경로 상품 구매 완료 후 공간 상품 구매가 진행됩니다.'
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -301,7 +331,7 @@ export default function SearchResultModal({
           </div>
         </div>
 
-        {/* 보관+운송일 경우 내부 탭 */}
+        {/* 보관+운송일 경우 내부 탭 (순서에 따라 탭 순서 변경) */}
         {activeTab === 'both' && (
           <div className="flex border-b border-slate-200">
             <button
@@ -312,28 +342,55 @@ export default function SearchResultModal({
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              보관+운송
+              연계
             </button>
-            <button
-              onClick={() => setBothTab('storage')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                bothTab === 'storage'
-                  ? 'text-blue-900 border-b-2 border-blue-900'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              보관
-            </button>
-            <button
-              onClick={() => setBothTab('transport')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                bothTab === 'transport'
-                  ? 'text-blue-900 border-b-2 border-blue-900'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              운송
-            </button>
+            {effectiveOrder === 'storage-first' ? (
+              <>
+                <button
+                  onClick={() => setBothTab('storage')}
+                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                    bothTab === 'storage'
+                      ? 'text-blue-900 border-b-2 border-blue-900'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  보관
+                </button>
+                <button
+                  onClick={() => setBothTab('transport')}
+                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                    bothTab === 'transport'
+                      ? 'text-blue-900 border-b-2 border-blue-900'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  운송
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setBothTab('transport')}
+                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                    bothTab === 'transport'
+                      ? 'text-blue-900 border-b-2 border-blue-900'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  운송
+                </button>
+                <button
+                  onClick={() => setBothTab('storage')}
+                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                    bothTab === 'storage'
+                      ? 'text-blue-900 border-b-2 border-blue-900'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  보관
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -347,7 +404,15 @@ export default function SearchResultModal({
             totalPallets={totalPallets}
             storageCondition={storageCondition}
             transportCondition={transportCondition}
+            serviceOrder={serviceOrder}
           />
+
+          {/* 보관+운송 안내 문구 */}
+          {activeTab === 'both' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-blue-800">{getBothGuideMessage()}</p>
+            </div>
+          )}
 
           {/* 상품 리스트 */}
           {filteredCount === 0 ? (
