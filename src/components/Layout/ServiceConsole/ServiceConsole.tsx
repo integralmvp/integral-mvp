@@ -270,6 +270,7 @@ export default function ServiceConsole() {
         totalPallets={state.totalPallets}
         storageCondition={state.storageCondition}
         transportCondition={state.transportCondition}
+        serviceOrder={state.serviceOrder}
       />
     </div>
   )

@@ -54,17 +54,13 @@ export function createPalletSvg(size: number): string {
 export function createAvailableMarkerSvg(): string {
   return `
     <svg width="32" height="42" viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg">
-      <!-- 물방울 모양 -->
-      <path d="M16 0C16 0 0 14 0 24C0 32.8366 7.16344 40 16 40C24.8366 40 32 32.8366 32 24C32 14 16 0 16 0Z"
-            fill="#1e40af" stroke="#3b82f6" stroke-width="2"/>
-      <!-- O 표시 -->
-      <circle cx="16" cy="22" r="8" fill="none" stroke="white" stroke-width="3"/>
-      <!-- 그림자 효과 -->
-      <defs>
-        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
-        </filter>
-      </defs>
+      <!-- 물방울 모양 (180도 회전 - 뾰족한 부분이 아래로) -->
+      <g transform="rotate(180, 16, 21)">
+        <path d="M16 0C16 0 0 14 0 24C0 32.8366 7.16344 40 16 40C24.8366 40 32 32.8366 32 24C32 14 16 0 16 0Z"
+              fill="#1e40af" stroke="#3b82f6" stroke-width="2"/>
+        <!-- O 표시 (연두색) -->
+        <circle cx="16" cy="22" r="8" fill="none" stroke="#22c55e" stroke-width="3"/>
+      </g>
     </svg>
   `
 }
