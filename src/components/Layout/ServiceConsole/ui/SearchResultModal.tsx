@@ -331,87 +331,103 @@ export default function SearchResultModal({
           </div>
         </div>
 
-        {/* 보관+운송일 경우 내부 탭 (순서에 따라 탭 순서 변경) */}
+        {/* 보관+운송일 경우: 입력 조건 요약 → 안내문구 → 탭 순서 */}
         {activeTab === 'both' && (
-          <div className="flex border-b border-slate-200">
-            <button
-              onClick={() => setBothTab('integrated')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                bothTab === 'integrated'
-                  ? 'text-blue-900 border-b-2 border-blue-900'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              연계
-            </button>
-            {effectiveOrder === 'storage-first' ? (
-              <>
-                <button
-                  onClick={() => setBothTab('storage')}
-                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                    bothTab === 'storage'
-                      ? 'text-blue-900 border-b-2 border-blue-900'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  보관
-                </button>
-                <button
-                  onClick={() => setBothTab('transport')}
-                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                    bothTab === 'transport'
-                      ? 'text-blue-900 border-b-2 border-blue-900'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  운송
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setBothTab('transport')}
-                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                    bothTab === 'transport'
-                      ? 'text-blue-900 border-b-2 border-blue-900'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  운송
-                </button>
-                <button
-                  onClick={() => setBothTab('storage')}
-                  className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                    bothTab === 'storage'
-                      ? 'text-blue-900 border-b-2 border-blue-900'
-                      : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  보관
-                </button>
-              </>
-            )}
-          </div>
+          <>
+            {/* 입력 조건 요약 */}
+            <div className="px-6 pt-4">
+              <ConditionSummary
+                activeTab={activeTab}
+                registeredCargos={registeredCargos}
+                totalCubes={totalCubes}
+                totalPallets={totalPallets}
+                storageCondition={storageCondition}
+                transportCondition={transportCondition}
+                serviceOrder={serviceOrder}
+              />
+
+              {/* 안내 문구 */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-800">{getBothGuideMessage()}</p>
+              </div>
+            </div>
+
+            {/* 내부 탭 (순서에 따라 탭 순서 변경) */}
+            <div className="flex border-b border-slate-200">
+              <button
+                onClick={() => setBothTab('integrated')}
+                className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                  bothTab === 'integrated'
+                    ? 'text-blue-900 border-b-2 border-blue-900'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                연계
+              </button>
+              {effectiveOrder === 'storage-first' ? (
+                <>
+                  <button
+                    onClick={() => setBothTab('storage')}
+                    className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                      bothTab === 'storage'
+                        ? 'text-blue-900 border-b-2 border-blue-900'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    보관
+                  </button>
+                  <button
+                    onClick={() => setBothTab('transport')}
+                    className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                      bothTab === 'transport'
+                        ? 'text-blue-900 border-b-2 border-blue-900'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    운송
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setBothTab('transport')}
+                    className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                      bothTab === 'transport'
+                        ? 'text-blue-900 border-b-2 border-blue-900'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    운송
+                  </button>
+                  <button
+                    onClick={() => setBothTab('storage')}
+                    className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                      bothTab === 'storage'
+                        ? 'text-blue-900 border-b-2 border-blue-900'
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    보관
+                  </button>
+                </>
+              )}
+            </div>
+          </>
         )}
 
         {/* 컨텐츠 영역 */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* 입력 조건 요약 */}
-          <ConditionSummary
-            activeTab={activeTab}
-            registeredCargos={registeredCargos}
-            totalCubes={totalCubes}
-            totalPallets={totalPallets}
-            storageCondition={storageCondition}
-            transportCondition={transportCondition}
-            serviceOrder={serviceOrder}
-          />
-
-          {/* 보관+운송 안내 문구 */}
-          {activeTab === 'both' && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-blue-800">{getBothGuideMessage()}</p>
-            </div>
+          {/* 보관/운송 단일 탭일 경우 입력 조건 요약 */}
+          {activeTab !== 'both' && (
+            <ConditionSummary
+              activeTab={activeTab}
+              registeredCargos={registeredCargos}
+              totalCubes={totalCubes}
+              totalPallets={totalPallets}
+              storageCondition={storageCondition}
+              transportCondition={transportCondition}
+              serviceOrder={serviceOrder}
+            />
           )}
 
           {/* 상품 리스트 */}
