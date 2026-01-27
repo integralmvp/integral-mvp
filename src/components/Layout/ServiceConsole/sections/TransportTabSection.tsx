@@ -17,6 +17,7 @@ import {
   DatePicker,
   ConversionResult,
   CargoSummaryCard,
+  ResetButton,
 } from '../ui'
 
 interface TransportTabSectionProps {
@@ -38,6 +39,10 @@ interface TransportTabSectionProps {
   // 조건 입력
   transportCondition: TransportCondition
   onUpdateCondition: (updates: Partial<TransportCondition>) => void
+
+  // PR4: 초기화 액션
+  onResetQuantities?: () => void
+  onResetTransportCondition?: () => void
 }
 
 // 모달 타입 정의
@@ -57,6 +62,8 @@ export default function TransportTabSection({
   demandResult,
   transportCondition,
   onUpdateCondition,
+  onResetQuantities,
+  onResetTransportCondition,
 }: TransportTabSectionProps) {
   const [activeModal, setActiveModal] = useState<ModalType>(null)
 
@@ -155,6 +162,12 @@ export default function TransportTabSection({
           icon="volume"
           onClick={() => openModal('quantity')}
           disabled={registeredCargos.length === 0}
+          headerAction={
+            <ResetButton
+              onClick={() => onResetQuantities?.()}
+              disabled={!allQuantitiesEntered}
+            />
+          }
         >
           {registeredCargos.length === 0 ? (
             <span className="text-slate-400 text-xs">화물 등록 필요</span>
@@ -179,6 +192,12 @@ export default function TransportTabSection({
             label="출발지"
             icon="origin"
             onClick={() => openModal('origin')}
+            headerAction={
+              <ResetButton
+                onClick={() => onResetTransportCondition?.()}
+                disabled={!transportCondition.origin && !transportCondition.destination && !transportCondition.transportDate}
+              />
+            }
           >
             {transportCondition.origin ? (
               <span className="text-sm font-medium">{getLocationName(transportCondition.origin)}</span>

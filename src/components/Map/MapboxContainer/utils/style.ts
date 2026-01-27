@@ -49,3 +49,37 @@ export function createPalletSvg(size: number): string {
     </svg>
   `
 }
+
+// PR4: 구매 가능 상품 하이라이트 마커 (물방울 + O 표시)
+export function createAvailableMarkerSvg(): string {
+  return `
+    <svg width="32" height="42" viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg">
+      <!-- 물방울 모양 -->
+      <path d="M16 0C16 0 0 14 0 24C0 32.8366 7.16344 40 16 40C24.8366 40 32 32.8366 32 24C32 14 16 0 16 0Z"
+            fill="#1e40af" stroke="#3b82f6" stroke-width="2"/>
+      <!-- O 표시 -->
+      <circle cx="16" cy="22" r="8" fill="none" stroke="white" stroke-width="3"/>
+      <!-- 그림자 효과 -->
+      <defs>
+        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+        </filter>
+      </defs>
+    </svg>
+  `
+}
+
+// PR4: 하이라이트 마커 HTML 생성
+export function createHighlightMarkerHtml(): string {
+  return `
+    <div class="highlight-marker" style="
+      width: 32px;
+      height: 42px;
+      cursor: pointer;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      animation: bounce 0.5s ease-out;
+    ">
+      ${createAvailableMarkerSvg()}
+    </div>
+  `
+}
