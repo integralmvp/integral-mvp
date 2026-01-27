@@ -125,34 +125,66 @@ CargoInfo 생성 → signature 부여 → 규정 체크 → DemandSession 연결
 ```
 src/
 ├── engine/                    # 플랫폼 통합 엔진 (순수 함수만)
-│   └── rules/                # 규정 체크 로직
+│   ├── rules/                # 규정 체크 로직
+│   └── regulation/           # PR4: 규정 엔진 (상품 필터링)
 ├── store/                     # Code Data System (localStorage 기반)
-│   ├── cargoStore.ts         # CargoInfo CRUD
-│   ├── demandStore.ts        # DemandSession 관리
-│   ├── eventLog.ts           # 이벤트 로그 (append-only)
-│   └── id.ts                 # ULID 스타일 ID 생성
+├── contexts/                  # PR4: React Context
+│   └── SearchResultContext   # 검색 결과 공유 (ServiceConsole ↔ Map)
 ├── data/
-│   ├── mockData.ts           # 더미 데이터
+│   ├── mockData.ts           # 더미 데이터 (상품별 규정 필드 포함)
 │   ├── itemCodes.ts          # 플랫폼 품목 코드 (IC01~IC99)
 │   └── bands.ts              # 중량/크기 밴드 정의
 ├── components/
 │   ├── Layout/
-│   │   ├── CommandLayout.tsx
+│   │   ├── CommandLayout.tsx # 지도 하이라이트 마커 연동
 │   │   └── ServiceConsole/   # 3행 그리드 레이아웃 UI
 │   │       ├── ServiceConsole.tsx
 │   │       ├── sections/     # StorageTab, TransportTab, BothTab
-│   │       ├── ui/           # GridCell, InputModal, CargoSummaryCard 등
+│   │       ├── ui/           # GridCell, InputModal, SearchResultModal, ResetButton 등
 │   │       └── hooks/        # useServiceConsoleState
 │   ├── Map/MapboxContainer/
-│   ├── visualizations/
-│   ├── common/
-│   ├── deal/
-│   ├── routes/
-│   └── storages/
-├── assets/icons/console/     # 입력칸 아이콘 (SVG)
-├── types/models.ts
+│   │   └── utils/style.ts    # 마커 스타일 (하이라이트 마커 포함)
+│   └── ...
+├── types/models.ts           # 상품 모델 (규정 필드 포함)
 └── styles/fonts.css
 ```
+
+---
+
+## Regulation Engine (PR4)
+
+화물 정보 기반으로 상품을 필터링하는 규정 엔진.
+
+### 핵심 규정 (4가지)
+
+| 규정 | 필드 | 설명 |
+|------|------|------|
+| 크기 제한 | `maxSumCm` | 3변합 초과 시 제외 |
+| 중량 제한 | `maxWeightKg` | 중량 초과 시 제외 |
+| 품목 제한 | `allowedItemCodes` | 허용 품목 외 제외 |
+| 최소 물량 | `minCubes` | 최소 큐브 미달 시 제외 |
+
+### 선택적 플래그
+
+| 플래그 | 설명 |
+|--------|------|
+| `tempSupported` | 온도 관리 필요 화물 지원 여부 |
+| `hazmatSupported` | 위험물 지원 여부 |
+| `allowedModuleClasses` | 허용 포장 모듈 클래스 |
+
+### 주요 함수 (`engine/regulation/`)
+
+```typescript
+checkRegulation(cargo, offer) → RegulationDecision  // 단일 화물-상품 규정 체크
+filterOffersByRegulation(cargos, offers) → FilterResult  // 전체 필터링
+adaptCargoForRegulation(registeredCargo) → CargoForRegulation  // UI→엔진 변환
+```
+
+### 지도 연동
+
+- **실시간 필터링**: 화물 등록 시 즉시 지도에 반영
+- **하이라이트 마커**: 구매 가능 상품에 물방울 마커 + 연두색 O 표시
+- **SearchResultContext**: ServiceConsole ↔ Map 간 검색 결과 공유
 
 ---
 
@@ -241,6 +273,7 @@ UI 변경 시:
 | 도내 경로 | #3b82f6 (파란색, 실선) |
 | 입도 경로 | #10b981 (녹색, 점선) |
 | 출도 경로 | #a855f7 (보라색, 점선) |
+| 구매 가능 하이라이트 | #1e40af (물방울) + #22c55e (연두색 O) |
 
 ---
 
@@ -324,10 +357,10 @@ UI 변경 시:
 | PR1~PR3-2.5 | 초기 설정, UI 개편, 통합 엔진, 구조 리팩토링 | ✅ 완료 |
 | PR3-3 | ServiceConsole 3행 그리드 UI + Navy blue 통일 | ✅ 완료 |
 | PR3-4 | Code Data System MVP (Local-first / 규정→자원 플로우) | ✅ 완료 |
-| PR4 | 검색 매칭 + 지도 연동 | 📋 예정 |
+| PR4 | Regulation Engine + 검색/지도 연동 | ✅ 완료 |
 | PR5 | 거래 모달 + 규정 매칭 | 📋 예정 |
 | PR6 | 마무리 + 최적화 | 📋 예정 |
 
 ---
 
-**최종 수정**: 2025.01.26 (PR3-4 Code Data System MVP 완료)
+**최종 수정**: 2025.01.27 (PR4 Regulation Engine + 검색/지도 연동 완료)
