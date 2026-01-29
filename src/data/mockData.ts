@@ -59,6 +59,9 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     maxSumCm: 200,
     tempSupported: true,
     minCubes: 0,
+    // PR5 자원: 5톤 차량 (여유 있음)
+    capacityCubes: 400,
+    remainingCubes: 350,
   },
   {
     id: 'R2',
@@ -85,6 +88,9 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     maxSumCm: 120,
     allowedModuleClasses: ['소형', '중형'] as ModuleClassification[],
     minCubes: 0,
+    // PR5 자원: 3.5톤 차량 (전체 가용)
+    capacityCubes: 280,
+    remainingCubes: 280,
   },
   {
     id: 'R3',
@@ -111,6 +117,9 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     minCubes: 8,
     maxWeightKg: 20,
     maxSumCm: 170,
+    // PR5 자원: 5톤 차량 (거의 다 찼음 - 필터링 테스트용)
+    capacityCubes: 400,
+    remainingCubes: 100,
   },
   {
     id: 'R4',
@@ -137,6 +146,9 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     maxSumCm: 100,
     allowedModuleClasses: ['소형'] as ModuleClassification[],
     minCubes: 0,
+    // PR5 자원: 1톤 소형 차량 (전체 가용)
+    capacityCubes: 80,
+    remainingCubes: 80,
   },
 
   // 입도 경로 (2개)
@@ -167,6 +179,9 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     maxSumCm: 250,
     tempSupported: true,
     minCubes: 16,
+    // PR5 자원: 11톤 대용량 (여유 있음)
+    capacityCubes: 880,
+    remainingCubes: 600,
   },
   {
     id: 'R6',
@@ -196,6 +211,9 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     maxWeightKg: 20,
     maxSumCm: 170,
     minCubes: 4,
+    // PR5 자원: 8톤 차량 (여유 있음)
+    capacityCubes: 640,
+    remainingCubes: 400,
   },
 
   // 출도 경로 (2개)
@@ -226,6 +244,9 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     maxSumCm: 200,
     tempSupported: false,
     minCubes: 32,
+    // PR5 자원: 11톤 대용량 (거의 다 찼음 - 필터링 테스트용)
+    capacityCubes: 880,
+    remainingCubes: 200,
   },
   {
     id: 'R8',
@@ -254,10 +275,14 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     maxSumCm: 170,
     tempSupported: true,
     minCubes: 0,
+    // PR5 자원: 5톤 차량 (전체 가용)
+    capacityCubes: 400,
+    remainingCubes: 400,
   },
 ]
 
 // ============ 공간 상품 (8개) ============
+// PR5: capacityCubes = Pallet 수 × 128
 export const STORAGE_PRODUCTS: StorageProduct[] = [
   {
     id: 'S1',
@@ -278,6 +303,9 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     maxSumCm: 200,
     tempSupported: false,
     minCubes: 0,
+    // PR5 자원: 30 Pallet × 128 = 3840 큐브 (전체 가용)
+    capacityCubes: 3840,
+    remainingCubes: 3840,
   },
   {
     id: 'S2',
@@ -299,6 +327,9 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     maxSumCm: 170,
     tempSupported: true,
     minCubes: 4,
+    // PR5 자원: 15 Pallet × 128 = 1920 큐브 (일부 사용 중)
+    capacityCubes: 1920,
+    remainingCubes: 1000,
   },
   {
     id: 'S3',
@@ -319,6 +350,9 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     maxSumCm: 250,
     tempSupported: false,
     minCubes: 8,
+    // PR5 자원: 25 Pallet × 128 = 3200 큐브 (전체 가용)
+    capacityCubes: 3200,
+    remainingCubes: 3200,
   },
   {
     id: 'S4',
@@ -340,6 +374,9 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     maxSumCm: 180,
     tempSupported: true,
     minCubes: 8,
+    // PR5 자원: 20 Pallet × 128 = 2560 큐브 (거의 다 찼음 - 필터링 테스트용)
+    capacityCubes: 2560,
+    remainingCubes: 500,
   },
   {
     id: 'S5',
@@ -361,6 +398,9 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     tempSupported: false,
     allowedModuleClasses: ['소형', '중형'] as ModuleClassification[],
     minCubes: 0,
+    // PR5 자원: 10 Pallet × 128 = 1280 큐브 (전체 가용)
+    capacityCubes: 1280,
+    remainingCubes: 1280,
   },
   {
     id: 'S6',
@@ -382,6 +422,9 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     maxSumCm: 170,
     tempSupported: true,
     minCubes: 0,
+    // PR5 자원: 12 Pallet × 128 = 1536 큐브 (일부 사용 중)
+    capacityCubes: 1536,
+    remainingCubes: 800,
   },
   {
     id: 'S7',
@@ -402,6 +445,9 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     maxSumCm: 170,
     tempSupported: false,
     minCubes: 0,
+    // PR5 자원: 22 Pallet × 128 = 2816 큐브 (전체 가용)
+    capacityCubes: 2816,
+    remainingCubes: 2816,
   },
   {
     id: 'S8',
@@ -422,6 +468,9 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     maxSumCm: 170,
     tempSupported: true,
     minCubes: 4,
+    // PR5 자원: 18 Pallet × 128 = 2304 큐브 (거의 다 찼음 - 필터링 테스트용)
+    capacityCubes: 2304,
+    remainingCubes: 100,
   },
 ]
 
