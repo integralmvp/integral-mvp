@@ -80,7 +80,6 @@ export default function CommandLayout() {
       {/* 좌측 45%: 블러 오버레이 */}
       <div className="absolute inset-y-0 left-0 w-[45%] z-10 flex flex-col"
         style={{
-          backdropFilter: 'blur(5px)',
           background: 'rgba(0,0,0,0.6)'
         }}
       >
