@@ -80,7 +80,7 @@ export default function CommandLayout() {
       {/* 좌측 45%: 블러 오버레이 */}
       <div className="absolute inset-y-0 left-0 w-[45%] z-10 flex flex-col"
         style={{
-          background: 'rgba(0,0,0,0.6)'
+          background: 'rgba(0,0,0)'
         }}
       >
         {/* 상단: 로고 영역 */}
