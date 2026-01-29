@@ -90,8 +90,8 @@ export default function CommandLayout() {
             className="cursor-pointer hover:opacity-70 transition-opacity inline-block"
             onClick={() => window.location.reload()}
           >
-            <span className="text-blue-900 text-3xl font-black tracking-tight drop-shadow-lg">
-              INTEGRAL
+            <span className="text-teal-700 text-3xl font-black tracking-tight drop-shadow-lg">
+              CUBE
             </span>
           </div>
           {/* 네비게이션 - 추후 추가 */}
