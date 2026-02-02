@@ -21,6 +21,14 @@ import {
   type RegulationSummary,
 } from '../../../../engine/regulation'
 import {
+  filterStorageByResource,
+  filterRouteByResource,
+} from '../../../../engine/resource'
+import {
+  logDemandSessionCreated,
+  logResourceChecked,
+} from '../../../../store/eventLog'
+import {
   addCargo as addCargoToStore,
   removeCargo as removeCargoFromStore,
   loadOrCreateActiveDemand,
@@ -406,15 +414,26 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setCurrentDemandId(demand.demandId)
   }
 
-  // PR4: 검색 (규정 필터링 적용)
+  // PR4+PR5: 검색 (규정 필터링 + 자원 체크 적용)
   const handleSearch = useCallback(() => {
-    console.log('=== PR4 검색 시작 ===')
+    console.log('=== PR5 검색 시작 (규정 + 자원) ===')
     console.log('활성 탭:', activeTab)
     console.log('등록된 화물:', registeredCargos)
     console.log('총 큐브:', totalCubes)
     console.log('총 파렛트:', totalPallets)
 
     setIsSearching(true)
+
+    // PR5: 세션 생성 이벤트 로깅
+    const sessionMode = activeTab === 'transport' ? 'ROUTE' : 'STORAGE'
+    if (currentDemandId) {
+      logDemandSessionCreated(
+        currentDemandId,
+        sessionMode,
+        totalCubes,
+        sessionMode === 'STORAGE' ? totalPallets : undefined
+      )
+    }
 
     // 화물이 없으면 빈 결과 반환
     if (registeredCargos.length === 0) {
@@ -431,7 +450,7 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
         const count = activeTab === 'storage' ? STORAGE_PRODUCTS.length
           : activeTab === 'transport' ? ROUTE_PRODUCTS.length
           : STORAGE_PRODUCTS.length + ROUTE_PRODUCTS.length
-        recordSearchExecution(currentDemandId, count)
+        recordSearchExecution(currentDemandId, count, count)
       }
       return
     }
@@ -448,33 +467,46 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     }))
 
     const demand = { totalCubes, totalPallets }
-    let passedStorage: StorageProduct[] = []
-    let passedRoutes: RouteProduct[] = []
+    let regulationPassedStorage: StorageProduct[] = []
+    let regulationPassedRoutes: RouteProduct[] = []
+    let resourcePassedStorage: StorageProduct[] = []
+    let resourcePassedRoutes: RouteProduct[] = []
     let combinedSummary: RegulationSummary | null = null
+    let totalResourceFailed = 0
 
-    // 탭별 필터링
+    // 탭별 필터링: 규정 → 자원
     if (activeTab === 'storage' || activeTab === 'both') {
       console.log('보관 조건:', storageCondition)
+
+      // Step 1: 규정 체크
       const storageResult = filterOffersByRegulation(
         cargosForRegulation,
         STORAGE_PRODUCTS,
         'STORAGE',
         demand
       )
-      passedStorage = storageResult.passed
+      regulationPassedStorage = storageResult.passed
       combinedSummary = storageResult.summary
-      console.log('보관 상품 필터링:', storageResult.summary)
+      console.log('[규정] 보관 상품:', storageResult.summary)
+
+      // Step 2: 자원 체크 (PR5)
+      const resourceResult = filterStorageByResource(regulationPassedStorage, totalCubes)
+      resourcePassedStorage = resourceResult.passed
+      totalResourceFailed += resourceResult.summary.failedCount
+      console.log('[자원] 보관 상품:', resourceResult.summary)
     }
 
     if (activeTab === 'transport' || activeTab === 'both') {
       console.log('운송 조건:', transportCondition)
+
+      // Step 1: 규정 체크
       const routeResult = filterOffersByRegulation(
         cargosForRegulation,
         ROUTE_PRODUCTS,
         'ROUTE',
         demand
       )
-      passedRoutes = routeResult.passed
+      regulationPassedRoutes = routeResult.passed
       if (!combinedSummary) {
         combinedSummary = routeResult.summary
       } else {
@@ -489,33 +521,47 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
           },
         }
       }
-      console.log('운송 상품 필터링:', routeResult.summary)
+      console.log('[규정] 운송 상품:', routeResult.summary)
+
+      // Step 2: 자원 체크 (PR5)
+      const resourceResult = filterRouteByResource(regulationPassedRoutes, totalCubes)
+      resourcePassedRoutes = resourceResult.passed
+      totalResourceFailed += resourceResult.summary.failedCount
+      console.log('[자원] 운송 상품:', resourceResult.summary)
     }
 
     if (activeTab === 'both') {
       console.log('서비스 순서:', serviceOrder)
     }
 
-    // 검색 결과 저장
+    // PR5: 최종 결과는 자원 체크 통과 상품
     const result: SearchResult = {
-      storageProducts: passedStorage,
-      routeProducts: passedRoutes,
+      storageProducts: resourcePassedStorage,
+      routeProducts: resourcePassedRoutes,
       summary: combinedSummary,
       searchedAt: new Date().toISOString(),
     }
     setSearchResult(result)
     setIsSearching(false)
 
-    const totalResultCount = passedStorage.length + passedRoutes.length
-    console.log('검색 결과:', totalResultCount, '건')
-    console.log('상세:', { 보관: passedStorage.length, 운송: passedRoutes.length })
+    const totalResourcePassed = resourcePassedStorage.length + resourcePassedRoutes.length
+    console.log('검색 결과 (자원 통과):', totalResourcePassed, '건')
+    console.log('상세:', {
+      보관_규정통과: regulationPassedStorage.length,
+      보관_자원통과: resourcePassedStorage.length,
+      운송_규정통과: regulationPassedRoutes.length,
+      운송_자원통과: resourcePassedRoutes.length,
+    })
 
-    // Code Data System: 검색 실행 이벤트 기록
+    // PR5: 이벤트 기록
     if (currentDemandId) {
-      recordSearchExecution(currentDemandId, totalResultCount)
+      // 자원 체크 이벤트
+      logResourceChecked(currentDemandId, totalResourcePassed, totalResourceFailed)
+      // 검색 실행 이벤트 (자원 통과 건수 포함)
+      recordSearchExecution(currentDemandId, totalResourcePassed, totalResourcePassed)
     }
 
-    console.log('=== PR4 검색 완료 ===')
+    console.log('=== PR5 검색 완료 ===')
   }, [activeTab, registeredCargos, totalCubes, totalPallets, storageCondition, transportCondition, serviceOrder, currentDemandId])
 
   const state: ServiceConsoleState = {

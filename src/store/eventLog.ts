@@ -315,10 +315,47 @@ export function logTransportDateSet(demandId: string, transportDate: string): Pl
 /**
  * 검색 실행 이벤트
  */
-export function logSearchExecuted(demandId: string, resultCount: number): PlatformEvent {
+export function logSearchExecuted(
+  demandId: string,
+  resultCount: number,
+  resourcePassedCount?: number
+): PlatformEvent {
   return logEvent({
     eventType: 'SEARCH_EXECUTED',
     subject: { kind: 'demand', id: demandId },
-    fields: { resultCount },
+    fields: { resultCount, resourcePassedCount },
+  })
+}
+
+// ============ PR5: 세션/자원 관련 이벤트 ============
+
+/**
+ * 수요 세션 생성 이벤트
+ */
+export function logDemandSessionCreated(
+  sessionId: string,
+  mode: 'STORAGE' | 'ROUTE',
+  totalCubes: number,
+  totalPallets?: number
+): PlatformEvent {
+  return logEvent({
+    eventType: 'DEMAND_SESSION_CREATED',
+    subject: { kind: 'demand', id: sessionId },
+    fields: { mode, totalCubes, totalPallets },
+  })
+}
+
+/**
+ * 자원 체크 완료 이벤트
+ */
+export function logResourceChecked(
+  demandId: string,
+  passedCount: number,
+  failedCount: number
+): PlatformEvent {
+  return logEvent({
+    eventType: 'RESOURCE_CHECKED',
+    subject: { kind: 'demand', id: demandId },
+    fields: { passedCount, failedCount },
   })
 }

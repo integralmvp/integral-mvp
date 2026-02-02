@@ -55,6 +55,9 @@ export interface RouteProduct {
   tempSupported?: boolean;               // 냉장/냉동 지원
   hazmatSupported?: boolean;             // 위험물 지원
   allowedModuleClasses?: ModuleClassification[];  // 허용 모듈
+  // PR5 자원 필드
+  capacityCubes: number;                 // 총 수용 가능 큐브 (정수)
+  remainingCubes: number;                // 현재 남은 큐브 (정수, MVP: capacity와 동일)
 }
 
 // ============ 공간 상품 (PR2에서 확장) ============
@@ -76,6 +79,9 @@ export interface StorageProduct {
   tempSupported?: boolean;               // 냉장/냉동 지원 (냉장/냉동 창고는 true)
   hazmatSupported?: boolean;             // 위험물 지원
   allowedModuleClasses?: ModuleClassification[];  // 허용 모듈
+  // PR5 자원 필드
+  capacityCubes: number;                 // 총 수용 가능 큐브 (정수, Pallet × 128)
+  remainingCubes: number;                // 현재 남은 큐브 (정수, MVP: capacity와 동일)
 }
 
 // ============ ProductCard Props (PR1 용도) ============
@@ -392,6 +398,19 @@ export interface DemandSession {
   // 상태
   status: DemandStatus
 
+  // PR5: 규정/자원 체크 결과 요약
+  regulationSummary?: {
+    checked: boolean
+    passedOfferIds: string[]
+    failedOfferIdsCount: number
+  }
+
+  resourceSummary?: {
+    checked: boolean
+    passedOfferIds: string[]
+    failedOfferIdsCount: number
+  }
+
   // 메타
   createdAt: string
   updatedAt: string
@@ -443,6 +462,9 @@ export type PlatformEventType =
   | 'TRANSPORT_DATE_SET'
   // 검색 관련
   | 'SEARCH_EXECUTED'
+  // PR5: 세션/자원 관련
+  | 'DEMAND_SESSION_CREATED'
+  | 'RESOURCE_CHECKED'
 
 /**
  * PlatformEvent - 플랫폼 사건 데이터
