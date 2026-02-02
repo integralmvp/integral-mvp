@@ -220,11 +220,16 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
       })),
     }
 
-    // 조건 구성
+    // 조건 구성 (PR7-pre: 코드 기반 조건 우선)
     const conditions: SearchConditions = {
+      // Storage 조건 - 코드 우선
+      storageLocationCode: storageCondition.locationCode,
       storageLocation: storageCondition.location,
       startDate: storageCondition.startDate,
       endDate: storageCondition.endDate,
+      // Route 조건 - 코드 우선
+      originCode: transportCondition.originCode,
+      destinationCode: transportCondition.destinationCode,
       origin: transportCondition.origin,
       destination: transportCondition.destination,
       transportDate: transportCondition.transportDate,
