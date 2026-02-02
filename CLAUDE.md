@@ -97,7 +97,7 @@ VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
 ### 핵심 플로우
 
 ```
-CargoInfo 생성 → signature 부여 → 규정 체크 → DemandSession 연결 → 큐브 계산 → 자원 준비
+CargoInfo 생성 → signature 부여 → 규정 체크 → 자원 체크 → DemandSession 연결 → 큐브 계산 → 자원 준비
 ```
 
 ### 이벤트 로그 (append-only)
@@ -107,6 +107,7 @@ CargoInfo 생성 → signature 부여 → 규정 체크 → DemandSession 연결
 - `RULE_CHECKED`, `RULES_PASSED`
 - `QUANTITY_SET`, `CUBE_CALCULATED`, `RESOURCE_READY`
 - `STORAGE_*`, `TRANSPORT_*`, `SEARCH_EXECUTED`
+- `DEMAND_SESSION_CREATED`, `RESOURCE_CHECKED` (PR5)
 
 ### 저장소 구조
 
@@ -126,12 +127,14 @@ CargoInfo 생성 → signature 부여 → 규정 체크 → DemandSession 연결
 src/
 ├── engine/                    # 플랫폼 통합 엔진 (순수 함수만)
 │   ├── rules/                # 규정 체크 로직
-│   └── regulation/           # PR4: 규정 엔진 (상품 필터링)
+│   ├── regulation/           # PR4: 규정 엔진 (상품 필터링)
+│   ├── resource/             # PR5: 자원 엔진 (용량 체크)
+│   └── session/              # PR5: 세션 관리 (검색 스냅샷)
 ├── store/                     # Code Data System (localStorage 기반)
-├── contexts/                  # PR4: React Context
+├── contexts/                  # React Context
 │   └── SearchResultContext   # 검색 결과 공유 (ServiceConsole ↔ Map)
 ├── data/
-│   ├── mockData.ts           # 더미 데이터 (상품별 규정 필드 포함)
+│   ├── mockData.ts           # 더미 데이터 (규정 + 자원 필드 포함)
 │   ├── itemCodes.ts          # 플랫폼 품목 코드 (IC01~IC99)
 │   └── bands.ts              # 중량/크기 밴드 정의
 ├── components/
@@ -140,12 +143,10 @@ src/
 │   │   └── ServiceConsole/   # 3행 그리드 레이아웃 UI
 │   │       ├── ServiceConsole.tsx
 │   │       ├── sections/     # StorageTab, TransportTab, BothTab
-│   │       ├── ui/           # GridCell, InputModal, SearchResultModal, ResetButton 등
+│   │       ├── ui/           # GridCell, InputModal, SearchResultModal 등
 │   │       └── hooks/        # useServiceConsoleState
-│   ├── Map/MapboxContainer/
-│   │   └── utils/style.ts    # 마커 스타일 (하이라이트 마커 포함)
-│   └── ...
-├── types/models.ts           # 상품 모델 (규정 필드 포함)
+│   └── Map/MapboxContainer/
+├── types/models.ts           # 상품 모델 (규정 + 자원 필드 포함)
 └── styles/fonts.css
 ```
 
@@ -180,100 +181,78 @@ filterOffersByRegulation(cargos, offers) → FilterResult  // 전체 필터링
 adaptCargoForRegulation(registeredCargo) → CargoForRegulation  // UI→엔진 변환
 ```
 
-### 지도 연동
+---
 
-- **실시간 필터링**: 화물 등록 시 즉시 지도에 반영
-- **하이라이트 마커**: 구매 가능 상품에 물방울 마커 + 연두색 O 표시
-- **SearchResultContext**: ServiceConsole ↔ Map 간 검색 결과 공유
+## Resource Engine (PR5)
+
+규정 통과 상품에 대해 자원(용량) 체크를 수행하는 엔진.
+
+### 자원 필드 (Offer에 추가)
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| `capacityCubes` | number | 총 수용 가능 큐브 (정수) |
+| `remainingCubes` | number | 현재 남은 큐브 (MVP: capacity와 동일 시작) |
+
+> Storage 상품: `capacityCubes = Pallet 수 × 128`
+
+### 자원 체크 로직
+
+```typescript
+// 핵심 판단: 남은 용량 >= 수요량
+offer.remainingCubes >= demand.totalCubes → 통과
+```
+
+### 주요 함수 (`engine/resource/`)
+
+```typescript
+checkResource({ offerRemainingCubes, demandCubes }) → { pass, reason? }
+filterStorageByResource(regulationPassed, demandCubes) → ResourceFilterResult
+filterRouteByResource(regulationPassed, demandCubes) → ResourceFilterResult
+```
+
+### 검색 파이프라인 (PR4 → PR5)
+
+```
+offers → 규정 체크 → regulationPassed → 자원 체크 → resourcePassed → 최종 결과
+```
+
+### DemandSession 확장
+
+```typescript
+interface DemandSession {
+  // ... 기존 필드
+
+  // PR5: 규정/자원 체크 결과 요약
+  regulationSummary?: {
+    checked: boolean
+    passedOfferIds: string[]
+    failedOfferIdsCount: number
+  }
+
+  resourceSummary?: {
+    checked: boolean
+    passedOfferIds: string[]
+    failedOfferIdsCount: number
+  }
+}
+```
 
 ---
 
-## Service Console UI 구조 규칙 (MVP 기준)
+## Service Console UI 구조 (MVP 기준)
 
-### 1. UI 설계 목적
+### 3행 그리드 레이아웃
 
-Service Console UI는 단순 입력 화면이 아니라,
-플랫폼의 **정보 데이터 수집 흐름**과 **이벤트 조건 필터링 흐름**을
-시각적으로 드러내는 구조로 설계한다.
+**1행 (2열)**: 화물 정보 (좌) + 물량 정보 (우)
+**2행**: 보관 장소 / 출발지↔도착지
+**3행**: 보관 기간 / 운송 날짜
 
-입력 순서는 곧 플랫폼 데이터 처리 순서와 동일해야 한다.
-
-### 2. 탭 내부 레이아웃 원칙 (고정 규칙)
-
-탭 내부는 **스크롤 없이 한 화면에 조건이 모두 보이도록 구성**한다.
-입력 영역은 항상 3행 그리드 구조를 유지한다.
-
-#### ▸ 3행 구조
-
-**1행 (2열)**
-- 좌측: 화물 정보
-- 우측: 물량 정보 (큐브/파레트 환산 결과와 연결)
-
-**2행**
-- 보관 탭: 보관 장소
-- 운송 탭: 출발지 ↔ 도착지
-- 보관+운송 탭: 단계 순서에 따라 동일 구조 재사용
-
-**3행**
-- 보관 탭: 시작일 / 종료일
-- 운송 탭: 운송 날짜
-
-이 구조는 기능 추가 시에도 유지되며, 행 순서는 변경하지 않는다.
-
-### 3. 화물 영역 설계 규칙
-
-화물 입력은 플랫폼 정보 데이터의 시작점이다.
-
-- 화물 추가 버튼은 항상 노출
-- 등록된 화물은 요약 카드 형태로 표시
-- 카드 단위 삭제 가능
-- 화물 수가 많을 경우 기본 화면은 요약 중심, 확장은 내부 처리
-
-화물 정보 → 이후 모든 필터링의 기준이 되므로 UI에서 가장 먼저 배치한다.
-
-### 4. 색상 및 시각 스타일 원칙
-
-탭별 색상 구분은 사용하지 않는다.
-Service Console 전체 톤은 **Neutral/Black 기반, 상징 컬러 navy blue**로 통일한다.
-
-| 요소 | 컬러 |
-|------|------|
-| 헤더 로고 INTEGRAL | `text-blue-900` |
-| 탭 Active | `text-blue-900`, `border-blue-900` |
-| 검색 버튼 | `from-blue-800 to-blue-900` |
-| 모달 헤더 | `bg-blue-900` |
-| 확인 버튼 | `bg-blue-900 hover:bg-blue-950` |
-| 쌍방향 화살표 | `text-blue-900` |
-
-### 5. UI와 엔진의 관계
-
-이 UI는 단순 폼이 아니라:
+### UI와 엔진의 관계
 
 - **1행**: 정보 데이터 입력
 - **2~3행**: 이벤트 조건 입력
-- **하단 검색 버튼**: 조건 확정 트리거
-
-라는 **플랫폼 운영 구조를 시각화한 화면**이다.
-
-UI 변경 시:
-플랫폼 통합 거래 엔진(큐브 단위 계산)과
-플랫폼 운영 프로세스(데이터 수집 구조)를
-훼손하지 않도록 설계해야 한다.
-
----
-
-## 디자인 시스템
-
-### 지도 요소
-
-| 요소 | 색상 |
-|------|------|
-| 지도 배경 | Mapbox light-v11 |
-| 공간 상품 마커 | #ff6b35 (주황색) |
-| 도내 경로 | #3b82f6 (파란색, 실선) |
-| 입도 경로 | #10b981 (녹색, 점선) |
-| 출도 경로 | #a855f7 (보라색, 점선) |
-| 구매 가능 하이라이트 | #1e40af (물방울) + #22c55e (연두색 O) |
+- **하단 검색 버튼**: 조건 확정 트리거 → 규정 체크 → 자원 체크 → 결과 표시
 
 ---
 
@@ -282,6 +261,8 @@ UI 변경 시:
 ### 절대 구현하지 말 것
 - 로그인/회원가입, 실제 결제, 백엔드/DB
 - 별도 페이지 라우팅, 실시간 데이터, 실제 거래
+- remainingCubes 차감 (예약/거래 확정) - PR7 이후
+- 비용 계산/추천 점수/정렬 고도화 - PR6 이후
 
 ### 허용되는 범위
 - 더미 데이터 기반 UI, 모달 상세, 룰 기반 매칭, 더미 비용 계산
@@ -355,12 +336,13 @@ UI 변경 시:
 | PR | 내용 | 상태 |
 |----|------|------|
 | PR1~PR3-2.5 | 초기 설정, UI 개편, 통합 엔진, 구조 리팩토링 | ✅ 완료 |
-| PR3-3 | ServiceConsole 3행 그리드 UI + Navy blue 통일 | ✅ 완료 |
-| PR3-4 | Code Data System MVP (Local-first / 규정→자원 플로우) | ✅ 완료 |
+| PR3-3 | ServiceConsole 3행 그리드 UI | ✅ 완료 |
+| PR3-4 | Code Data System MVP (Local-first) | ✅ 완료 |
 | PR4 | Regulation Engine + 검색/지도 연동 | ✅ 완료 |
-| PR5 | 거래 모달 + 규정 매칭 | 📋 예정 |
-| PR6 | 마무리 + 최적화 | 📋 예정 |
+| PR5 | Resource Layer Wiring (자원 체크 + DemandSession) | ✅ 완료 |
+| PR6 | 조건/정렬/거래 모달 | 📋 예정 |
+| PR7 | 재고 차감 + 거래 확정 | 📋 예정 |
 
 ---
 
-**최종 수정**: 2025.01.27 (PR4 Regulation Engine + 검색/지도 연동 완료)
+**최종 수정**: 2025.01.28 (PR5 Resource Layer Wiring 완료)
