@@ -299,13 +299,18 @@ export function setDemandStatus(demandId: string, status: DemandStatus): DemandS
 /**
  * 검색 실행 기록
  * PR5: resourcePassedCount 추가 (자원 체크 통과 건수)
+ * PR6: counts 추가 (파이프라인 단계별 건수)
  */
 export function recordSearchExecution(
   demandId: string,
   resultCount: number,
-  resourcePassedCount?: number
+  counts?: {
+    afterRegulation: number
+    afterResource: number
+    afterConditions: number
+  }
 ): DemandSession | undefined {
-  logSearchExecuted(demandId, resultCount, resourcePassedCount)
+  logSearchExecuted(demandId, resultCount, counts)
 
   return updateDemand(demandId, { status: 'SEARCHED' })
 }

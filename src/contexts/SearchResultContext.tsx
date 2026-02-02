@@ -2,27 +2,50 @@
  * SearchResultContext - 검색 결과 공유 Context
  *
  * PR4: ServiceConsole ↔ MapboxContainer 간 검색 결과 공유
- * 지도에서 검색 결과 상품을 하이라이트하기 위해 사용
+ * PR6: Preview/Search 분리 - 하이라이트는 Preview 기반
+ *
+ * 핵심 원칙:
+ * - previewResult: 실시간 업데이트 (수량/조건 변경 시)
+ * - searchResult: 검색 버튼 클릭 시 스냅샷
+ * - highlightedIds: previewResult 기반 (지도 하이라이트)
  */
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react'
 import type { StorageProduct, RouteProduct } from '../types/models'
-import type { RegulationSummary } from '../engine/regulation'
+import type { PipelineCounts } from '../engine/matching'
 
-// 검색 결과 타입
+// 검색 결과 타입 (스냅샷용)
 export interface SearchResultData {
   storageProducts: StorageProduct[]
   routeProducts: RouteProduct[]
-  summary: RegulationSummary | null
+  counts: PipelineCounts
   searchedAt: string
+}
+
+// 프리뷰 결과 타입 (실시간 업데이트용)
+export interface PreviewResultData {
+  storageProducts: StorageProduct[]
+  routeProducts: RouteProduct[]
+  matchedOfferIds: string[]
+  counts: PipelineCounts
+  updatedAt: string
 }
 
 // Context 값 타입
 interface SearchResultContextValue {
+  // 프리뷰 (실시간, 지도 하이라이트 기준)
+  previewResult: PreviewResultData | null
+  setPreviewResult: (result: PreviewResultData | null) => void
+
+  // 검색 결과 (클릭 스냅샷, 리스트 출력 기준)
   searchResult: SearchResultData | null
-  highlightedIds: Set<string>
   setSearchResult: (result: SearchResultData | null) => void
-  clearSearchResult: () => void
+
+  // 하이라이트 ID (프리뷰 기반)
+  highlightedIds: Set<string>
+
+  // 초기화
+  clearAll: () => void
 }
 
 // Context 생성
@@ -30,31 +53,39 @@ const SearchResultContext = createContext<SearchResultContextValue | undefined>(
 
 // Provider 컴포넌트
 export function SearchResultProvider({ children }: { children: ReactNode }) {
+  const [previewResult, setPreviewResultState] = useState<PreviewResultData | null>(null)
   const [searchResult, setSearchResultState] = useState<SearchResultData | null>(null)
 
-  // 하이라이트할 상품 ID 목록 계산
-  const highlightedIds = searchResult
-    ? new Set([
-        ...searchResult.storageProducts.map(p => p.id),
-        ...searchResult.routeProducts.map(p => p.id),
-      ])
-    : new Set<string>()
+  // 하이라이트할 상품 ID 목록 계산 (프리뷰 기반)
+  const highlightedIds = useMemo(() => {
+    if (!previewResult) {
+      return new Set<string>()
+    }
+    return new Set(previewResult.matchedOfferIds)
+  }, [previewResult])
+
+  const setPreviewResult = useCallback((result: PreviewResultData | null) => {
+    setPreviewResultState(result)
+  }, [])
 
   const setSearchResult = useCallback((result: SearchResultData | null) => {
     setSearchResultState(result)
   }, [])
 
-  const clearSearchResult = useCallback(() => {
+  const clearAll = useCallback(() => {
+    setPreviewResultState(null)
     setSearchResultState(null)
   }, [])
 
   return (
     <SearchResultContext.Provider
       value={{
+        previewResult,
+        setPreviewResult,
         searchResult,
-        highlightedIds,
         setSearchResult,
-        clearSearchResult,
+        highlightedIds,
+        clearAll,
       }}
     >
       {children}
@@ -73,8 +104,15 @@ export function useSearchResult() {
 
 // 하이라이트 여부만 확인하는 간단한 Hook
 export function useIsHighlighted(id: string): boolean {
-  const { highlightedIds, searchResult } = useSearchResult()
-  // 검색 결과가 없으면 모든 상품 표시
-  if (!searchResult) return true
+  const { highlightedIds, previewResult } = useSearchResult()
+  // 프리뷰 결과가 없으면 모든 상품 표시
+  if (!previewResult) return true
   return highlightedIds.has(id)
+}
+
+// 프리뷰 건수 확인 Hook
+export function usePreviewCount(): number {
+  const { previewResult } = useSearchResult()
+  if (!previewResult) return 0
+  return previewResult.matchedOfferIds.length
 }

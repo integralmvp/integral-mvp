@@ -2,6 +2,8 @@
 // PR3-3: UI 재설계 - 화물 등록 → 물량 입력 → 조건 입력 흐름 반영
 // Code Data System MVP: CargoInfo, DemandSession, Event 연동
 // PR4: Regulation Engine 연동 - 검색 시 규정 필터링
+// PR6: Matching Pipeline 통합 - 프리뷰/검색 결과 동기화
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import type {
   CargoUI,
@@ -14,16 +16,13 @@ import type {
   RouteProduct,
 } from '../../../../types/models'
 import { computeDemand, type BoxInput, type DemandResult } from '../../../../engine'
+import {
+  runMatchingPipeline,
+  runCombinedPipeline,
+  type PipelineCounts,
+  type SearchConditions,
+} from '../../../../engine/matching'
 import { checkQuickRulesWithLogging } from '../../../../engine/rules'
-import {
-  filterOffersByRegulation,
-  adaptCargoForRegulation,
-  type RegulationSummary,
-} from '../../../../engine/regulation'
-import {
-  filterStorageByResource,
-  filterRouteByResource,
-} from '../../../../engine/resource'
 import {
   logDemandSessionCreated,
   logResourceChecked,
@@ -42,6 +41,7 @@ import {
 } from '../../../../store'
 import { CUBE_CONFIG } from '../../../../engine/cubeConfig'
 import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../../data/mockData'
+import { useSearchResult } from '../../../../contexts/SearchResultContext'
 
 export type ServiceType = 'storage' | 'transport' | 'both'
 
@@ -60,11 +60,19 @@ function toModelServiceType(uiType: ServiceType): ServiceTypeModel {
   }
 }
 
-// PR4: 검색 결과 타입
+// PR6: 프리뷰 결과 타입
+export interface PreviewMatch {
+  storageProducts: StorageProduct[]
+  routeProducts: RouteProduct[]
+  matchedOfferIds: string[]
+  counts: PipelineCounts
+}
+
+// PR6: 검색 결과 타입 (스냅샷)
 export interface SearchResult {
   storageProducts: StorageProduct[]
   routeProducts: RouteProduct[]
-  summary: RegulationSummary | null
+  counts: PipelineCounts
   searchedAt: string
 }
 
@@ -91,13 +99,13 @@ export interface ServiceConsoleState {
   // 보관+운송 순서
   serviceOrder: ServiceOrder
 
-  // 검색 가능 상품 건수 (더미)
-  availableProductCount: number
+  // PR6: 프리뷰 매칭 건수 (실시간)
+  previewCount: number
 
   // Code Data System: 현재 Demand ID
   currentDemandId: string | null
 
-  // PR4: 검색 결과
+  // PR6: 검색 결과 (스냅샷)
   searchResult: SearchResult | null
   isSearching: boolean
 }
@@ -155,9 +163,12 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
   // Code Data System: 현재 Demand ID
   const [currentDemandId, setCurrentDemandId] = useState<string | null>(null)
 
-  // PR4: 검색 결과 상태
-  const [searchResult, setSearchResult] = useState<SearchResult | null>(null)
+  // PR6: 검색 결과 상태 (스냅샷)
+  const [searchResult, setSearchResultLocal] = useState<SearchResult | null>(null)
   const [isSearching, setIsSearching] = useState(false)
+
+  // PR6: Context 연동
+  const { setPreviewResult, setSearchResult: setSearchResultContext } = useSearchResult()
 
   // 탭 변경 시 DemandSession 초기화/로드
   useEffect(() => {
@@ -191,26 +202,122 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     }
   }, [registeredCargos, activeTab])
 
-  // 검색 가능 상품 건수 (더미 - 조건에 따라 감소)
-  const availableProductCount = useMemo(() => {
-    let count = 8 // 기본 8개 상품
-
-    // 조건이 입력될수록 건수 감소 (더미 로직)
-    if (activeTab === 'storage') {
-      if (storageCondition.location) count -= 2
-      if (storageCondition.startDate && storageCondition.endDate) count -= 1
-    } else if (activeTab === 'transport') {
-      if (transportCondition.origin) count -= 2
-      if (transportCondition.destination) count -= 1
-      if (transportCondition.transportDate) count -= 1
-    } else if (activeTab === 'both') {
-      if (serviceOrder) count -= 1
-      if (storageCondition.location) count -= 1
-      if (transportCondition.origin || transportCondition.destination) count -= 1
+  // PR6: 프리뷰 매칭 (실시간, 파이프라인 단일 소스)
+  const previewMatch = useMemo<PreviewMatch>(() => {
+    // 세션 정보 구성
+    const session = {
+      demandId: currentDemandId || undefined,
+      totalCubes,
+      totalPallets,
+      cargos: registeredCargos.map(cargo => ({
+        id: cargo.id,
+        sumCm: cargo.sumCm,
+        weightKg: cargo.weightKg,
+        moduleType: cargo.moduleType,
+        itemCode: cargo.itemCode,
+        weightBand: cargo.weightBand,
+        sizeBand: cargo.sizeBand,
+      })),
     }
 
-    return Math.max(1, count)
-  }, [activeTab, storageCondition, transportCondition, serviceOrder])
+    // 조건 구성
+    const conditions: SearchConditions = {
+      storageLocation: storageCondition.location,
+      startDate: storageCondition.startDate,
+      endDate: storageCondition.endDate,
+      origin: transportCondition.origin,
+      destination: transportCondition.destination,
+      transportDate: transportCondition.transportDate,
+    }
+
+    // 탭별 파이프라인 실행
+    if (activeTab === 'storage') {
+      const result = runMatchingPipeline({
+        mode: 'STORAGE',
+        offers: STORAGE_PRODUCTS,
+        session,
+        conditions,
+        sort: 'LATEST',
+      })
+
+      return {
+        storageProducts: result.matchedOffers,
+        routeProducts: [],
+        matchedOfferIds: result.matchedOfferIds,
+        counts: result.counts,
+      }
+    }
+
+    if (activeTab === 'transport') {
+      const result = runMatchingPipeline({
+        mode: 'ROUTE',
+        offers: ROUTE_PRODUCTS,
+        session,
+        conditions,
+        sort: 'LATEST',
+      })
+
+      return {
+        storageProducts: [],
+        routeProducts: result.matchedOffers,
+        matchedOfferIds: result.matchedOfferIds,
+        counts: result.counts,
+      }
+    }
+
+    // both 탭
+    const combinedResult = runCombinedPipeline({
+      storageOffers: STORAGE_PRODUCTS,
+      routeOffers: ROUTE_PRODUCTS,
+      session,
+      conditions,
+      sort: 'LATEST',
+    })
+
+    return {
+      storageProducts: combinedResult.storage.matchedOffers,
+      routeProducts: combinedResult.route.matchedOffers,
+      matchedOfferIds: combinedResult.combinedIds,
+      counts: combinedResult.combinedCounts,
+    }
+  }, [
+    activeTab,
+    registeredCargos,
+    totalCubes,
+    totalPallets,
+    storageCondition,
+    transportCondition,
+    currentDemandId,
+  ])
+
+  // PR6: Context에 프리뷰 결과 동기화 (지도 하이라이트용)
+  useEffect(() => {
+    // 화물이 있거나 조건이 있을 때만 프리뷰 결과 설정
+    const hasCargoOrCondition =
+      registeredCargos.length > 0 ||
+      storageCondition.location ||
+      transportCondition.origin ||
+      transportCondition.destination
+
+    if (hasCargoOrCondition) {
+      setPreviewResult({
+        storageProducts: previewMatch.storageProducts,
+        routeProducts: previewMatch.routeProducts,
+        matchedOfferIds: previewMatch.matchedOfferIds,
+        counts: previewMatch.counts,
+        updatedAt: new Date().toISOString(),
+      })
+    } else {
+      setPreviewResult(null)
+    }
+  }, [
+    previewMatch,
+    registeredCargos.length,
+    storageCondition.location,
+    transportCondition.origin,
+    transportCondition.destination,
+    setPreviewResult,
+  ])
 
   // 화물 추가
   const addCargo = () => {
@@ -405,8 +512,10 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setStorageCondition({})
     setTransportCondition({})
     setServiceOrder(null)
-    // PR4: 검색 결과 리셋
-    setSearchResult(null)
+    // PR6: 검색 결과 리셋
+    setSearchResultLocal(null)
+    setSearchResultContext(null)
+    setPreviewResult(null)
     setIsSearching(false)
 
     // Code Data System: 새 DemandSession 시작
@@ -414,13 +523,11 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setCurrentDemandId(demand.demandId)
   }
 
-  // PR4+PR5: 검색 (규정 필터링 + 자원 체크 적용)
+  // PR6: 검색 (프리뷰 결과를 스냅샷으로 저장)
   const handleSearch = useCallback(() => {
-    console.log('=== PR5 검색 시작 (규정 + 자원) ===')
+    console.log('=== PR6 검색 시작 (단일 파이프라인) ===')
     console.log('활성 탭:', activeTab)
-    console.log('등록된 화물:', registeredCargos)
-    console.log('총 큐브:', totalCubes)
-    console.log('총 파렛트:', totalPallets)
+    console.log('프리뷰 건수:', previewMatch.matchedOfferIds.length)
 
     setIsSearching(true)
 
@@ -435,134 +542,46 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
       )
     }
 
-    // 화물이 없으면 빈 결과 반환
-    if (registeredCargos.length === 0) {
-      console.log('등록된 화물 없음 - 전체 상품 표시')
-      setSearchResult({
-        storageProducts: activeTab !== 'transport' ? STORAGE_PRODUCTS : [],
-        routeProducts: activeTab !== 'storage' ? ROUTE_PRODUCTS : [],
-        summary: null,
-        searchedAt: new Date().toISOString(),
-      })
-      setIsSearching(false)
-
-      if (currentDemandId) {
-        const count = activeTab === 'storage' ? STORAGE_PRODUCTS.length
-          : activeTab === 'transport' ? ROUTE_PRODUCTS.length
-          : STORAGE_PRODUCTS.length + ROUTE_PRODUCTS.length
-        recordSearchExecution(currentDemandId, count, count)
-      }
-      return
-    }
-
-    // 화물 데이터를 규정 엔진 입력으로 변환
-    const cargosForRegulation = registeredCargos.map(cargo => adaptCargoForRegulation({
-      id: cargo.id,
-      sumCm: cargo.sumCm,
-      weightKg: cargo.weightKg,
-      moduleType: cargo.moduleType,
-      itemCode: cargo.itemCode,
-      weightBand: cargo.weightBand,
-      sizeBand: cargo.sizeBand,
-    }))
-
-    const demand = { totalCubes, totalPallets }
-    let regulationPassedStorage: StorageProduct[] = []
-    let regulationPassedRoutes: RouteProduct[] = []
-    let resourcePassedStorage: StorageProduct[] = []
-    let resourcePassedRoutes: RouteProduct[] = []
-    let combinedSummary: RegulationSummary | null = null
-    let totalResourceFailed = 0
-
-    // 탭별 필터링: 규정 → 자원
-    if (activeTab === 'storage' || activeTab === 'both') {
-      console.log('보관 조건:', storageCondition)
-
-      // Step 1: 규정 체크
-      const storageResult = filterOffersByRegulation(
-        cargosForRegulation,
-        STORAGE_PRODUCTS,
-        'STORAGE',
-        demand
-      )
-      regulationPassedStorage = storageResult.passed
-      combinedSummary = storageResult.summary
-      console.log('[규정] 보관 상품:', storageResult.summary)
-
-      // Step 2: 자원 체크 (PR5)
-      const resourceResult = filterStorageByResource(regulationPassedStorage, totalCubes)
-      resourcePassedStorage = resourceResult.passed
-      totalResourceFailed += resourceResult.summary.failedCount
-      console.log('[자원] 보관 상품:', resourceResult.summary)
-    }
-
-    if (activeTab === 'transport' || activeTab === 'both') {
-      console.log('운송 조건:', transportCondition)
-
-      // Step 1: 규정 체크
-      const routeResult = filterOffersByRegulation(
-        cargosForRegulation,
-        ROUTE_PRODUCTS,
-        'ROUTE',
-        demand
-      )
-      regulationPassedRoutes = routeResult.passed
-      if (!combinedSummary) {
-        combinedSummary = routeResult.summary
-      } else {
-        // 두 결과 합산
-        combinedSummary = {
-          totalOffers: combinedSummary.totalOffers + routeResult.summary.totalOffers,
-          passedCount: combinedSummary.passedCount + routeResult.summary.passedCount,
-          failedCount: combinedSummary.failedCount + routeResult.summary.failedCount,
-          failuresByReason: {
-            ...combinedSummary.failuresByReason,
-            ...routeResult.summary.failuresByReason,
-          },
-        }
-      }
-      console.log('[규정] 운송 상품:', routeResult.summary)
-
-      // Step 2: 자원 체크 (PR5)
-      const resourceResult = filterRouteByResource(regulationPassedRoutes, totalCubes)
-      resourcePassedRoutes = resourceResult.passed
-      totalResourceFailed += resourceResult.summary.failedCount
-      console.log('[자원] 운송 상품:', resourceResult.summary)
-    }
-
-    if (activeTab === 'both') {
-      console.log('서비스 순서:', serviceOrder)
-    }
-
-    // PR5: 최종 결과는 자원 체크 통과 상품
+    // PR6: 프리뷰 결과를 스냅샷으로 저장
     const result: SearchResult = {
-      storageProducts: resourcePassedStorage,
-      routeProducts: resourcePassedRoutes,
-      summary: combinedSummary,
+      storageProducts: previewMatch.storageProducts,
+      routeProducts: previewMatch.routeProducts,
+      counts: previewMatch.counts,
       searchedAt: new Date().toISOString(),
     }
-    setSearchResult(result)
+
+    setSearchResultLocal(result)
+    setSearchResultContext(result)
     setIsSearching(false)
 
-    const totalResourcePassed = resourcePassedStorage.length + resourcePassedRoutes.length
-    console.log('검색 결과 (자원 통과):', totalResourcePassed, '건')
-    console.log('상세:', {
-      보관_규정통과: regulationPassedStorage.length,
-      보관_자원통과: resourcePassedStorage.length,
-      운송_규정통과: regulationPassedRoutes.length,
-      운송_자원통과: resourcePassedRoutes.length,
-    })
+    const totalResourcePassed = previewMatch.matchedOfferIds.length
+    console.log('검색 결과:', totalResourcePassed, '건')
+    console.log('단계별 건수:', previewMatch.counts)
 
-    // PR5: 이벤트 기록
+    // PR6: 이벤트 기록 (counts 포함)
     if (currentDemandId) {
       // 자원 체크 이벤트
-      logResourceChecked(currentDemandId, totalResourcePassed, totalResourceFailed)
-      // 검색 실행 이벤트 (자원 통과 건수 포함)
-      recordSearchExecution(currentDemandId, totalResourcePassed, totalResourcePassed)
+      const totalFailed =
+        previewMatch.counts.afterResource - previewMatch.counts.afterConditions
+      logResourceChecked(currentDemandId, totalResourcePassed, totalFailed)
+
+      // 검색 실행 이벤트 (counts 포함)
+      recordSearchExecution(currentDemandId, totalResourcePassed, {
+        afterRegulation: previewMatch.counts.afterRegulation,
+        afterResource: previewMatch.counts.afterResource,
+        afterConditions: previewMatch.counts.afterConditions,
+      })
     }
 
-    console.log('=== PR5 검색 완료 ===')
-  }, [activeTab, registeredCargos, totalCubes, totalPallets, storageCondition, transportCondition, serviceOrder, currentDemandId])
+    console.log('=== PR6 검색 완료 ===')
+  }, [
+    activeTab,
+    previewMatch,
+    totalCubes,
+    totalPallets,
+    currentDemandId,
+    setSearchResultContext,
+  ])
 
   const state: ServiceConsoleState = {
     activeTab,
@@ -576,9 +595,9 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     storageCondition,
     transportCondition,
     serviceOrder,
-    availableProductCount,
+    previewCount: previewMatch.matchedOfferIds.length,
     currentDemandId,
-    searchResult,
+    searchResult: searchResult,
     isSearching,
   }
 

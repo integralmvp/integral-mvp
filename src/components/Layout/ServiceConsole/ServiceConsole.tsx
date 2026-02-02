@@ -1,13 +1,13 @@
 // 서비스 콘솔 - 조립 컴포넌트
 // 3행 그리드 레이아웃 UI 재설계
 // PR4: 검색 결과 Context 연동 + 결과 모달 표시 + 실시간 지도 필터링
-import { useEffect, useState, useMemo } from 'react'
+// PR6: 단일 파이프라인 통합 - previewCount로 건수 표시
+
+import { useState } from 'react'
 import { useServiceConsoleState, type ServiceType } from './hooks'
 import { StorageTabSection, TransportTabSection, BothTabSection } from './sections'
 import { SlotCounter, SearchResultModal } from './ui'
 import { useSearchResult } from '../../../contexts/SearchResultContext'
-import { filterOffersByRegulation, adaptCargoForRegulation } from '../../../engine/regulation'
-import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../data/mockData'
 
 // 탭 버튼 컴포넌트
 interface TabButtonProps {
@@ -60,81 +60,16 @@ function SearchButton({ activeTab: _activeTab, productCount, onClick }: SearchBu
 
 export default function ServiceConsole() {
   const [state, actions] = useServiceConsoleState()
-  const { setSearchResult, searchResult } = useSearchResult()
+  const { searchResult } = useSearchResult()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // PR4: 실시간 필터링 결과 계산 (화물 등록 시 + 조건 변경 시)
-  const liveFilterResult = useMemo(() => {
-    // 화물이 없으면 전체 상품 표시
-    if (state.registeredCargos.length === 0) {
-      return {
-        storageProducts: state.activeTab !== 'transport' ? STORAGE_PRODUCTS : [],
-        routeProducts: state.activeTab !== 'storage' ? ROUTE_PRODUCTS : [],
-        summary: null,
-      }
-    }
-
-    // 화물 데이터를 규정 엔진 입력으로 변환
-    const cargosForRegulation = state.registeredCargos.map(cargo => adaptCargoForRegulation({
-      id: cargo.id,
-      sumCm: cargo.sumCm,
-      weightKg: cargo.weightKg,
-      moduleType: cargo.moduleType,
-      itemCode: cargo.itemCode,
-      weightBand: cargo.weightBand,
-      sizeBand: cargo.sizeBand,
-    }))
-
-    const demand = { totalCubes: state.totalCubes, totalPallets: state.totalPallets }
-    let passedStorage: typeof STORAGE_PRODUCTS = []
-    let passedRoutes: typeof ROUTE_PRODUCTS = []
-
-    // 탭별 필터링
-    if (state.activeTab === 'storage' || state.activeTab === 'both') {
-      const storageResult = filterOffersByRegulation(cargosForRegulation, STORAGE_PRODUCTS, 'STORAGE', demand)
-      passedStorage = storageResult.passed
-    }
-
-    if (state.activeTab === 'transport' || state.activeTab === 'both') {
-      const routeResult = filterOffersByRegulation(cargosForRegulation, ROUTE_PRODUCTS, 'ROUTE', demand)
-      passedRoutes = routeResult.passed
-    }
-
-    return {
-      storageProducts: passedStorage,
-      routeProducts: passedRoutes,
-      summary: null,
-    }
-  }, [state.registeredCargos, state.activeTab, state.totalCubes, state.totalPallets])
-
-  // PR4: 실시간 필터링 결과를 Context에 반영 (입력 도중에도 지도에 반영)
-  useEffect(() => {
-    if (state.registeredCargos.length > 0) {
-      setSearchResult({
-        storageProducts: liveFilterResult.storageProducts,
-        routeProducts: liveFilterResult.routeProducts,
-        summary: liveFilterResult.summary,
-        searchedAt: new Date().toISOString(),
-      })
-    }
-  }, [liveFilterResult, state.registeredCargos.length, setSearchResult])
-
-  // PR4: 검색 결과가 변경되면 Context에 반영 (검색 버튼 클릭 시)
-  useEffect(() => {
-    if (state.searchResult) {
-      setSearchResult({
-        storageProducts: state.searchResult.storageProducts,
-        routeProducts: state.searchResult.routeProducts,
-        summary: state.searchResult.summary,
-        searchedAt: state.searchResult.searchedAt,
-      })
-    }
-  }, [state.searchResult, setSearchResult])
-
-  // 검색 결과가 있으면 결과 건수 표시
-  const resultCount = searchResult
-    ? searchResult.storageProducts.length + searchResult.routeProducts.length
-    : state.availableProductCount
+  // PR6: previewCount를 직접 사용 (단일 파이프라인에서 계산됨)
+  // 화물이 없으면 전체 상품 수를 표시 (8개)
+  const displayCount = state.registeredCargos.length > 0
+    ? state.previewCount
+    : state.activeTab === 'storage' ? 8
+    : state.activeTab === 'transport' ? 8
+    : 16
 
   // 검색 버튼 클릭 핸들러
   const handleSearchClick = () => {
@@ -252,7 +187,7 @@ export default function ServiceConsole() {
       <div className="p-4 border-t border-slate-200">
         <SearchButton
           activeTab={state.activeTab}
-          productCount={resultCount}
+          productCount={displayCount}
           onClick={handleSearchClick}
         />
       </div>
@@ -264,7 +199,7 @@ export default function ServiceConsole() {
         storageProducts={searchResult?.storageProducts || []}
         routeProducts={searchResult?.routeProducts || []}
         activeTab={state.activeTab}
-        summary={searchResult?.summary || null}
+        summary={null}
         registeredCargos={state.registeredCargos}
         totalCubes={state.totalCubes}
         totalPallets={state.totalPallets}

@@ -1,5 +1,7 @@
 // 전체 지도 배경 + 좌측 블러 오버레이 레이아웃
 // PR4: 검색 결과 하이라이트 연동 - 물방울 마커로 가능 상품 강조
+// PR6: 프리뷰 결과 기반 하이라이트 (실시간 동기화)
+
 import { useEffect, useRef } from 'react'
 import ServiceConsole from './ServiceConsole'
 import MapboxContainer from '../Map/MapboxContainer'
@@ -27,17 +29,18 @@ function createHighlightMarker(productId: string): HTMLDivElement {
 }
 
 export default function CommandLayout() {
-  const { highlightedIds, searchResult } = useSearchResult()
+  // PR6: 프리뷰 결과 기반 하이라이트 (실시간 동기화)
+  const { highlightedIds, previewResult } = useSearchResult()
   const highlightMarkersRef = useRef<HTMLDivElement[]>([])
 
-  // PR4: 검색 결과에 따라 물방울 마커로 가능 상품 강조
+  // PR6: 프리뷰 결과에 따라 물방울 마커로 가능 상품 강조
   useEffect(() => {
     // 기존 하이라이트 마커 제거
     highlightMarkersRef.current.forEach(marker => marker.remove())
     highlightMarkersRef.current = []
 
-    // 검색 결과가 없으면 아무것도 하지 않음 (모든 상품 기본 표시)
-    if (!searchResult) return
+    // 프리뷰 결과가 없으면 아무것도 하지 않음 (모든 상품 기본 표시)
+    if (!previewResult) return
 
     // 하이라이트된 상품에 물방울 마커 추가
     const palletMarkers = document.querySelectorAll('.pallet-marker')
@@ -54,7 +57,7 @@ export default function CommandLayout() {
         highlightMarkersRef.current.push(highlightMarker)
       }
     })
-  }, [highlightedIds, searchResult])
+  }, [highlightedIds, previewResult])
 
   // CSS 애니메이션 스타일 추가
   useEffect(() => {

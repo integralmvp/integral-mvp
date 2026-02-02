@@ -314,16 +314,29 @@ export function logTransportDateSet(demandId: string, transportDate: string): Pl
 
 /**
  * 검색 실행 이벤트
+ *
+ * PR6: counts 필드 추가 - 파이프라인 단계별 건수
  */
 export function logSearchExecuted(
   demandId: string,
   resultCount: number,
-  resourcePassedCount?: number
+  counts?: {
+    afterRegulation: number
+    afterResource: number
+    afterConditions: number
+  }
 ): PlatformEvent {
   return logEvent({
     eventType: 'SEARCH_EXECUTED',
     subject: { kind: 'demand', id: demandId },
-    fields: { resultCount, resourcePassedCount },
+    fields: {
+      resultCount,
+      ...(counts && {
+        afterRegulation: counts.afterRegulation,
+        afterResource: counts.afterResource,
+        afterConditions: counts.afterConditions,
+      }),
+    },
   })
 }
 
