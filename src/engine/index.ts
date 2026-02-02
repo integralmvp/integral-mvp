@@ -28,27 +28,6 @@ export {
   palletsToAreaM2, palletsToAreaPyeong, areaToPalletsWithFactor, areaPyeongToPalletsWithFactor
 } from './unitConvert'
 
-// 매칭 타입 (Phase 4)
-export type {
-  StorageDemand, RouteDemand,
-  StorageOffer, RouteOffer,
-  MatchValidation, MatchScore, MatchResult,
-  StorageSearchRequest, RouteSearchRequest,
-  StorageSearchResponse, RouteSearchResponse,
-  StorageMatchResult, RouteMatchResult,
-} from './matchingTypes'
-
-// 매칭 엔진 (Phase 4 - 스텁)
-export {
-  checkCapacity,
-  filterStorageOffers, filterRouteOffers,
-  validateStorageMatch, validateRouteMatch,
-  scoreStorageMatch, scoreRouteMatch,
-  estimateStorageCost, estimateRouteCost,
-  createStorageMatchResult, createRouteMatchResult,
-  searchStorageOffers, searchRouteOffers,
-} from './matchingEngine'
-
 // 규정 체크 (Code Data System)
 export {
   checkCargoRules,

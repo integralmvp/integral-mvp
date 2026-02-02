@@ -12,6 +12,7 @@ import type {
   LocationOption,
   WeightRange,
   ModuleClassification,
+  FeatureCode,
 } from '../types/models'
 
 // ============ 제주도 좌표 ============
@@ -31,6 +32,8 @@ export const MAINLAND_PORTS = {
 }
 
 // ============ 경로 상품 (8개) ============
+// PR7-pre: originCode/destinationCode 추가 (법정동 코드 기반 필터링)
+// 육지 항만(부산항, 인천항, 목포항)은 제주 법정동이 아니므로 빈 문자열 처리
 
 // 도내 경로 (4개)
 export const ROUTE_PRODUCTS: RouteProduct[] = [
@@ -46,6 +49,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lat: JEJU_COORDS.seogwipo.lat,
       lng: JEJU_COORDS.seogwipo.lng,
     },
+    originCode: '5011000000',      // 제주시
+    destinationCode: '5013000000', // 서귀포시
     schedule: '매일',
     capacity: '5톤',
     vehicleType: '카고',
@@ -75,6 +80,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lat: JEJU_COORDS.seongsan.lat,
       lng: JEJU_COORDS.seongsan.lng,
     },
+    originCode: '5011000000',      // 제주시
+    destinationCode: '5013025900', // 서귀포시 성산읍
     schedule: '월수금',
     capacity: '3.5톤',
     vehicleType: '다마스',
@@ -104,6 +111,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lat: JEJU_COORDS.seogwipo.lat,
       lng: JEJU_COORDS.seogwipo.lng,
     },
+    originCode: '5011025300',      // 제주시 애월읍
+    destinationCode: '5013000000', // 서귀포시
     schedule: '화목',
     capacity: '5톤',
     vehicleType: '윙바디',
@@ -133,6 +142,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lat: 33.538,
       lng: 126.64,
     },
+    originCode: '5011025000',      // 제주시 한림읍
+    destinationCode: '5011025900', // 제주시 조천읍
     schedule: '수금',
     capacity: '1톤',
     vehicleType: '라보',
@@ -151,7 +162,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     remainingCubes: 80,
   },
 
-  // 입도 경로 (2개)
+  // 입도 경로 (2개) - 육지 출발, 제주 도착
   {
     id: 'R5',
     origin: {
@@ -164,6 +175,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lat: JEJU_COORDS.jejuPort.lat,
       lng: JEJU_COORDS.jejuPort.lng,
     },
+    originCode: '',                // 육지 (제주 법정동 외)
+    destinationCode: '5011000000', // 제주시 (제주항)
     schedule: '화목',
     capacity: '11톤',
     vehicleType: '윙바디',
@@ -195,6 +208,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lat: JEJU_COORDS.jejuPort.lat,
       lng: JEJU_COORDS.jejuPort.lng,
     },
+    originCode: '',                // 육지 (제주 법정동 외)
+    destinationCode: '5011000000', // 제주시 (제주항)
     schedule: '매일',
     capacity: '8톤',
     vehicleType: '윙바디',
@@ -216,7 +231,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     remainingCubes: 400,
   },
 
-  // 출도 경로 (2개)
+  // 출도 경로 (2개) - 제주 출발, 육지 도착
   {
     id: 'R7',
     origin: {
@@ -229,6 +244,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lat: MAINLAND_PORTS.incheon.lat,
       lng: MAINLAND_PORTS.incheon.lng,
     },
+    originCode: '5011000000', // 제주시 (제주항)
+    destinationCode: '',      // 육지 (제주 법정동 외)
     schedule: '월수',
     capacity: '11톤',
     vehicleType: '카고',
@@ -260,6 +277,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
       lat: MAINLAND_PORTS.busan.lat,
       lng: MAINLAND_PORTS.busan.lng,
     },
+    originCode: '5013000000', // 서귀포시
+    destinationCode: '',      // 육지 (제주 법정동 외)
     schedule: '화금',
     capacity: '5톤',
     vehicleType: '윙바디',
@@ -283,6 +302,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
 
 // ============ 공간 상품 (8개) ============
 // PR5: capacityCubes = Pallet 수 × 128
+// PR7-pre: regionCode 추가 + features를 FeatureCode로 표준화
 export const STORAGE_PRODUCTS: StorageProduct[] = [
   {
     id: 'S1',
@@ -291,12 +311,13 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
       lat: 33.515,
       lng: 126.525,
       region: '제주시',
+      regionCode: '5011000000',  // 제주시
     },
     storageType: '상온' as StorageType,
     capacity: '파렛트 30개',
     price: 45000,
     priceUnit: '일',
-    features: ['24시간 입출고', '지게차 보유', 'CCTV'],
+    features: ['F_24H_INOUT', 'F_FORKLIFT', 'F_CCTV'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 일반 창고 (넉넉한 조건)
     maxWeightKg: 25,
@@ -314,12 +335,13 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
       lat: 33.505,
       lng: 126.49,
       region: '제주시',
+      regionCode: '5011000000',  // 제주시
     },
     storageType: '냉장' as StorageType,
     capacity: '파렛트 15개',
     price: 80000,
     priceUnit: '일',
-    features: ['신선식품 특화', '온도 관리', '24시간 모니터링'],
+    features: ['F_FOOD_SPECIALIZED', 'F_TEMP_MONITORING'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 냉장 창고, 식품 전용
     allowedItemCodes: ['IC10', 'IC11', 'IC12', 'IC13', 'IC14'],
@@ -338,12 +360,13 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
       lat: 33.255,
       lng: 126.56,
       region: '서귀포',
+      regionCode: '5013000000',  // 서귀포시
     },
     storageType: '상온' as StorageType,
     capacity: '파렛트 25개',
     price: 40000,
     priceUnit: '일',
-    features: ['대형 물량 가능', '주차 공간'],
+    features: ['F_PARKING', 'F_FORKLIFT'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 대형 화물 가능
     maxWeightKg: 30,
@@ -361,12 +384,13 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
       lat: 33.245,
       lng: 126.565,
       region: '서귀포',
+      regionCode: '5013000000',  // 서귀포시
     },
     storageType: '냉동' as StorageType,
     capacity: '파렛트 20개',
     price: 120000,
     priceUnit: '일',
-    features: ['수산물 특화', '-20도 유지', '급속 냉동'],
+    features: ['F_FOOD_SPECIALIZED', 'F_TEMP_MONITORING', 'F_FAST_FREEZE'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 냉동 창고, 수산물/냉동식품
     allowedItemCodes: ['IC10', 'IC12', 'IC13'],
@@ -385,12 +409,13 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
       lat: 33.44,
       lng: 126.93,
       region: '성산',
+      regionCode: '5013025900',  // 서귀포시 성산읍
     },
     storageType: '상온' as StorageType,
     capacity: '파렛트 10개',
     price: 35000,
     priceUnit: '일',
-    features: ['동부권 거점', '소량 보관'],
+    features: ['F_PARKING'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 소규모 창고 (제한적)
     maxWeightKg: 15,
@@ -409,12 +434,13 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
       lat: 33.465,
       lng: 126.31,
       region: '애월',
+      regionCode: '5011025300',  // 제주시 애월읍
     },
     storageType: '냉장' as StorageType,
     capacity: '파렛트 12개',
     price: 70000,
     priceUnit: '일',
-    features: ['서부권 거점', '농산물 특화'],
+    features: ['F_AGRI_SPECIALIZED', 'F_TEMP_MONITORING'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 농산물 냉장 창고
     allowedItemCodes: ['IC10', 'IC11', 'IC14'],
@@ -433,12 +459,13 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
       lat: 33.41,
       lng: 126.27,
       region: '한림',
+      regionCode: '5011025000',  // 제주시 한림읍
     },
     storageType: '상온' as StorageType,
     capacity: '파렛트 22개',
     price: 38000,
     priceUnit: '일',
-    features: ['서부권 거점', '도로 접근성 우수'],
+    features: ['F_PARKING', 'F_FORKLIFT'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 일반 창고
     maxWeightKg: 20,
@@ -456,12 +483,13 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
       lat: 33.538,
       lng: 126.64,
       region: '조천',
+      regionCode: '5011025900',  // 제주시 조천읍
     },
     storageType: '냉장' as StorageType,
     capacity: '파렛트 18개',
     price: 75000,
     priceUnit: '일',
-    features: ['동부권 거점', '온도관리 시설'],
+    features: ['F_TEMP_MONITORING'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 냉장 창고, 중형 물량 요구
     maxWeightKg: 20,

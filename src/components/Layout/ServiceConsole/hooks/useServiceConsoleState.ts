@@ -220,11 +220,16 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
       })),
     }
 
-    // 조건 구성
+    // 조건 구성 (PR7-pre: 코드 기반 조건 우선)
     const conditions: SearchConditions = {
+      // Storage 조건 - 코드 우선
+      storageLocationCode: storageCondition.locationCode,
       storageLocation: storageCondition.location,
       startDate: storageCondition.startDate,
       endDate: storageCondition.endDate,
+      // Route 조건 - 코드 우선
+      originCode: transportCondition.originCode,
+      destinationCode: transportCondition.destinationCode,
       origin: transportCondition.origin,
       destination: transportCondition.destination,
       transportDate: transportCondition.transportDate,
@@ -293,11 +298,12 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
   // PR6: Context에 프리뷰 결과 동기화 (지도 하이라이트용)
   useEffect(() => {
     // 화물이 있거나 조건이 있을 때만 프리뷰 결과 설정
+    // PR6 일원화: locationCode 기반으로 체크
     const hasCargoOrCondition =
       registeredCargos.length > 0 ||
-      storageCondition.location ||
-      transportCondition.origin ||
-      transportCondition.destination
+      storageCondition.locationCode ||
+      transportCondition.originCode ||
+      transportCondition.destinationCode
 
     if (hasCargoOrCondition) {
       setPreviewResult({
@@ -313,9 +319,9 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
   }, [
     previewMatch,
     registeredCargos.length,
-    storageCondition.location,
-    transportCondition.origin,
-    transportCondition.destination,
+    storageCondition.locationCode,
+    transportCondition.originCode,
+    transportCondition.destinationCode,
     setPreviewResult,
   ])
 
@@ -480,7 +486,13 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
   const resetStorageCondition = () => {
     setStorageCondition({})
     if (currentDemandId) {
-      setStorageConditionInStore(currentDemandId, { location: undefined, startDate: undefined, endDate: undefined })
+      // PR6: locationCode도 함께 초기화
+      setStorageConditionInStore(currentDemandId, {
+        location: undefined,
+        locationCode: undefined,
+        startDate: undefined,
+        endDate: undefined,
+      })
     }
   }
 
@@ -488,7 +500,14 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
   const resetTransportCondition = () => {
     setTransportCondition({})
     if (currentDemandId) {
-      setTransportConditionInStore(currentDemandId, { origin: undefined, destination: undefined, transportDate: undefined })
+      // PR6: originCode/destinationCode도 함께 초기화
+      setTransportConditionInStore(currentDemandId, {
+        origin: undefined,
+        originCode: undefined,
+        destination: undefined,
+        destinationCode: undefined,
+        transportDate: undefined,
+      })
     }
   }
 

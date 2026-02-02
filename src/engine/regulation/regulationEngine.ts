@@ -82,7 +82,9 @@ export function checkRegulation(params: CheckRegulationParams): RegulationDecisi
   }
 
   // ======= 4. 최소 물량 체크 =======
-  if (demand && minCubes > 0) {
+  // PR6 수정: totalCubes가 입력되지 않은 경우(undefined, 0)에는 minCubes 필터 스킵
+  // "물량 입력 전에는 minCubes 필터 OFF" 정책
+  if (demand && demand.totalCubes && demand.totalCubes > 0 && minCubes > 0) {
     if (demand.totalCubes < minCubes) {
       reasons.push('MIN_QTY_NOT_MET')
     }

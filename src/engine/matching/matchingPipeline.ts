@@ -114,6 +114,9 @@ export function runMatchingPipeline(
     totalPallets: session.totalPallets,
   }
 
+  // PR6: totalCubes가 미입력(0 또는 undefined)이면 자원 체크 스킵
+  const shouldSkipResourceCheck = !session.totalCubes || session.totalCubes === 0
+
   // mode에 따라 분기 처리
   if (mode === 'STORAGE') {
     const storageOffers = offers as StorageProduct[]
@@ -127,16 +130,24 @@ export function runMatchingPipeline(
     )
     const afterRegulation = regulationResult.passed.length
 
-    // 자원 체크
-    const resourceResult = filterStorageByResource(
-      regulationResult.passed,
-      session.totalCubes
-    )
-    const afterResource = resourceResult.passed.length
+    // 자원 체크 (물량 미입력 시 스킵)
+    let resourcePassed: StorageProduct[]
+    let afterResource: number
+    if (shouldSkipResourceCheck) {
+      resourcePassed = regulationResult.passed
+      afterResource = afterRegulation
+    } else {
+      const resourceResult = filterStorageByResource(
+        regulationResult.passed,
+        session.totalCubes
+      )
+      resourcePassed = resourceResult.passed
+      afterResource = resourceResult.passed.length
+    }
 
     // 조건 필터
     const conditionFiltered = filterStorageByConditions(
-      resourceResult.passed,
+      resourcePassed,
       conditions
     )
     const afterConditions = conditionFiltered.length
@@ -171,16 +182,24 @@ export function runMatchingPipeline(
     )
     const afterRegulation = regulationResult.passed.length
 
-    // 자원 체크
-    const resourceResult = filterRouteByResource(
-      regulationResult.passed,
-      session.totalCubes
-    )
-    const afterResource = resourceResult.passed.length
+    // 자원 체크 (물량 미입력 시 스킵)
+    let resourcePassed: RouteProduct[]
+    let afterResource: number
+    if (shouldSkipResourceCheck) {
+      resourcePassed = regulationResult.passed
+      afterResource = afterRegulation
+    } else {
+      const resourceResult = filterRouteByResource(
+        regulationResult.passed,
+        session.totalCubes
+      )
+      resourcePassed = resourceResult.passed
+      afterResource = resourceResult.passed.length
+    }
 
     // 조건 필터
     const conditionFiltered = filterRouteByConditions(
-      resourceResult.passed,
+      resourcePassed,
       conditions
     )
     const afterConditions = conditionFiltered.length

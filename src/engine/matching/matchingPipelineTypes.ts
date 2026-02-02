@@ -11,16 +11,20 @@ import type { StorageProduct, RouteProduct } from '../../types/models'
 
 /**
  * 검색 조건 (UI에서 입력된 조건)
+ * PR7-pre: 코드 기반 조건 필드 추가 (우선순위 > 이름 기반)
  */
 export interface SearchConditions {
-  // Storage 조건
-  storageLocation?: string
+  // Storage 조건 - 코드 기반 (PR7-pre)
+  storageLocationCode?: string   // 법정동 코드 (우선)
+  storageLocation?: string       // 지역명 (기존 호환성)
   startDate?: string
   endDate?: string
 
-  // Route 조건
-  origin?: string
-  destination?: string
+  // Route 조건 - 코드 기반 (PR7-pre)
+  originCode?: string            // 출발지 법정동 코드 (우선)
+  destinationCode?: string       // 도착지 법정동 코드 (우선)
+  origin?: string                // 출발지명 (기존 호환성)
+  destination?: string           // 도착지명 (기존 호환성)
   transportDate?: string
 }
 

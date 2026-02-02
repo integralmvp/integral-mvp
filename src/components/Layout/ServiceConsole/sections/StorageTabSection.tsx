@@ -2,10 +2,11 @@
 // 1행: 화물 정보 | 물량 정보
 // 2행: 보관 장소
 // 3행: 보관 기간 (시작일 | 종료일)
+// PR6 일원화: RegionCode 기반 장소 관리
 import { useState } from 'react'
 import type { CargoUI, RegisteredCargo, StorageCondition } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine'
-import { JEJU_LOCATIONS } from '../../../../data/mockData'
+import { getRegionByCode } from '../../../../data/regionCodesJeju'
 import {
   GridCell,
   CargoCarousel,
@@ -68,7 +69,8 @@ export default function StorageTabSection({
   const [activeModal, setActiveModal] = useState<ModalType>(null)
 
   // 임시 상태 (모달에서 "선택하시겠습니까?" 버튼 누르기 전까지)
-  const [tempLocation, setTempLocation] = useState<string | undefined>(storageCondition.location)
+  // PR6: locationCode(RegionCode) 기반으로 통일
+  const [tempLocationCode, setTempLocationCode] = useState<string | undefined>(storageCondition.locationCode)
   const [tempStartDate, setTempStartDate] = useState<string | undefined>(storageCondition.startDate)
   const [tempEndDate, setTempEndDate] = useState<string | undefined>(storageCondition.endDate)
 
@@ -86,17 +88,20 @@ export default function StorageTabSection({
     return `${d.getMonth() + 1}/${d.getDate()}`
   }
 
-  // 장소명 가져오기
-  const getLocationName = (locationId?: string) => {
-    if (!locationId) return null
-    const loc = JEJU_LOCATIONS.find(l => l.id === locationId)
-    return loc?.name || locationId
+  // 장소명 가져오기 (RegionCode → name)
+  const getLocationName = (regionCode?: string) => {
+    if (!regionCode) return null
+    const region = getRegionByCode(regionCode)
+    if (!region) return regionCode
+    // 간결한 이름 반환 (예: "제주시 애월읍" → "애월읍")
+    const parts = region.name.split(' ')
+    return parts[parts.length - 1]
   }
 
   // 모달 열기 (임시 상태 초기화)
   const openModal = (modal: ModalType) => {
     if (modal === 'location') {
-      setTempLocation(storageCondition.location)
+      setTempLocationCode(storageCondition.locationCode)
     } else if (modal === 'date') {
       setTempStartDate(storageCondition.startDate)
       setTempEndDate(storageCondition.endDate)
@@ -104,10 +109,16 @@ export default function StorageTabSection({
     setActiveModal(modal)
   }
 
-  // 장소 선택 확정
+  // 장소 선택 확정 (RegionCode 저장)
   const confirmLocation = () => {
-    if (tempLocation) {
-      onUpdateCondition({ location: tempLocation })
+    if (tempLocationCode) {
+      const region = getRegionByCode(tempLocationCode)
+      const displayName = region ? region.name.split(' ').pop() : tempLocationCode
+      // locationCode(필터용)와 location(표시용) 모두 저장
+      onUpdateCondition({
+        locationCode: tempLocationCode,
+        location: displayName,
+      })
     }
     setActiveModal(null)
   }
@@ -174,12 +185,12 @@ export default function StorageTabSection({
           headerAction={
             <ResetButton
               onClick={() => onResetStorageCondition?.()}
-              disabled={!storageCondition.location && !storageCondition.startDate && !storageCondition.endDate}
+              disabled={!storageCondition.locationCode && !storageCondition.startDate && !storageCondition.endDate}
             />
           }
         >
-          {storageCondition.location ? (
-            <span className="text-sm font-medium">{getLocationName(storageCondition.location)}</span>
+          {storageCondition.locationCode ? (
+            <span className="text-sm font-medium">{getLocationName(storageCondition.locationCode)}</span>
           ) : (
             <span className="text-slate-400 text-xs">장소를 선택해주세요</span>
           )}
@@ -320,12 +331,12 @@ export default function StorageTabSection({
       >
         <div className="space-y-4">
           <LocationDropdown
-            value={tempLocation}
-            onChange={setTempLocation}
+            value={tempLocationCode}
+            onChange={setTempLocationCode}
             placeholder="보관 장소 선택"
           />
 
-          {tempLocation && (
+          {tempLocationCode && (
             <button
               onClick={confirmLocation}
               className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"

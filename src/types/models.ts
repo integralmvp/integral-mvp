@@ -6,7 +6,14 @@
 
 // Code Data System 타입 import
 import type { WeightBand, SizeBand } from '../data/bands'
+import type { FeatureCode } from '../data/featureCodes'
 export type { WeightBand, SizeBand }
+export type { FeatureCode }
+
+// ============ RegionCode 타입 (PR6 일원화) ============
+// 법정동 코드 - 10자리 문자열 (예: '5011025300')
+// UI/State/Store/Engine 전체에서 장소 식별에 사용하는 단일 진실 소스
+export type RegionCode = string
 
 // ============ 기본 위치 타입 ============
 export interface Location {
@@ -35,6 +42,9 @@ export interface RouteProduct {
   id: string;
   origin: Location;
   destination: Location;
+  // PR7-pre: 법정동 코드 기반 필터링용 (필수)
+  originCode: string;                    // 출발지 법정동 코드
+  destinationCode: string;               // 도착지 법정동 코드
   schedule: string;
   capacity: string;
   vehicleType: string;
@@ -63,12 +73,12 @@ export interface RouteProduct {
 // ============ 공간 상품 (PR2에서 확장) ============
 export interface StorageProduct {
   id: string;
-  location: Location & { region: string };
+  location: Location & { region: string; regionCode: string };  // PR7-pre: 법정동 코드 추가
   storageType: StorageType;
   capacity: string;
   price: number;
   priceUnit: string;
-  features: string[];
+  features: FeatureCode[];  // PR7-pre: FeatureCode 타입으로 표준화
   connectedRoutes?: string[];
   regulationStatus: RegulationStatus;
   // PR4 규정 필드
@@ -213,32 +223,6 @@ export interface BoxBasedAreaSelection {
   estimatedPallets?: number
 }
 
-// ============ Phase 1: 통합 엔진 - Offer 모델 확장 (TODO) ============
-// NOTE: Phase 4 매칭/추천 시 사용 예정
-
-// 보관 오퍼 (확장)
-export interface StorageOfferExtended {
-  capacityPallets: number      // 용량 (파렛트)
-  capacityCubes: number         // 용량 (큐브 = pallets * 128)
-  remainingPallets: number      // 남은 용량 (파렛트)
-  remainingCubes: number        // 남은 용량 (큐브)
-  pricePerPallet: number        // 파렛트당 가격
-  // TODO: 제약 조건 추가 (allowedModules, maxWeight, etc.)
-}
-
-// 운송 오퍼 (확장)
-export interface RouteOfferExtended {
-  capacityCubes: number         // 용량 (큐브)
-  remainingCubes: number        // 남은 용량 (큐브)
-  pricePerCube: number          // 큐브당 가격
-  // TODO: 제약 조건 추가
-  constraints?: {
-    allowedModules?: ('소형' | '중형' | '대형')[]
-    maxEdgeMm?: number
-    maxWeightKg?: number
-  }
-}
-
 // ============ PR3-3: UI 재설계 - 화물 등록 관련 타입 ============
 
 // 중량 구간
@@ -292,17 +276,20 @@ export interface LocationOption {
   parentId?: string
 }
 
-// 조건 입력 상태
+// 조건 입력 상태 (PR6 일원화: RegionCode 기반)
 export interface StorageCondition {
-  location?: string        // 보관 장소
-  startDate?: string       // 보관 시작일
-  endDate?: string         // 보관 종료일
+  location?: string        // 보관 장소 표시용 (name) - 레거시 호환
+  locationCode?: RegionCode    // 보관 장소 법정동 코드 (필터링용, 단일 진실)
+  startDate?: string       // 보관 시작일 (ISO 8601)
+  endDate?: string         // 보관 종료일 (ISO 8601)
 }
 
 export interface TransportCondition {
-  origin?: string          // 출발지
-  destination?: string     // 도착지
-  transportDate?: string   // 운송 날짜
+  origin?: string          // 출발지 표시용 (name) - 레거시 호환
+  originCode?: RegionCode      // 출발지 법정동 코드 (필터링용, 단일 진실)
+  destination?: string     // 도착지 표시용 (name) - 레거시 호환
+  destinationCode?: RegionCode // 도착지 법정동 코드 (필터링용, 단일 진실)
+  transportDate?: string   // 운송 날짜 (ISO 8601)
 }
 
 // 보관+운송 순서
