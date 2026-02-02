@@ -129,10 +129,11 @@ src/
 │   ├── rules/                # 규정 체크 로직
 │   ├── regulation/           # PR4: 규정 엔진 (상품 필터링)
 │   ├── resource/             # PR5: 자원 엔진 (용량 체크)
-│   └── session/              # PR5: 세션 관리 (검색 스냅샷)
+│   ├── session/              # PR5: 세션 관리 (검색 스냅샷)
+│   └── matching/             # PR6: 매칭 파이프라인 (단일 검색 소스)
 ├── store/                     # Code Data System (localStorage 기반)
 ├── contexts/                  # React Context
-│   └── SearchResultContext   # 검색 결과 공유 (ServiceConsole ↔ Map)
+│   └── SearchResultContext   # PR6: 프리뷰/검색 결과 공유 (ServiceConsole ↔ Map)
 ├── data/
 │   ├── mockData.ts           # 더미 데이터 (규정 + 자원 필드 포함)
 │   ├── itemCodes.ts          # 플랫폼 품목 코드 (IC01~IC99)
@@ -211,10 +212,10 @@ filterStorageByResource(regulationPassed, demandCubes) → ResourceFilterResult
 filterRouteByResource(regulationPassed, demandCubes) → ResourceFilterResult
 ```
 
-### 검색 파이프라인 (PR4 → PR5)
+### 검색 파이프라인 (PR4 → PR5 → PR6)
 
 ```
-offers → 규정 체크 → regulationPassed → 자원 체크 → resourcePassed → 최종 결과
+offers → 규정 체크 → regulationPassed → 자원 체크 → resourcePassed → 조건 필터 → 정렬 → 최종 결과
 ```
 
 ### DemandSession 확장
@@ -240,6 +241,53 @@ interface DemandSession {
 
 ---
 
+## Matching Pipeline (PR6)
+
+단일 검색 파이프라인으로 프리뷰/검색 결과/지도 하이라이트 동기화.
+
+### 핵심 원칙 (Single Source of Truth)
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  runMatchingPipeline = 검색 결과의 "단일 진실 소스"      │
+│  - 검색 버튼 건수: previewMatch.matchedOfferIds.length  │
+│  - 지도 하이라이트: previewMatch.matchedOfferIds        │
+│  - 검색 결과 리스트: searchResult (스냅샷)              │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 파이프라인 단계 (고정 순서)
+
+1. **규정 체크 (PR4)**: 크기/중량/품목/최소물량 필터링
+2. **자원 체크 (PR5)**: 용량(remainingCubes) 필터링
+3. **조건 필터 (PR6)**: 지역/날짜 필터링
+4. **정렬 (PR6)**: MVP는 LATEST만 구현
+
+### 주요 함수 (`engine/matching/`)
+
+```typescript
+runMatchingPipeline({ mode, offers, session, conditions, sort }) → MatchingPipelineResult
+runCombinedPipeline({ storageOffers, routeOffers, session, conditions, sort }) → CombinedResult
+filterStorageByConditions(offers, conditions) → StorageProduct[]
+filterRouteByConditions(offers, conditions) → RouteProduct[]
+```
+
+### Preview/Search 분리
+
+| 구분 | 역할 | 업데이트 시점 |
+|------|------|--------------|
+| previewResult | 실시간 하이라이트 | 수량/조건 변경 시 |
+| searchResult | 리스트 출력 스냅샷 | 검색 버튼 클릭 시 |
+
+### 조건 필터 (MVP)
+
+| 조건 | Storage | Route |
+|------|---------|-------|
+| 지역 | location 포함 매칭 | origin/destination 포함 매칭 |
+| 날짜 | 세션에 저장만 | 세션에 저장만 |
+
+---
+
 ## Service Console UI 구조 (MVP 기준)
 
 ### 3행 그리드 레이아웃
@@ -262,7 +310,7 @@ interface DemandSession {
 - 로그인/회원가입, 실제 결제, 백엔드/DB
 - 별도 페이지 라우팅, 실시간 데이터, 실제 거래
 - remainingCubes 차감 (예약/거래 확정) - PR7 이후
-- 비용 계산/추천 점수/정렬 고도화 - PR6 이후
+- 비용 계산/추천 점수/정렬 고도화 - PR7 이후
 
 ### 허용되는 범위
 - 더미 데이터 기반 UI, 모달 상세, 룰 기반 매칭, 더미 비용 계산
@@ -340,9 +388,9 @@ interface DemandSession {
 | PR3-4 | Code Data System MVP (Local-first) | ✅ 완료 |
 | PR4 | Regulation Engine + 검색/지도 연동 | ✅ 완료 |
 | PR5 | Resource Layer Wiring (자원 체크 + DemandSession) | ✅ 완료 |
-| PR6 | 조건/정렬/거래 모달 | 📋 예정 |
+| PR6 | Matching Pipeline (단일 파이프라인 + UX 동기화 + 지도 동기화) | ✅ 완료 |
 | PR7 | 재고 차감 + 거래 확정 | 📋 예정 |
 
 ---
 
-**최종 수정**: 2025.01.28 (PR5 Resource Layer Wiring 완료)
+**최종 수정**: 2026.02.02 (PR6 Matching Pipeline 완료)

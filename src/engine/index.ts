@@ -5,7 +5,9 @@
 // Phase 1: 엔진 빌드 - 완료
 // Phase 2-3: 운영계수 보정 환산 - 완료
 // Phase 4: 검색·매칭 타입/스텁 준비 - 완료
-// PR4: 실제 매칭 구현 예정
+// PR4: 규정 엔진 구현 - 완료
+// PR5: 자원 엔진 구현 - 완료
+// PR6: 매칭 파이프라인 통합 - 완료
 
 // ============ Exports ============
 
@@ -59,6 +61,23 @@ export {
   getPlatformLimits,
 } from './rules'
 export type { RuleCheckResult, RuleReason } from './rules'
+
+// PR6: 매칭 파이프라인
+export {
+  runMatchingPipeline,
+  runCombinedPipeline,
+  filterStorageByConditions,
+  filterRouteByConditions,
+  hasDateConditions,
+} from './matching'
+export type {
+  MatchingPipelineParams,
+  MatchingPipelineResult,
+  PipelineCounts,
+  SortCriteria,
+  SearchConditions,
+  PreviewResult,
+} from './matching'
 
 // ============ 통합 인터페이스 ============
 
