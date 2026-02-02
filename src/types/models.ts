@@ -10,6 +10,11 @@ import type { FeatureCode } from '../data/featureCodes'
 export type { WeightBand, SizeBand }
 export type { FeatureCode }
 
+// ============ RegionCode 타입 (PR6 일원화) ============
+// 법정동 코드 - 10자리 문자열 (예: '5011025300')
+// UI/State/Store/Engine 전체에서 장소 식별에 사용하는 단일 진실 소스
+export type RegionCode = string
+
 // ============ 기본 위치 타입 ============
 export interface Location {
   name: string;
@@ -271,20 +276,20 @@ export interface LocationOption {
   parentId?: string
 }
 
-// 조건 입력 상태
+// 조건 입력 상태 (PR6 일원화: RegionCode 기반)
 export interface StorageCondition {
-  location?: string        // 보관 장소 (표시용, deprecated)
-  locationCode?: string    // PR7-pre: 보관 장소 법정동 코드 (필터링용)
-  startDate?: string       // 보관 시작일
-  endDate?: string         // 보관 종료일
+  location?: string        // 보관 장소 표시용 (name) - 레거시 호환
+  locationCode?: RegionCode    // 보관 장소 법정동 코드 (필터링용, 단일 진실)
+  startDate?: string       // 보관 시작일 (ISO 8601)
+  endDate?: string         // 보관 종료일 (ISO 8601)
 }
 
 export interface TransportCondition {
-  origin?: string          // 출발지 (표시용, deprecated)
-  originCode?: string      // PR7-pre: 출발지 법정동 코드 (필터링용)
-  destination?: string     // 도착지 (표시용, deprecated)
-  destinationCode?: string // PR7-pre: 도착지 법정동 코드 (필터링용)
-  transportDate?: string   // 운송 날짜
+  origin?: string          // 출발지 표시용 (name) - 레거시 호환
+  originCode?: RegionCode      // 출발지 법정동 코드 (필터링용, 단일 진실)
+  destination?: string     // 도착지 표시용 (name) - 레거시 호환
+  destinationCode?: RegionCode // 도착지 법정동 코드 (필터링용, 단일 진실)
+  transportDate?: string   // 운송 날짜 (ISO 8601)
 }
 
 // 보관+운송 순서

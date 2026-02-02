@@ -2,10 +2,11 @@
 // 1행: 화물 정보 | 물량 정보
 // 2행: 출발지 ↔ 도착지
 // 3행: 운송 날짜
+// PR6 일원화: RegionCode 기반 장소 관리
 import { useState } from 'react'
 import type { CargoUI, RegisteredCargo, TransportCondition } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine'
-import { JEJU_LOCATIONS } from '../../../../data/mockData'
+import { getRegionByCode } from '../../../../data/regionCodesJeju'
 import {
   GridCell,
   CargoCarousel,
@@ -67,9 +68,9 @@ export default function TransportTabSection({
 }: TransportTabSectionProps) {
   const [activeModal, setActiveModal] = useState<ModalType>(null)
 
-  // 임시 상태
-  const [tempOrigin, setTempOrigin] = useState<string | undefined>(transportCondition.origin)
-  const [tempDestination, setTempDestination] = useState<string | undefined>(transportCondition.destination)
+  // 임시 상태 (PR6: RegionCode 기반으로 통일)
+  const [tempOriginCode, setTempOriginCode] = useState<string | undefined>(transportCondition.originCode)
+  const [tempDestinationCode, setTempDestinationCode] = useState<string | undefined>(transportCondition.destinationCode)
   const [tempTransportDate, setTempTransportDate] = useState<string | undefined>(transportCondition.transportDate)
 
   // 등록 대기 중인 화물 (미완료)
@@ -86,37 +87,52 @@ export default function TransportTabSection({
     return `${d.getMonth() + 1}/${d.getDate()}`
   }
 
-  // 장소명 가져오기
-  const getLocationName = (locationId?: string) => {
-    if (!locationId) return null
-    const loc = JEJU_LOCATIONS.find(l => l.id === locationId)
-    return loc?.name || locationId
+  // 장소명 가져오기 (RegionCode → name)
+  const getLocationName = (regionCode?: string) => {
+    if (!regionCode) return null
+    const region = getRegionByCode(regionCode)
+    if (!region) return regionCode
+    // 간결한 이름 반환 (예: "제주시 애월읍" → "애월읍")
+    const parts = region.name.split(' ')
+    return parts[parts.length - 1]
   }
 
   // 모달 열기 (임시 상태 초기화)
   const openModal = (modal: ModalType) => {
     if (modal === 'origin') {
-      setTempOrigin(transportCondition.origin)
+      setTempOriginCode(transportCondition.originCode)
     } else if (modal === 'destination') {
-      setTempDestination(transportCondition.destination)
+      setTempDestinationCode(transportCondition.destinationCode)
     } else if (modal === 'date') {
       setTempTransportDate(transportCondition.transportDate)
     }
     setActiveModal(modal)
   }
 
-  // 출발지 선택 확정
+  // 출발지 선택 확정 (RegionCode 저장)
   const confirmOrigin = () => {
-    if (tempOrigin) {
-      onUpdateCondition({ origin: tempOrigin })
+    if (tempOriginCode) {
+      const region = getRegionByCode(tempOriginCode)
+      const displayName = region ? region.name.split(' ').pop() : tempOriginCode
+      // originCode(필터용)와 origin(표시용) 모두 저장
+      onUpdateCondition({
+        originCode: tempOriginCode,
+        origin: displayName,
+      })
     }
     setActiveModal(null)
   }
 
-  // 도착지 선택 확정
+  // 도착지 선택 확정 (RegionCode 저장)
   const confirmDestination = () => {
-    if (tempDestination) {
-      onUpdateCondition({ destination: tempDestination })
+    if (tempDestinationCode) {
+      const region = getRegionByCode(tempDestinationCode)
+      const displayName = region ? region.name.split(' ').pop() : tempDestinationCode
+      // destinationCode(필터용)와 destination(표시용) 모두 저장
+      onUpdateCondition({
+        destinationCode: tempDestinationCode,
+        destination: displayName,
+      })
     }
     setActiveModal(null)
   }
@@ -129,10 +145,12 @@ export default function TransportTabSection({
     setActiveModal(null)
   }
 
-  // 출발지/도착지 토글
+  // 출발지/도착지 토글 (코드와 표시명 모두 교환)
   const handleSwapLocations = () => {
     onUpdateCondition({
+      originCode: transportCondition.destinationCode,
       origin: transportCondition.destination,
+      destinationCode: transportCondition.originCode,
       destination: transportCondition.origin,
     })
   }
@@ -195,12 +213,12 @@ export default function TransportTabSection({
             headerAction={
               <ResetButton
                 onClick={() => onResetTransportCondition?.()}
-                disabled={!transportCondition.origin && !transportCondition.destination && !transportCondition.transportDate}
+                disabled={!transportCondition.originCode && !transportCondition.destinationCode && !transportCondition.transportDate}
               />
             }
           >
-            {transportCondition.origin ? (
-              <span className="text-sm font-medium">{getLocationName(transportCondition.origin)}</span>
+            {transportCondition.originCode ? (
+              <span className="text-sm font-medium">{getLocationName(transportCondition.originCode)}</span>
             ) : (
               <span className="text-slate-400 text-xs">선택</span>
             )}
@@ -225,8 +243,8 @@ export default function TransportTabSection({
             icon="destination"
             onClick={() => openModal('destination')}
           >
-            {transportCondition.destination ? (
-              <span className="text-sm font-medium">{getLocationName(transportCondition.destination)}</span>
+            {transportCondition.destinationCode ? (
+              <span className="text-sm font-medium">{getLocationName(transportCondition.destinationCode)}</span>
             ) : (
               <span className="text-slate-400 text-xs">선택</span>
             )}
@@ -357,12 +375,12 @@ export default function TransportTabSection({
       >
         <div className="space-y-4">
           <LocationDropdown
-            value={tempOrigin}
-            onChange={setTempOrigin}
+            value={tempOriginCode}
+            onChange={setTempOriginCode}
             placeholder="출발지 선택"
           />
 
-          {tempOrigin && (
+          {tempOriginCode && (
             <button
               onClick={confirmOrigin}
               className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
@@ -381,12 +399,12 @@ export default function TransportTabSection({
       >
         <div className="space-y-4">
           <LocationDropdown
-            value={tempDestination}
-            onChange={setTempDestination}
+            value={tempDestinationCode}
+            onChange={setTempDestinationCode}
             placeholder="도착지 선택"
           />
 
-          {tempDestination && (
+          {tempDestinationCode && (
             <button
               onClick={confirmDestination}
               className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
