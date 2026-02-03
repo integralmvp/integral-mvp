@@ -156,7 +156,7 @@ export default function TransportTabSection({
   }
 
   return (
-    <div className="grid grid-rows-[1.35fr_1fr_1fr] gap-3 h-full">
+    <div className="grid grid-rows-[1.35fr_1fr_1fr] gap-3 h-full p-4">
       {/* 1행: 화물 정보 | 물량 정보 */}
       <div className="grid grid-cols-2 gap-2 min-h-0">
         {/* 화물 정보 */}

@@ -91,7 +91,7 @@ export default function ItemCodeDropdown({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`w-full px-2 py-1.5 border rounded text-xs text-left flex items-center justify-between
+        className={`w-full px-2 py-1.5 border rounded text-xs text-left flex items-center justify-between text-black
           ${disabled ? 'bg-slate-100 cursor-not-allowed' : 'bg-white hover:border-slate-400'}
           ${isOpen ? 'border-teal-500 ring-1 ring-teal-500' : 'border-slate-300'}
         `}
@@ -122,7 +122,7 @@ export default function ItemCodeDropdown({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="코드, 품목명, 키워드 검색..."
-              className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded focus:outline-none focus:border-teal-500"
+              className="w-full px-2 py-1.5 text-xs text-black border border-slate-200 rounded focus:outline-none focus:border-teal-500"
             />
           </div>
 

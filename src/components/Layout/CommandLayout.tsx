@@ -109,6 +109,8 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
+            borderTop: '3px solid rgba(0, 240, 255, 0.6)',
+            borderLeft: '3px solid rgba(0, 240, 255, 0.6)',
             borderRight: '3px solid rgba(0, 240, 255, 0.6)',
             borderBottom: '3px solid rgba(0, 240, 255, 0.6)',
             display: 'flex',
@@ -138,6 +140,8 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
+            borderTop: '3px solid rgba(0, 240, 255, 0.6)',
+            borderRight: '3px solid rgba(0, 240, 255, 0.6)',
             borderBottom: '3px solid rgba(0, 240, 255, 0.6)',
           }}
         >
@@ -190,7 +194,9 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
+            borderLeft: '3px solid rgba(0, 240, 255, 0.6)',
             borderRight: '3px solid rgba(0, 240, 255, 0.6)',
+            borderBottom: '3px solid rgba(0, 240, 255, 0.6)',
           }}
         >
           <ServiceConsole />

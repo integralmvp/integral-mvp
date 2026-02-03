@@ -54,8 +54,8 @@ export default function GridCell({
       `}
       style={{
         background: 'rgba(22, 22, 32, 0.8)',
-        border: '1px solid rgba(0, 240, 255, 0.3)',
-        boxShadow: disabled ? 'none' : 'inset 0 0 10px rgba(0, 240, 255, 0.05)',
+        border: '2px solid rgba(255, 255, 255, 0.5)',
+        boxShadow: disabled ? 'none' : 'inset 0 0 10px rgba(255, 255, 255, 0.05)',
       }}
     >
       {/* 콘텐츠 영역 - 전체 칸 기준 수직/수평 중앙 정렬 */}
