@@ -246,7 +246,7 @@ export default function BothTabSection({
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeView === firstButton
               ? 'bg-teal-700 text-white shadow-md'
-              : 'bg-slate-800 text-slate-100 hover:bg-slate-200'
+              : 'bg-slate-800 text-slate-100 hover:bg-teal-200'
           }`}
         >
           {firstButton === 'storage' ? '보관' : '운송'}
@@ -269,7 +269,7 @@ export default function BothTabSection({
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeView === secondButton
               ? 'bg-teal-700 text-white shadow-md'
-              : 'bg-slate-800 text-slate-100 hover:bg-slate-200'
+              : 'bg-slate-800 text-slate-100 hover:bg-teal-200'
           }`}
         >
           {secondButton === 'storage' ? '보관' : '운송'}
