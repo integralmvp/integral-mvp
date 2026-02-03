@@ -21,7 +21,8 @@ import { REGION_REPRESENTATIVE_COORDS } from './regionRepresentativeCoords'
 const getCoords = (code: string) => REGION_REPRESENTATIVE_COORDS[code]
 
 // ============ 제주도 좌표 (대표좌표 참조) ============
-export const JEJU_COORDS = {
+// 내부 참조용 (외부 export 하지 않음)
+const JEJU_COORDS = {
   jejuCity: getCoords('5011000000'),
   seogwipo: getCoords('5013000000'),
   seongsan: getCoords('5013025900'),
@@ -32,7 +33,8 @@ export const JEJU_COORDS = {
 }
 
 // ============ 육지 항만 좌표 (대표좌표 참조) ============
-export const MAINLAND_PORTS = {
+// 내부 참조용 (외부 export 하지 않음)
+const MAINLAND_PORTS = {
   busan: getCoords('BUSAN_PORT'),
   incheon: getCoords('INCHEON_PORT'),
   mokpo: getCoords('MOKPO_PORT'),
@@ -508,59 +510,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     remainingCubes: 100,
   },
 ]
-
-// ============ 유니트 로드 모듈 옵션 ============
-export const UNIT_LOAD_MODULES = ['소형', '대형', '특수'] as const
-
-// ============ 포장박스 모듈 (PR3-2 재설계 - 바닥 규격 mm) ============
-export interface PackageBoxModule {
-  id: string
-  name: '소형' | '중형' | '대형'
-  width: number  // mm (바닥 가로)
-  depth: number  // mm (바닥 세로)
-  label: string
-}
-
-export const PACKAGE_BOX_MODULES: PackageBoxModule[] = [
-  {
-    id: 'box-small',
-    name: '소형',
-    width: 550,
-    depth: 275,
-    label: '소형(8분할)'
-  },
-  {
-    id: 'box-medium',
-    name: '중형',
-    width: 550,
-    depth: 366,
-    label: '중형(6분할)'
-  },
-  {
-    id: 'box-large',
-    name: '대형',
-    width: 650,
-    depth: 450,
-    label: '대형(4분할)'
-  }
-]
-
-// 파렛트 기준 (1100mm × 1100mm)
-export const PALLET_SIZE = {
-  width: 110,  // cm
-  depth: 110,  // cm
-  stackHeight: 180  // cm (적재 가능 높이)
-}
-
-// ============ 취급 특이사항 옵션 ============
-export const HANDLING_OPTIONS = [
-  '파손주의',
-  '냉장',
-  '냉동',
-  '위험물',
-  '온도민감',
-  '적재방향',
-] as const
 
 // ============ PR3-3: UI 재설계 - 품목 카테고리 (우체국 품목 코드 체계 기반) ============
 export const PRODUCT_CATEGORIES: ProductCategory[] = [
