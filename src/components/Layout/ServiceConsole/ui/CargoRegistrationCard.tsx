@@ -168,7 +168,7 @@ export default function CargoRegistrationCard({
         {hasBoxDimensions && !showClassifyResult && !isConfirmed && (
           <button
             onClick={handleClassify}
-            className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded transition-colors"
+            className="w-full py-2 bg-teal-500 hover:bg-teal-600 text-white text-xs font-bold rounded transition-colors"
           >
             포장 모듈 분류하기
           </button>
@@ -190,7 +190,7 @@ export default function CargoRegistrationCard({
                     key={moduleName}
                     className={`flex-1 py-2 px-2 border rounded text-center ${
                       isSelected
-                        ? 'border-blue-500 bg-blue-50 text-blue-900'
+                        ? 'border-teal-500 bg-teal-50 text-teal-900'
                         : 'border-slate-200 bg-slate-50 text-slate-400'
                     }`}
                   >
@@ -263,13 +263,13 @@ export default function CargoRegistrationCard({
       {/* 등록 정보 요약 및 등록 버튼 */}
       {isComplete && !isConfirmed && (
         <div className="space-y-3 pt-2 border-t border-slate-200">
-          <div className="bg-blue-50 border border-blue-200 rounded p-3">
-            <div className="text-xs font-semibold text-blue-900 mb-2">등록 정보 요약</div>
-            <div className="text-xs text-blue-800 space-y-1">
+          <div className="bg-teal-50 border border-teal-200 rounded p-3">
+            <div className="text-xs font-semibold text-teal-900 mb-2">등록 정보 요약</div>
+            <div className="text-xs text-teal-800 space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-slate-600">규격:</span>
                 <span>{cargo.width}×{cargo.depth}×{cargo.height}mm</span>
-                <span className="px-1 py-0.5 bg-blue-100 rounded text-[10px]">
+                <span className="px-1 py-0.5 bg-teal-100 rounded text-[10px]">
                   {cargo.moduleType}
                 </span>
                 {cargo.sizeBand && (
@@ -300,7 +300,7 @@ export default function CargoRegistrationCard({
           </div>
           <button
             onClick={() => onComplete(cargo.id)}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors"
+            className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold rounded-lg transition-colors"
           >
             이 화물을 등록하시겠습니까?
           </button>

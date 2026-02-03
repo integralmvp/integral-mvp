@@ -278,7 +278,7 @@ export default function StorageTabSection({
           {registeredCargos.length > 0 && pendingCargos.length === 0 && (
             <button
               onClick={() => setActiveModal(null)}
-              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
             >
               등록을 완료하시겠습니까?
             </button>
@@ -339,7 +339,7 @@ export default function StorageTabSection({
           {tempLocationCode && (
             <button
               onClick={confirmLocation}
-              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -365,7 +365,7 @@ export default function StorageTabSection({
           {(tempStartDate || tempEndDate) && (
             <button
               onClick={confirmDate}
-              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>

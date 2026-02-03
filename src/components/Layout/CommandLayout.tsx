@@ -7,6 +7,7 @@ import ServiceConsole from './ServiceConsole'
 import MapboxContainer from '../Map/MapboxContainer'
 import { useSearchResult } from '../../contexts/SearchResultContext'
 import { createAvailableMarkerSvg } from '../Map/MapboxContainer/utils/style'
+import logoSvg from '../../assets/icons/console/logo.svg'
 
 // 하이라이트 마커 생성
 function createHighlightMarker(productId: string): HTMLDivElement {
@@ -90,9 +91,10 @@ export default function CommandLayout() {
         {/* 상단: 로고 영역 */}
         <div className="p-6">
           <div
-            className="cursor-pointer hover:opacity-70 transition-opacity inline-block"
+            className="cursor-pointer hover:opacity-70 transition-opacity inline-flex items-center gap-2"
             onClick={() => window.location.reload()}
           >
+            <img src={logoSvg} alt="CUBE Logo" className="h-8 w-auto" />
             <span className="text-teal-700 text-3xl font-black tracking-tight drop-shadow-lg">
               CUBE
             </span>

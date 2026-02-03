@@ -67,7 +67,7 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
   return (
     <button
       onClick={handleClick}
-      className="w-full p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-lg transition-all text-left"
+      className="w-full p-4 bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all text-left"
     >
       <div className="flex justify-between items-start">
         <div className="flex-1">
@@ -84,7 +84,7 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
           </div>
         </div>
         <div className="text-right ml-4">
-          <div className="text-blue-900 font-bold text-lg">
+          <div className="text-teal-700 font-bold text-lg">
             {product.price.toLocaleString()}원
           </div>
           <div className="text-xs text-slate-400">/{product.priceUnit}</div>
@@ -102,7 +102,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
   }
 
   const scopeBadge = product.routeScope === 'INTRA_JEJU'
-    ? { label: '도내', color: 'bg-blue-100 text-blue-700' }
+    ? { label: '도내', color: 'bg-teal-100 text-teal-700' }
     : product.direction === 'INBOUND'
       ? { label: '입도', color: 'bg-green-100 text-green-700' }
       : { label: '출도', color: 'bg-purple-100 text-purple-700' }
@@ -110,7 +110,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
   return (
     <button
       onClick={handleClick}
-      className="w-full p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-lg transition-all text-left"
+      className="w-full p-4 bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all text-left"
     >
       <div className="flex justify-between items-start">
         <div className="flex-1">
@@ -134,7 +134,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
           </div>
         </div>
         <div className="text-right ml-4">
-          <div className="text-blue-900 font-bold text-lg">
+          <div className="text-teal-700 font-bold text-lg">
             {product.price.toLocaleString()}원
           </div>
           <div className="text-xs text-slate-400">/{product.priceUnit}</div>
@@ -312,11 +312,11 @@ export default function SearchResultModal({
       {/* 모달 */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-[90%] max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
         {/* 헤더 */}
-        <div className="bg-blue-900 text-white p-6">
+        <div className="bg-teal-700 text-white p-6">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">{header.title}</h2>
-              <p className="text-blue-200 text-sm mt-1">{header.subtitle}</p>
+              <p className="text-teal-200 text-sm mt-1">{header.subtitle}</p>
             </div>
             <button
               onClick={onClose}
@@ -332,7 +332,7 @@ export default function SearchResultModal({
               {totalCount}건의 상품
             </span>
             {summary && summary.failedCount > 0 && (
-              <span className="text-blue-200 text-xs">
+              <span className="text-teal-200 text-xs">
                 (조건 불일치 {summary.failedCount}건 제외)
               </span>
             )}
@@ -357,8 +357,8 @@ export default function SearchResultModal({
                 />
 
                 {/* 안내 문구 */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-blue-800">{getBothGuideMessage()}</p>
+                <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-teal-800">{getBothGuideMessage()}</p>
                 </div>
               </div>
 
@@ -368,7 +368,7 @@ export default function SearchResultModal({
                   onClick={() => setBothTab('integrated')}
                   className={`flex-1 py-3 text-sm font-medium transition-colors ${
                     bothTab === 'integrated'
-                      ? 'text-blue-900 border-b-2 border-blue-900'
+                      ? 'text-teal-700 border-b-2 border-teal-700'
                       : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
@@ -380,7 +380,7 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('storage')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'storage'
-                          ? 'text-blue-900 border-b-2 border-blue-900'
+                          ? 'text-teal-700 border-b-2 border-teal-700'
                           : 'text-slate-500 hover:text-slate-700'
                       }`}
                     >
@@ -390,7 +390,7 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('transport')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'transport'
-                          ? 'text-blue-900 border-b-2 border-blue-900'
+                          ? 'text-teal-700 border-b-2 border-teal-700'
                           : 'text-slate-500 hover:text-slate-700'
                       }`}
                     >
@@ -403,7 +403,7 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('transport')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'transport'
-                          ? 'text-blue-900 border-b-2 border-blue-900'
+                          ? 'text-teal-700 border-b-2 border-teal-700'
                           : 'text-slate-500 hover:text-slate-700'
                       }`}
                     >
@@ -413,7 +413,7 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('storage')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'storage'
-                          ? 'text-blue-900 border-b-2 border-blue-900'
+                          ? 'text-teal-700 border-b-2 border-teal-700'
                           : 'text-slate-500 hover:text-slate-700'
                       }`}
                     >

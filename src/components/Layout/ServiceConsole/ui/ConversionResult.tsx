@@ -27,15 +27,15 @@ export default function ConversionResult({
   return (
     <>
       {/* 환산 결과 창 (하이라이트) */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <div className="bg-teal-50 border border-teal-200 rounded-lg p-3">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-blue-900">
+          <span className="text-sm font-semibold text-teal-900">
             환산 결과
           </span>
           {hasModuleDetails && (
             <button
               onClick={() => setShowModuleDetails(!showModuleDetails)}
-              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+              className="text-xs text-teal-600 hover:text-teal-800 font-medium"
             >
               상세
             </button>
@@ -44,17 +44,17 @@ export default function ConversionResult({
 
         {/* 상세 정보 (상세 버튼 클릭 시 펼침) */}
         {showModuleDetails && result.moduleSummary && result.moduleSummary.length > 0 && (
-          <div className="mb-3 space-y-2 border-b border-blue-200 pb-3">
+          <div className="mb-3 space-y-2 border-b border-teal-200 pb-3">
             {result.moduleSummary.map((summary, idx) => {
               const pallets = mode === 'STORAGE' ? Math.ceil(summary.estimatedCubes / 128) : null
               const cubes = summary.estimatedCubes
 
               return (
-                <div key={idx} className="bg-white rounded p-2 border border-blue-100">
+                <div key={idx} className="bg-white rounded p-2 border border-teal-100">
                   <div className="text-xs text-slate-800">
                     {mode === 'STORAGE' ? (
                       <span>
-                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-blue-700">{pallets} 파렛트</span>
+                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-teal-700">{pallets} 파렛트</span>
                       </span>
                     ) : (
                       <span>
@@ -68,7 +68,7 @@ export default function ConversionResult({
           </div>
         )}
 
-        <div className="bg-white rounded p-2.5 border border-blue-100">
+        <div className="bg-white rounded p-2.5 border border-teal-100">
           <div className="text-base font-bold text-slate-900">
             {mode === 'STORAGE'
               ? isAreaInput ? `수용 가능: ${result.demandPallets} 파렛트` : `총 ${result.demandPallets} 파렛트`
@@ -145,7 +145,7 @@ export default function ConversionResult({
             id={`conversion-confirmed-${isAreaInput ? 'area' : 'box'}`}
             checked={conversionConfirmed}
             onChange={(e) => setConversionConfirmed(e.target.checked)}
-            className="mt-0.5 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+            className="mt-0.5 w-4 h-4 text-teal-600 rounded focus:ring-2 focus:ring-teal-500"
           />
           <label
             htmlFor={`conversion-confirmed-${isAreaInput ? 'area' : 'box'}`}
@@ -164,7 +164,7 @@ export default function ConversionResult({
               isButtonDisabled
                 ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                 : mode === 'STORAGE'
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-teal-600 hover:bg-teal-700 text-white'
                 : 'bg-emerald-600 hover:bg-emerald-700 text-white'
             }`}
           >

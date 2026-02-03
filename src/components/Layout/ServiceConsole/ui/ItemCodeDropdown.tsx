@@ -93,7 +93,7 @@ export default function ItemCodeDropdown({
         disabled={disabled}
         className={`w-full px-2 py-1.5 border rounded text-xs text-left flex items-center justify-between
           ${disabled ? 'bg-slate-100 cursor-not-allowed' : 'bg-white hover:border-slate-400'}
-          ${isOpen ? 'border-blue-500 ring-1 ring-blue-500' : 'border-slate-300'}
+          ${isOpen ? 'border-teal-500 ring-1 ring-teal-500' : 'border-slate-300'}
         `}
       >
         {selectedItem ? (
@@ -122,7 +122,7 @@ export default function ItemCodeDropdown({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="코드, 품목명, 키워드 검색..."
-              className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded focus:outline-none focus:border-blue-500"
+              className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded focus:outline-none focus:border-teal-500"
             />
           </div>
 
@@ -138,8 +138,8 @@ export default function ItemCodeDropdown({
                   key={item.code}
                   type="button"
                   onClick={() => handleSelect(item)}
-                  className={`w-full px-3 py-2 text-left hover:bg-blue-50 transition-colors
-                    ${value === item.code ? 'bg-blue-50' : ''}
+                  className={`w-full px-3 py-2 text-left hover:bg-teal-50 transition-colors
+                    ${value === item.code ? 'bg-teal-50' : ''}
                   `}
                 >
                   <div className="flex items-start gap-2">

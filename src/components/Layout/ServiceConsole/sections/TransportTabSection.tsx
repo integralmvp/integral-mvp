@@ -228,7 +228,7 @@ export default function TransportTabSection({
         {/* 양방향 화살표 버튼 */}
         <button
           onClick={handleSwapLocations}
-          className="flex-shrink-0 w-7 flex items-center justify-center text-blue-900 hover:text-blue-950 hover:bg-blue-50 rounded-lg transition-colors"
+          className="flex-shrink-0 w-7 flex items-center justify-center text-teal-700 hover:text-teal-800 hover:bg-teal-50 rounded-lg transition-colors"
           title="출발지/도착지 교환"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,7 +322,7 @@ export default function TransportTabSection({
           {registeredCargos.length > 0 && pendingCargos.length === 0 && (
             <button
               onClick={() => setActiveModal(null)}
-              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
             >
               등록을 완료하시겠습니까?
             </button>
@@ -383,7 +383,7 @@ export default function TransportTabSection({
           {tempOriginCode && (
             <button
               onClick={confirmOrigin}
-              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -407,7 +407,7 @@ export default function TransportTabSection({
           {tempDestinationCode && (
             <button
               onClick={confirmDestination}
-              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>
@@ -431,7 +431,7 @@ export default function TransportTabSection({
           {tempTransportDate && (
             <button
               onClick={confirmDate}
-              className="w-full py-3 bg-blue-900 hover:bg-blue-950 text-white text-sm font-bold rounded-lg transition-colors"
+              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
             >
               선택하시겠습니까?
             </button>

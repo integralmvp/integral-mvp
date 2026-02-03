@@ -72,7 +72,7 @@ export default function LocationDropdown({
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
+      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
     >
       <option value="">{placeholder}</option>
 

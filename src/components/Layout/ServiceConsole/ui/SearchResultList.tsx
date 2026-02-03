@@ -27,7 +27,7 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
   return (
     <button
       onClick={handleClick}
-      className="w-full p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+      className="w-full p-3 bg-white rounded-lg border border-slate-200 hover:border-teal-300 hover:shadow-md transition-all text-left"
     >
       <div className="flex justify-between items-start">
         <div>
@@ -39,7 +39,7 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-blue-900 font-bold text-sm">
+          <div className="text-teal-700 font-bold text-sm">
             {product.price.toLocaleString()}원
           </div>
           <div className="text-xs text-slate-400">/{product.priceUnit}</div>
@@ -69,7 +69,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
 
   // 경로 타입 뱃지
   const scopeBadge = product.routeScope === 'INTRA_JEJU'
-    ? { label: '도내', color: 'bg-blue-100 text-blue-700' }
+    ? { label: '도내', color: 'bg-teal-100 text-teal-700' }
     : product.direction === 'INBOUND'
       ? { label: '입도', color: 'bg-green-100 text-green-700' }
       : { label: '출도', color: 'bg-purple-100 text-purple-700' }
@@ -77,7 +77,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
   return (
     <button
       onClick={handleClick}
-      className="w-full p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+      className="w-full p-3 bg-white rounded-lg border border-slate-200 hover:border-teal-300 hover:shadow-md transition-all text-left"
     >
       <div className="flex justify-between items-start">
         <div>
@@ -94,7 +94,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-blue-900 font-bold text-sm">
+          <div className="text-teal-700 font-bold text-sm">
             {product.price.toLocaleString()}원
           </div>
           <div className="text-xs text-slate-400">/{product.priceUnit}</div>
