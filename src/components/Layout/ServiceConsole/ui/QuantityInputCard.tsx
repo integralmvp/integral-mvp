@@ -53,7 +53,7 @@ export default function QuantityInputCard({
       {/* 화물 정보 헤더 */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500 text-white text-xs font-bold rounded-full">
+          <span className="inline-flex items-center justify-center w-6 h-6 bg-teal-500 text-white text-xs font-bold rounded-full">
             {cargo.cargoNumber}
           </span>
           <div>
@@ -68,7 +68,7 @@ export default function QuantityInputCard({
         {confirmed && (
           <button
             onClick={handleEdit}
-            className="text-xs text-blue-600 hover:text-blue-800"
+            className="text-xs text-teal-600 hover:text-teal-800"
           >
             수정
           </button>
@@ -109,7 +109,7 @@ export default function QuantityInputCard({
         {!confirmed && quantity > 0 && (
           <button
             onClick={handleConfirm}
-            className="w-full py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold rounded-lg transition-colors"
+            className="w-full py-2 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-lg transition-colors"
           >
             수량 확정
           </button>
