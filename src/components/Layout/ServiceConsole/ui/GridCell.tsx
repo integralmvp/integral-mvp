@@ -48,31 +48,48 @@ export default function GridCell({
       onClick={onClick}
       disabled={disabled}
       className={`
-        relative w-full h-full min-h-0 p-2 rounded-2xl border border-slate-400 text-left transition-all overflow-hidden
-        bg-slate-50/60 hover:bg-slate-100/80 hover:border-slate-600
+        relative w-full h-full min-h-0 p-2 text-left transition-all overflow-hidden
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-[0.98]'}
         ${className}
       `}
+      style={{
+        background: 'rgba(22, 22, 32, 0.8)',
+        border: '1px solid rgba(0, 240, 255, 0.3)',
+        boxShadow: disabled ? 'none' : 'inset 0 0 10px rgba(0, 240, 255, 0.05)',
+      }}
     >
       {/* 콘텐츠 영역 - 전체 칸 기준 수직/수평 중앙 정렬 */}
-      <div className="absolute inset-0 flex items-center justify-center text-sm font-medium text-slate-800 px-2">
+      <div className="absolute inset-0 flex items-center justify-center text-sm font-medium text-cyber-text px-2">
         {children}
       </div>
 
       {/* 헤더: 아이콘 + 라벨 (좌상단 오버레이) + 액션 버튼 (우상단) */}
       <div className="absolute top-1.5 left-2 right-2 flex items-center justify-between z-10">
-        <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-md px-1.5 py-0.5 shadow-sm">
+        <div
+          className="flex items-center gap-1 px-1.5 py-0.5"
+          style={{
+            background: 'rgba(0, 240, 255, 0.1)',
+            border: '1px solid rgba(0, 240, 255, 0.2)',
+          }}
+        >
           {iconSrc && (
             <img
               src={iconSrc}
               alt={label}
               className="w-4 h-4 object-contain"
+              style={{ filter: 'brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(150deg)' }}
             />
           )}
-          <span className="text-[11px] font-semibold text-slate-700">{label}</span>
+          <span className="text-[11px] font-semibold text-cyber-cyan">{label}</span>
         </div>
         {headerAction && (
-          <div onClick={(e) => e.stopPropagation()} className="bg-white/90 backdrop-blur-sm rounded-md shadow-sm">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'rgba(0, 240, 255, 0.1)',
+              border: '1px solid rgba(0, 240, 255, 0.2)',
+            }}
+          >
             {headerAction}
           </div>
         )}

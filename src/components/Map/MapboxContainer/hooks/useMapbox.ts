@@ -53,6 +53,26 @@ function applyCameraOffset(map: mapboxgl.Map): void {
   })
 }
 
+/**
+ * 사이버펑크 테마: 바다 색상을 검정색 계열로 변경
+ */
+function applyCyberpunkWaterStyle(map: mapboxgl.Map): void {
+  // water 레이어의 색상을 어두운 남색/검정으로 변경
+  if (map.getLayer('water')) {
+    map.setPaintProperty('water', 'fill-color', '#0a0a12')
+  }
+
+  // water-depth (깊은 바다) 레이어가 있다면 변경
+  if (map.getLayer('water-depth')) {
+    map.setPaintProperty('water-depth', 'fill-color', '#050508')
+  }
+
+  // waterway 레이어가 있다면 변경
+  if (map.getLayer('waterway')) {
+    map.setPaintProperty('waterway', 'line-color', '#0a0a12')
+  }
+}
+
 export interface UseMapboxResult {
   mapContainer: React.RefObject<HTMLDivElement>
   miniMapContainer: React.RefObject<HTMLDivElement>
@@ -98,6 +118,9 @@ export function useMapbox(): UseMapboxResult {
       map.current.resize()
       applyCameraOffset(map.current)
 
+      // 사이버펑크 테마: 바다 색상 변경
+      applyCyberpunkWaterStyle(map.current)
+
       addPalletMarkers(map.current)
       addArrowImages(map.current)
 
@@ -122,6 +145,10 @@ export function useMapbox(): UseMapboxResult {
         if (!miniMap.current) return
 
         miniMap.current.resize()
+
+        // 사이버펑크 테마: 미니맵 바다 색상 변경
+        applyCyberpunkWaterStyle(miniMap.current)
+
         addMiniMapArrowImages(miniMap.current)
 
         setTimeout(() => {

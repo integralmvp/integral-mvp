@@ -27,15 +27,21 @@ export default function ConversionResult({
   return (
     <>
       {/* 환산 결과 창 (하이라이트) */}
-      <div className="bg-teal-50 border border-teal-200 rounded-lg p-3">
+      <div
+        className="p-3"
+        style={{
+          background: 'rgba(0, 240, 255, 0.08)',
+          border: '1px solid rgba(0, 240, 255, 0.3)',
+        }}
+      >
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-teal-900">
+          <span className="text-sm font-semibold text-cyber-cyan">
             환산 결과
           </span>
           {hasModuleDetails && (
             <button
               onClick={() => setShowModuleDetails(!showModuleDetails)}
-              className="text-xs text-teal-600 hover:text-teal-800 font-medium"
+              className="text-xs text-cyber-text-dim hover:text-cyber-cyan font-medium"
             >
               상세
             </button>
@@ -44,21 +50,31 @@ export default function ConversionResult({
 
         {/* 상세 정보 (상세 버튼 클릭 시 펼침) */}
         {showModuleDetails && result.moduleSummary && result.moduleSummary.length > 0 && (
-          <div className="mb-3 space-y-2 border-b border-teal-200 pb-3">
+          <div
+            className="mb-3 space-y-2 pb-3"
+            style={{ borderBottom: '1px solid rgba(0, 240, 255, 0.2)' }}
+          >
             {result.moduleSummary.map((summary, idx) => {
               const pallets = mode === 'STORAGE' ? Math.ceil(summary.estimatedCubes / 128) : null
               const cubes = summary.estimatedCubes
 
               return (
-                <div key={idx} className="bg-white rounded p-2 border border-teal-100">
-                  <div className="text-xs text-slate-800">
+                <div
+                  key={idx}
+                  className="p-2"
+                  style={{
+                    background: 'rgba(22, 22, 32, 0.8)',
+                    border: '1px solid rgba(0, 240, 255, 0.15)',
+                  }}
+                >
+                  <div className="text-xs text-cyber-text">
                     {mode === 'STORAGE' ? (
                       <span>
-                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-teal-700">{pallets} 파렛트</span>
+                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-cyber-cyan">{pallets} 파렛트</span>
                       </span>
                     ) : (
                       <span>
-                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-emerald-700">{cubes} 큐브</span>
+                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-cyber-cyan">{cubes} 큐브</span>
                       </span>
                     )}
                   </div>
@@ -68,19 +84,25 @@ export default function ConversionResult({
           </div>
         )}
 
-        <div className="bg-white rounded p-2.5 border border-teal-100">
-          <div className="text-base font-bold text-slate-900">
+        <div
+          className="p-2.5"
+          style={{
+            background: 'rgba(22, 22, 32, 0.8)',
+            border: '1px solid rgba(0, 240, 255, 0.15)',
+          }}
+        >
+          <div className="text-base font-bold text-cyber-text">
             {mode === 'STORAGE'
               ? isAreaInput ? `수용 가능: ${result.demandPallets} 파렛트` : `총 ${result.demandPallets} 파렛트`
               : `총 ${result.demandCubes} 큐브`}
           </div>
-          <div className="text-xs text-slate-600 mt-0.5">
+          <div className="text-xs text-cyber-text-dim mt-0.5">
             {mode === 'STORAGE'
               ? `${palletsToCBM(result.demandPallets || 0)} CBM (구매 공간 기준 체적)`
               : `${cubesToCBM(result.demandCubes)} CBM (구매 공간 기준 체적)`}
           </div>
           {isAreaInput && mode === 'STORAGE' && (
-            <div className="text-[10px] text-slate-500 mt-1">
+            <div className="text-[10px] text-cyber-text-dim mt-1">
               운영 동선 고려(÷{STORAGE_AREA_CONSTANTS.storageAreaFactor.toFixed(2)})
             </div>
           )}
@@ -88,8 +110,17 @@ export default function ConversionResult({
       </div>
 
       {/* 안내사항 */}
-      <div className="border border-slate-300 rounded-lg p-4 space-y-4">
-        <div className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2">
+      <div
+        className="p-4 space-y-4"
+        style={{
+          border: '1px solid rgba(0, 240, 255, 0.2)',
+          background: 'rgba(22, 22, 32, 0.5)',
+        }}
+      >
+        <div
+          className="text-sm font-bold text-cyber-cyan pb-2"
+          style={{ borderBottom: '1px solid rgba(0, 240, 255, 0.2)' }}
+        >
           📋 안내사항
         </div>
 
@@ -97,7 +128,7 @@ export default function ConversionResult({
         <div className="flex items-end justify-center gap-6">
           {/* 파렛트/큐브 */}
           <div className="flex flex-col items-center" style={{ width: '150px' }}>
-            <div className="text-xs font-semibold text-slate-700 mb-2">
+            <div className="text-xs font-semibold text-cyber-text-dim mb-2">
               {mode === 'STORAGE' ? '<기준 파렛트>' : '<기준 큐브>'}
             </div>
             {mode === 'STORAGE' ? (
@@ -108,7 +139,7 @@ export default function ConversionResult({
           </div>
 
           {/* 화살표 */}
-          <div className="text-3xl text-slate-400 pb-2">
+          <div className="text-3xl text-cyber-cyan pb-2">
             →
           </div>
 
@@ -131,12 +162,12 @@ export default function ConversionResult({
         </div>
 
         {/* 안내 문구 */}
-        <div className="text-[10px] text-slate-500 text-center leading-relaxed">
+        <div className="text-[10px] text-cyber-text-dim text-center leading-relaxed">
           구매자의 이해를 돕기 위한 정보이며, 현장 적재 상황에 따라 사용 형태는 달라질 수 있습니다.
         </div>
 
         {/* 구분선 */}
-        <div className="border-t border-slate-200"></div>
+        <div style={{ borderTop: '1px solid rgba(0, 240, 255, 0.2)' }}></div>
 
         {/* 체크박스 확인 */}
         <div className="flex items-start gap-2">
@@ -145,11 +176,11 @@ export default function ConversionResult({
             id={`conversion-confirmed-${isAreaInput ? 'area' : 'box'}`}
             checked={conversionConfirmed}
             onChange={(e) => setConversionConfirmed(e.target.checked)}
-            className="mt-0.5 w-4 h-4 text-teal-600 rounded focus:ring-2 focus:ring-teal-500"
+            className="mt-0.5 w-4 h-4 accent-cyber-cyan"
           />
           <label
             htmlFor={`conversion-confirmed-${isAreaInput ? 'area' : 'box'}`}
-            className="text-xs text-slate-700 cursor-pointer select-none"
+            className="text-xs text-cyber-text cursor-pointer select-none"
           >
             환산 결과를 확인했습니다
           </label>
@@ -160,13 +191,15 @@ export default function ConversionResult({
           <button
             onClick={onSelectConfirm}
             disabled={isButtonDisabled}
-            className={`w-full py-2 text-sm font-bold rounded-lg transition-colors ${
-              isButtonDisabled
-                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                : mode === 'STORAGE'
-                ? 'bg-teal-600 hover:bg-teal-700 text-white'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-            }`}
+            className="w-full py-2 text-sm font-bold transition-colors"
+            style={{
+              background: isButtonDisabled
+                ? 'rgba(100, 100, 100, 0.5)'
+                : 'linear-gradient(135deg, #00F0FF 0%, #00B8C4 100%)',
+              color: isButtonDisabled ? '#666' : '#0A0A0F',
+              border: 'none',
+              cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
+            }}
           >
             {mode === 'STORAGE'
               ? `${result.demandPallets} 파렛트를 선택하시겠습니까?`

@@ -67,27 +67,40 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
   return (
     <button
       onClick={handleClick}
-      className="w-full p-4 bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all text-left"
+      className="w-full p-4 transition-all text-left"
+      style={{
+        background: 'rgba(22, 22, 32, 0.8)',
+        border: '1px solid rgba(0, 240, 255, 0.3)',
+        boxShadow: 'inset 0 0 10px rgba(0, 240, 255, 0.05)',
+      }}
     >
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <div className="font-bold text-slate-900">{product.location.name}</div>
-          <div className="text-sm text-slate-500 mt-1">
+          <div className="font-bold text-cyber-text">{product.location.name}</div>
+          <div className="text-sm text-cyber-text-dim mt-1">
             {product.storageType} · {product.capacity}
           </div>
           <div className="flex gap-1 mt-2 flex-wrap">
             {product.features.slice(0, 3).map((feature, i) => (
-              <span key={i} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
+              <span
+                key={i}
+                className="text-xs px-2 py-1"
+                style={{
+                  background: 'rgba(0, 240, 255, 0.1)',
+                  border: '1px solid rgba(0, 240, 255, 0.2)',
+                  color: 'var(--cyber-text-dim)',
+                }}
+              >
                 {feature}
               </span>
             ))}
           </div>
         </div>
         <div className="text-right ml-4">
-          <div className="text-teal-700 font-bold text-lg">
+          <div className="text-cyber-cyan font-bold text-lg">
             {product.price.toLocaleString()}원
           </div>
-          <div className="text-xs text-slate-400">/{product.priceUnit}</div>
+          <div className="text-xs text-cyber-text-dim">/{product.priceUnit}</div>
         </div>
       </div>
     </button>
@@ -102,42 +115,62 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
   }
 
   const scopeBadge = product.routeScope === 'INTRA_JEJU'
-    ? { label: '도내', color: 'bg-teal-100 text-teal-700' }
+    ? { label: '도내', bgColor: 'rgba(0, 240, 255, 0.15)', borderColor: 'rgba(0, 240, 255, 0.3)', textColor: 'var(--cyber-cyan)' }
     : product.direction === 'INBOUND'
-      ? { label: '입도', color: 'bg-green-100 text-green-700' }
-      : { label: '출도', color: 'bg-purple-100 text-purple-700' }
+      ? { label: '입도', bgColor: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.3)', textColor: '#10b981' }
+      : { label: '출도', bgColor: 'rgba(168, 85, 247, 0.15)', borderColor: 'rgba(168, 85, 247, 0.3)', textColor: '#a855f7' }
 
   return (
     <button
       onClick={handleClick}
-      className="w-full p-4 bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all text-left"
+      className="w-full p-4 transition-all text-left"
+      style={{
+        background: 'rgba(22, 22, 32, 0.8)',
+        border: '1px solid rgba(0, 240, 255, 0.3)',
+        boxShadow: 'inset 0 0 10px rgba(0, 240, 255, 0.05)',
+      }}
     >
       <div className="flex justify-between items-start">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <span className={`text-xs px-2 py-1 rounded-full font-medium ${scopeBadge.color}`}>
+            <span
+              className="text-xs px-2 py-1 font-medium"
+              style={{
+                background: scopeBadge.bgColor,
+                border: `1px solid ${scopeBadge.borderColor}`,
+                color: scopeBadge.textColor,
+              }}
+            >
               {scopeBadge.label}
             </span>
-            <span className="font-bold text-slate-900">
+            <span className="font-bold text-cyber-text">
               {product.origin.name} → {product.destination.name}
             </span>
           </div>
-          <div className="text-sm text-slate-500 mt-1">
+          <div className="text-sm text-cyber-text-dim mt-1">
             {product.vehicleType} · {product.capacity} · {product.schedule}
           </div>
           <div className="flex gap-1 mt-2 flex-wrap">
             {product.cargoTypes.map((type, i) => (
-              <span key={i} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
+              <span
+                key={i}
+                className="text-xs px-2 py-1"
+                style={{
+                  background: 'rgba(0, 240, 255, 0.1)',
+                  border: '1px solid rgba(0, 240, 255, 0.2)',
+                  color: 'var(--cyber-text-dim)',
+                }}
+              >
                 {type}
               </span>
             ))}
           </div>
         </div>
         <div className="text-right ml-4">
-          <div className="text-teal-700 font-bold text-lg">
+          <div className="text-cyber-cyan font-bold text-lg">
             {product.price.toLocaleString()}원
           </div>
-          <div className="text-xs text-slate-400">/{product.priceUnit}</div>
+          <div className="text-xs text-cyber-text-dim">/{product.priceUnit}</div>
         </div>
       </div>
     </button>
@@ -176,13 +209,25 @@ function ConditionSummary({
     : transportCondition.transportDate
 
   return (
-    <div className="bg-slate-50 rounded-xl p-4 mb-4">
-      <div className="text-xs font-semibold text-slate-500 mb-2">입력 조건 요약</div>
+    <div
+      className="p-4 mb-4"
+      style={{
+        background: 'rgba(0, 240, 255, 0.05)',
+        border: '1px solid rgba(0, 240, 255, 0.2)',
+      }}
+    >
+      <div className="text-xs font-semibold text-cyber-cyan mb-2">입력 조건 요약</div>
       <div className="grid grid-cols-2 gap-3 text-sm">
         {/* 화물 정보 */}
-        <div className="bg-white rounded-lg p-3 border border-slate-200">
-          <div className="text-xs text-slate-400 mb-1">화물</div>
-          <div className="font-medium text-slate-900">
+        <div
+          className="p-3"
+          style={{
+            background: 'rgba(22, 22, 32, 0.8)',
+            border: '1px solid rgba(0, 240, 255, 0.15)',
+          }}
+        >
+          <div className="text-xs text-cyber-text-dim mb-1">화물</div>
+          <div className="font-medium text-cyber-text">
             {registeredCargos.length > 0
               ? `${registeredCargos.length}건 등록`
               : '미등록'}
@@ -190,9 +235,15 @@ function ConditionSummary({
         </div>
 
         {/* 물량 */}
-        <div className="bg-white rounded-lg p-3 border border-slate-200">
-          <div className="text-xs text-slate-400 mb-1">물량</div>
-          <div className="font-medium text-slate-900">
+        <div
+          className="p-3"
+          style={{
+            background: 'rgba(22, 22, 32, 0.8)',
+            border: '1px solid rgba(0, 240, 255, 0.15)',
+          }}
+        >
+          <div className="text-xs text-cyber-text-dim mb-1">물량</div>
+          <div className="font-medium text-cyber-text">
             {totalCubes > 0
               ? activeTab === 'storage'
                 ? `${totalPallets} 파레트`
@@ -206,15 +257,27 @@ function ConditionSummary({
         {/* 보관 조건 */}
         {(activeTab === 'storage' || activeTab === 'both') && (
           <>
-            <div className="bg-white rounded-lg p-3 border border-slate-200">
-              <div className="text-xs text-slate-400 mb-1">보관 장소</div>
-              <div className="font-medium text-slate-900">
+            <div
+              className="p-3"
+              style={{
+                background: 'rgba(22, 22, 32, 0.8)',
+                border: '1px solid rgba(0, 240, 255, 0.15)',
+              }}
+            >
+              <div className="text-xs text-cyber-text-dim mb-1">보관 장소</div>
+              <div className="font-medium text-cyber-text">
                 {getLocationName(storageCondition.location)}
               </div>
             </div>
-            <div className="bg-white rounded-lg p-3 border border-slate-200">
-              <div className="text-xs text-slate-400 mb-1">보관 기간</div>
-              <div className="font-medium text-slate-900">
+            <div
+              className="p-3"
+              style={{
+                background: 'rgba(22, 22, 32, 0.8)',
+                border: '1px solid rgba(0, 240, 255, 0.15)',
+              }}
+            >
+              <div className="text-xs text-cyber-text-dim mb-1">보관 기간</div>
+              <div className="font-medium text-cyber-text">
                 {effectiveStorageStartDate && storageCondition.endDate
                   ? `${effectiveStorageStartDate} ~ ${storageCondition.endDate}`
                   : effectiveStorageStartDate || storageCondition.endDate || '-'}
@@ -226,17 +289,29 @@ function ConditionSummary({
         {/* 운송 조건 */}
         {(activeTab === 'transport' || activeTab === 'both') && (
           <>
-            <div className="bg-white rounded-lg p-3 border border-slate-200">
-              <div className="text-xs text-slate-400 mb-1">출발지 → 도착지</div>
-              <div className="font-medium text-slate-900">
+            <div
+              className="p-3"
+              style={{
+                background: 'rgba(22, 22, 32, 0.8)',
+                border: '1px solid rgba(0, 240, 255, 0.15)',
+              }}
+            >
+              <div className="text-xs text-cyber-text-dim mb-1">출발지 → 도착지</div>
+              <div className="font-medium text-cyber-text">
                 {transportCondition.origin && transportCondition.destination
                   ? `${getLocationName(transportCondition.origin)} → ${getLocationName(transportCondition.destination)}`
                   : getLocationName(transportCondition.origin) || getLocationName(transportCondition.destination) || '전체'}
               </div>
             </div>
-            <div className="bg-white rounded-lg p-3 border border-slate-200">
-              <div className="text-xs text-slate-400 mb-1">운송일</div>
-              <div className="font-medium text-slate-900">
+            <div
+              className="p-3"
+              style={{
+                background: 'rgba(22, 22, 32, 0.8)',
+                border: '1px solid rgba(0, 240, 255, 0.15)',
+              }}
+            >
+              <div className="text-xs text-cyber-text-dim mb-1">운송일</div>
+              <div className="font-medium text-cyber-text">
                 {effectiveTransportDate || '-'}
               </div>
             </div>
@@ -305,22 +380,35 @@ export default function SearchResultModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* 백드롭 */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* 모달 */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-[90%] max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div
+        className="relative w-[90%] max-w-2xl max-h-[85vh] flex flex-col overflow-hidden cyber-corner"
+        style={{
+          background: 'rgba(10, 10, 15, 0.95)',
+          border: '1px solid rgba(0, 240, 255, 0.4)',
+          boxShadow: '0 0 40px rgba(0, 240, 255, 0.2)',
+        }}
+      >
         {/* 헤더 */}
-        <div className="bg-teal-700 text-white p-6">
+        <div
+          className="p-6"
+          style={{
+            background: 'linear-gradient(180deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 184, 196, 0.05) 100%)',
+            borderBottom: '1px solid rgba(0, 240, 255, 0.3)',
+          }}
+        >
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-2xl font-bold">{header.title}</h2>
-              <p className="text-teal-200 text-sm mt-1">{header.subtitle}</p>
+              <h2 className="text-2xl font-bold text-cyber-cyan">{header.title}</h2>
+              <p className="text-cyber-text-dim text-sm mt-1">{header.subtitle}</p>
             </div>
             <button
               onClick={onClose}
-              className="text-white/70 hover:text-white text-2xl leading-none p-1"
+              className="text-cyber-text-dim hover:text-cyber-cyan text-2xl leading-none p-1"
             >
               ×
             </button>
@@ -328,11 +416,18 @@ export default function SearchResultModal({
 
           {/* 결과 카운트 */}
           <div className="mt-4 flex items-center gap-2">
-            <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
+            <span
+              className="px-3 py-1 text-sm"
+              style={{
+                background: 'rgba(0, 240, 255, 0.15)',
+                border: '1px solid rgba(0, 240, 255, 0.3)',
+                color: 'var(--cyber-cyan)',
+              }}
+            >
               {totalCount}건의 상품
             </span>
             {summary && summary.failedCount > 0 && (
-              <span className="text-teal-200 text-xs">
+              <span className="text-cyber-text-dim text-xs">
                 (조건 불일치 {summary.failedCount}건 제외)
               </span>
             )}
@@ -357,19 +452,31 @@ export default function SearchResultModal({
                 />
 
                 {/* 안내 문구 */}
-                <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 mb-4">
-                  <p className="text-sm text-teal-800">{getBothGuideMessage()}</p>
+                <div
+                  className="p-3 mb-4"
+                  style={{
+                    background: 'rgba(0, 240, 255, 0.05)',
+                    border: '1px solid rgba(0, 240, 255, 0.2)',
+                  }}
+                >
+                  <p className="text-sm text-cyber-text-dim">{getBothGuideMessage()}</p>
                 </div>
               </div>
 
               {/* 내부 탭 (순서에 따라 탭 순서 변경) - sticky로 스크롤 시 상단 고정 */}
-              <div className="flex border-b border-slate-200 bg-white sticky top-0 z-10">
+              <div
+                className="flex sticky top-0 z-10"
+                style={{
+                  background: 'rgba(10, 10, 15, 0.95)',
+                  borderBottom: '1px solid rgba(0, 240, 255, 0.3)',
+                }}
+              >
                 <button
                   onClick={() => setBothTab('integrated')}
                   className={`flex-1 py-3 text-sm font-medium transition-colors ${
                     bothTab === 'integrated'
-                      ? 'text-teal-700 border-b-2 border-teal-700'
-                      : 'text-slate-500 hover:text-slate-700'
+                      ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                      : 'text-cyber-text-dim hover:text-cyber-text'
                   }`}
                 >
                   연계
@@ -380,8 +487,8 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('storage')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'storage'
-                          ? 'text-teal-700 border-b-2 border-teal-700'
-                          : 'text-slate-500 hover:text-slate-700'
+                          ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                          : 'text-cyber-text-dim hover:text-cyber-text'
                       }`}
                     >
                       보관
@@ -390,8 +497,8 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('transport')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'transport'
-                          ? 'text-teal-700 border-b-2 border-teal-700'
-                          : 'text-slate-500 hover:text-slate-700'
+                          ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                          : 'text-cyber-text-dim hover:text-cyber-text'
                       }`}
                     >
                       운송
@@ -403,8 +510,8 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('transport')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'transport'
-                          ? 'text-teal-700 border-b-2 border-teal-700'
-                          : 'text-slate-500 hover:text-slate-700'
+                          ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                          : 'text-cyber-text-dim hover:text-cyber-text'
                       }`}
                     >
                       운송
@@ -413,8 +520,8 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('storage')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'storage'
-                          ? 'text-teal-700 border-b-2 border-teal-700'
-                          : 'text-slate-500 hover:text-slate-700'
+                          ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                          : 'text-cyber-text-dim hover:text-cyber-text'
                       }`}
                     >
                       보관
@@ -442,7 +549,7 @@ export default function SearchResultModal({
 
             {/* 상품 리스트 */}
             {filteredCount === 0 ? (
-              <div className="text-center py-12 text-slate-400">
+              <div className="text-center py-12 text-cyber-text-dim">
                 {activeTab === 'both' && bothTab === 'integrated' ? (
                   <>
                     <div className="text-4xl mb-3">📦</div>
@@ -462,7 +569,7 @@ export default function SearchResultModal({
                 {filtered.storage.length > 0 && (
                   <>
                     {activeTab === 'both' && bothTab !== 'storage' && (
-                      <div className="text-sm font-semibold text-slate-700 mt-4 mb-2">
+                      <div className="text-sm font-semibold text-cyber-cyan mt-4 mb-2">
                         공간상품 ({filtered.storage.length})
                       </div>
                     )}
@@ -476,7 +583,7 @@ export default function SearchResultModal({
                 {filtered.route.length > 0 && (
                   <>
                     {activeTab === 'both' && bothTab !== 'transport' && (
-                      <div className="text-sm font-semibold text-slate-700 mt-4 mb-2">
+                      <div className="text-sm font-semibold text-cyber-cyan mt-4 mb-2">
                         경로상품 ({filtered.route.length})
                       </div>
                     )}

@@ -17,11 +17,11 @@ interface TabButtonProps {
   onClick: () => void
 }
 
-// Teal 통일 스타일 (플랫폼 상징 컬러)
+// 사이버펑크 스타일 (형광 청록)
 const tabActiveStyles: Record<ServiceType, string> = {
-  storage: 'text-teal-700 border-b-2 border-teal-700',
-  transport: 'text-teal-700 border-b-2 border-teal-700',
-  both: 'text-teal-700 border-b-2 border-teal-700',
+  storage: 'text-cyber-cyan border-b-2 border-cyber-cyan',
+  transport: 'text-cyber-cyan border-b-2 border-cyber-cyan',
+  both: 'text-cyber-cyan border-b-2 border-cyber-cyan',
 }
 
 function TabButton({ label, isActive, tabType, onClick }: TabButtonProps) {
@@ -31,7 +31,7 @@ function TabButton({ label, isActive, tabType, onClick }: TabButtonProps) {
       className={`flex-1 py-4 text-sm font-semibold transition-colors ${
         isActive
           ? tabActiveStyles[tabType]
-          : 'text-slate-600 hover:text-slate-900'
+          : 'text-cyber-text-dim hover:text-cyber-text'
       }`}
     >
       {label}
@@ -50,7 +50,12 @@ function SearchButton({ activeTab: _activeTab, productCount, onClick }: SearchBu
   return (
     <button
       onClick={onClick}
-      className="w-full py-4 rounded-xl text-white font-bold text-lg transition-all hover:shadow-lg bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800"
+      className="w-full py-4 text-cyber-dark font-bold text-lg transition-all hover:shadow-lg"
+      style={{
+        background: 'linear-gradient(135deg, #00F0FF 0%, #00B8C4 100%)',
+        boxShadow: '0 0 20px rgba(0, 240, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+        border: 'none',
+      }}
     >
       <SlotCounter value={productCount} className="font-bold" />
       건의 상품 검색하기
@@ -79,22 +84,23 @@ export default function ServiceConsole() {
 
   return (
     <div
-      className="h-full flex flex-col overflow-hidden rounded-2xl shadow-2xl"
+      className="h-full flex flex-col overflow-hidden cyber-corner"
       style={{
-        background: 'rgba(255, 255, 255, 0.8)',
+        background: 'rgba(10, 10, 15, 0.9)',
+        border: '1px solid rgba(0, 240, 255, 0.3)',
         cursor: 'default'
       }}
     >
       {/* 타이틀 */}
-      <div className="p-6 border-b border-slate-200">
-        <h1 className="text-2xl font-bold text-slate-900">내 손 안의 작은 물류 허브</h1>
-        <p className="text-sm text-slate-600 mt-1">
+      <div className="p-6 border-b border-cyber-border">
+        <h1 className="text-2xl font-bold text-cyber-text">내 손 안의 작은 물류 허브</h1>
+        <p className="text-sm text-cyber-text-dim mt-1">
           비어있는 공간과 경로를 원하는 조건으로 검색하고 결제까지! 신개념 물류 오픈마켓
         </p>
       </div>
 
       {/* 탭 */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex border-b border-cyber-border">
         <TabButton
           label="보관"
           isActive={state.activeTab === 'storage'}
@@ -184,7 +190,7 @@ export default function ServiceConsole() {
       </div>
 
       {/* 검색 버튼 - 하단 고정 */}
-      <div className="p-4 border-t border-slate-200">
+      <div className="p-4 border-t border-cyber-border">
         <SearchButton
           activeTab={state.activeTab}
           productCount={displayCount}

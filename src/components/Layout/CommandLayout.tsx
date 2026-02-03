@@ -81,21 +81,35 @@ export default function CommandLayout() {
         <MapboxContainer />
       </div>
 
-      {/* 좌측 45%: 블러 오버레이 */}
+      {/* 좌측 45%: 사이버펑크 오버레이 */}
       <div className="absolute inset-y-0 left-0 w-[45%] z-10 flex flex-col"
         style={{
-          backdropFilter: 'blur(5px)',
-          background: 'rgba(255,255,255,0.6)'
+          backdropFilter: 'blur(8px)',
+          background: 'rgba(10, 10, 15, 0.85)'
         }}
       >
+        {/* 테두리 장식 */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            borderRight: '1px solid rgba(0, 240, 255, 0.3)',
+            boxShadow: 'inset -10px 0 30px rgba(0, 240, 255, 0.05)'
+          }}
+        />
+
         {/* 상단: 로고 영역 */}
-        <div className="p-6">
+        <div className="p-6 relative z-10">
           <div
-            className="cursor-pointer hover:opacity-70 transition-opacity inline-flex items-center gap-2"
+            className="cursor-pointer hover:opacity-80 transition-opacity inline-flex items-center gap-3"
             onClick={() => window.location.reload()}
           >
-            <img src={logoSvg} alt="CUBE Logo" className="h-8 w-auto" />
-            <span className="text-teal-700 text-3xl font-black tracking-tight drop-shadow-lg">
+            <img
+              src={logoSvg}
+              alt="CUBE Logo"
+              className="h-9 w-auto"
+              style={{ filter: 'drop-shadow(0 0 8px rgba(0, 240, 255, 0.6))' }}
+            />
+            <span className="logo-cyber">
               CUBE
             </span>
           </div>
@@ -103,7 +117,7 @@ export default function CommandLayout() {
         </div>
 
         {/* 하단: 서비스 콘솔 */}
-        <div className="flex-1 p-6 pt-0 overflow-hidden">
+        <div className="flex-1 p-6 pt-0 overflow-hidden relative z-10">
           <ServiceConsole />
         </div>
       </div>

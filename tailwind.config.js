@@ -27,6 +27,19 @@ export default {
           light: '#F87171',
           dark: '#DC2626',
         },
+        // 사이버펑크 테마 컬러
+        cyber: {
+          cyan: '#00F0FF',      // 메인 형광 청록
+          'cyan-dim': '#00B8C4', // 어두운 청록
+          'cyan-glow': '#00FFFF', // 글로우 효과용
+          dark: '#0A0A0F',      // 메인 배경 (거의 검정)
+          'dark-lighter': '#12121A', // 약간 밝은 배경
+          'dark-card': '#161620', // 카드 배경
+          border: '#1E3A4A',    // 기본 보더
+          'border-bright': '#00D4FF', // 강조 보더
+          text: '#E0F7FA',      // 밝은 텍스트
+          'text-dim': '#7FDBDF', // 어두운 텍스트
+        },
       },
       keyframes: {
         'slot-drop': {

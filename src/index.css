@@ -25,4 +25,80 @@ html {
   --color-console-bg: rgba(15, 23, 42, 0.85);
   --color-live: #34d399;
   --color-title-accent: #22d3ee;
+
+  /* 사이버펑크 테마 변수 */
+  --cyber-cyan: #00F0FF;
+  --cyber-cyan-dim: #00B8C4;
+  --cyber-cyan-glow: #00FFFF;
+  --cyber-dark: #0A0A0F;
+  --cyber-dark-lighter: #12121A;
+  --cyber-dark-card: #161620;
+  --cyber-border: #1E3A4A;
+  --cyber-border-bright: #00D4FF;
+  --cyber-text: #E0F7FA;
+  --cyber-text-dim: #7FDBDF;
+}
+
+/* 사이버펑크 글로우 효과 */
+.cyber-glow {
+  box-shadow: 0 0 10px var(--cyber-cyan), 0 0 20px rgba(0, 240, 255, 0.3);
+}
+
+.cyber-glow-text {
+  text-shadow: 0 0 10px var(--cyber-cyan), 0 0 20px rgba(0, 240, 255, 0.5);
+}
+
+.cyber-border {
+  border: 1px solid var(--cyber-border-bright);
+  box-shadow: 0 0 5px rgba(0, 212, 255, 0.3), inset 0 0 5px rgba(0, 212, 255, 0.1);
+}
+
+/* 사이버펑크 코너 장식 */
+.cyber-corner {
+  position: relative;
+}
+
+.cyber-corner::before,
+.cyber-corner::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--cyber-cyan);
+  border-style: solid;
+}
+
+.cyber-corner::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.cyber-corner::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+/* 사이버펑크 스캔라인 효과 (옵션) */
+.cyber-scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-scanline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 240, 255, 0.03) 0px,
+    rgba(0, 240, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
 }
