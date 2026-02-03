@@ -1,4 +1,4 @@
-// 전체 지도 배경 + 좌측 블러 오버레이 레이아웃
+// 전체 지도 배경 + 그리드 기반 이중 패널 레이아웃
 // PR4: 검색 결과 하이라이트 연동 - 물방울 마커로 가능 상품 강조
 // PR6: 프리뷰 결과 기반 하이라이트 (실시간 동기화)
 
@@ -81,48 +81,26 @@ export default function CommandLayout() {
         <MapboxContainer />
       </div>
 
-      {/* 우측 상단: 모니터링 헤더 */}
+      {/* 그리드 기반 이중 패널 오버레이 */}
       <div
-        className="absolute top-0 left-[45%] right-0 z-10 h-16 flex items-center justify-between px-6"
+        className="absolute inset-0 z-10 pointer-events-none"
         style={{
-          background: 'rgba(10, 10, 15, 0.85)',
-          borderBottom: '1px solid rgba(0, 240, 255, 0.3)',
-          borderLeft: '1px solid rgba(0, 240, 255, 0.3)',
-          backdropFilter: 'blur(8px)',
+          display: 'grid',
+          gridTemplateColumns: '45% 55%',
+          gridTemplateRows: '64px 1fr',
         }}
       >
-        <div className="flex items-center gap-4">
-          <span className="text-cyber-cyan text-sm font-semibold tracking-wider">LOGISTICS MONITORING</span>
-          <span className="text-cyber-text-dim text-xs">JEJU ISLAND</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span className="text-cyber-text-dim text-xs">LIVE</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 좌측 45%: 사이버펑크 오버레이 */}
-      <div className="absolute inset-y-0 left-0 w-[45%] z-10 flex flex-col"
-        style={{
-          background: 'rgba(10, 10, 15, 0.85)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        {/* 테두리 장식 */}
+        {/* Row 1, Col 1: 로고 영역 */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="pointer-events-auto"
           style={{
+            background: 'rgba(10, 10, 15, 0.85)',
+            backdropFilter: 'blur(8px)',
             borderRight: '1px solid rgba(0, 240, 255, 0.3)',
-          }}
-        />
-
-        {/* 상단: 로고 영역 */}
-        <div
-          className="px-6 py-4 relative z-10"
-          style={{
             borderBottom: '1px solid rgba(0, 240, 255, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 24px',
           }}
         >
           <div
@@ -141,10 +119,41 @@ export default function CommandLayout() {
           </div>
         </div>
 
-        {/* 하단: 서비스 콘솔 - 마진 없이 꽉 채움 */}
-        <div className="flex-1 overflow-hidden relative z-10">
+        {/* Row 1, Col 2: 모니터링 헤더 */}
+        <div
+          className="pointer-events-auto flex items-center justify-between px-6"
+          style={{
+            background: 'rgba(10, 10, 15, 0.85)',
+            backdropFilter: 'blur(8px)',
+            borderBottom: '1px solid rgba(0, 240, 255, 0.3)',
+          }}
+        >
+          <div className="flex items-center gap-4">
+            <span className="text-cyber-cyan text-sm font-semibold tracking-wider">LOGISTICS MONITORING</span>
+            <span className="text-cyber-text-dim text-xs">JEJU ISLAND</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              <span className="text-cyber-text-dim text-xs">LIVE</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2, Col 1: 서비스 콘솔 */}
+        <div
+          className="pointer-events-auto overflow-hidden"
+          style={{
+            background: 'rgba(10, 10, 15, 0.85)',
+            backdropFilter: 'blur(8px)',
+            borderRight: '1px solid rgba(0, 240, 255, 0.3)',
+          }}
+        >
           <ServiceConsole />
         </div>
+
+        {/* Row 2, Col 2: 투명 영역 (지도 표시) */}
+        <div className="pointer-events-none" />
       </div>
     </div>
   )

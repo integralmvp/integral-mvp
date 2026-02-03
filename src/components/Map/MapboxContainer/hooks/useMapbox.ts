@@ -38,18 +38,19 @@ const MINIMAP_CONFIG = {
 }
 
 /**
- * 카메라 오프셋 적용 (좌측 45% 블러 영역 보정)
- * 마커/레이어와 무관하게 카메라 상태만 갱신
+ * 패딩 기반 카메라 보정 (좌측 45% 오버레이 영역 고려)
+ * easeTo offset 대신 setPadding 사용으로 안정적인 뷰포트 계산
  */
-function applyCameraOffset(map: mapboxgl.Map): void {
+function applyMapPadding(map: mapboxgl.Map): void {
   const container = map.getContainer()
   const width = container.clientWidth
-  const offsetX = (width * 0.45) / 2
+  const leftPadding = width * 0.45  // 좌측 45% 패널 영역
 
-  map.easeTo({
-    center: MAP_CONFIG.center,
-    offset: [offsetX, 0],
-    duration: 0,
+  map.setPadding({
+    left: leftPadding,
+    top: 64,  // 상단 헤더 높이
+    right: 0,
+    bottom: 0,
   })
 }
 
@@ -90,7 +91,7 @@ export function useMapbox(): UseMapboxResult {
   const handleResize = useCallback(() => {
     if (map.current) {
       map.current.resize()
-      applyCameraOffset(map.current)
+      applyMapPadding(map.current)
     }
     if (miniMap.current) {
       miniMap.current.resize()
@@ -116,7 +117,7 @@ export function useMapbox(): UseMapboxResult {
 
       // load 시 resize 호출 후 offset 적용
       map.current.resize()
-      applyCameraOffset(map.current)
+      applyMapPadding(map.current)
 
       // 사이버펑크 테마: 바다 색상 변경
       applyCyberpunkWaterStyle(map.current)
