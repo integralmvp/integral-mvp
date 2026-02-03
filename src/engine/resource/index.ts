@@ -17,5 +17,4 @@ export {
   checkResource,
   filterStorageByResource,
   filterRouteByResource,
-  filterOffersByResource,
 } from './resourceEngine'

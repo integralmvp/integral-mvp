@@ -137,7 +137,9 @@ src/
 ├── data/
 │   ├── mockData.ts           # 더미 데이터 (규정 + 자원 필드 포함)
 │   ├── itemCodes.ts          # 플랫폼 품목 코드 (IC01~IC99)
-│   └── bands.ts              # 중량/크기 밴드 정의
+│   ├── bands.ts              # 중량/크기 밴드 정의
+│   ├── regionCodesJeju.ts    # PR7-pre: 제주 법정동 코드
+│   └── regionRepresentativeCoords.ts  # PR7-pre: 지역/항만 대표 좌표
 ├── components/
 │   ├── Layout/
 │   │   ├── CommandLayout.tsx # 지도 하이라이트 마커 연동
@@ -283,8 +285,90 @@ filterRouteByConditions(offers, conditions) → RouteProduct[]
 
 | 조건 | Storage | Route |
 |------|---------|-------|
-| 지역 | location 포함 매칭 | origin/destination 포함 매칭 |
+| 지역 | locationCode 법정동 매칭 | originCode/destinationCode 법정동 매칭 |
 | 날짜 | 세션에 저장만 | 세션에 저장만 |
+
+---
+
+## 내부 데이터 체계화 (PR7-pre)
+
+PR7 준비 과정에서 내부 코드/좌표 체계를 일원화하여 데이터 일관성 확보.
+
+### 장소 코드 체계 (RegionCode)
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  RegionCode = 법정동 코드 (10자리 문자열)                │
+│  - 예: '5011000000' = 제주시, '5013025900' = 성산읍      │
+│  - UI/State/Store/Engine 전체에서 단일 진실 소스        │
+│  - JEJU_LOCATIONS.id는 표시용으로만 사용 (로직 금지)     │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### 관련 파일
+
+| 파일 | 역할 |
+|------|------|
+| `data/regionCodesJeju.ts` | 제주 법정동 코드 정의 |
+| `data/regionRepresentativeCoords.ts` | 지역/항만 대표 좌표 매핑 |
+
+#### 조건 타입 확장
+
+```typescript
+interface StorageCondition {
+  location?: string        // 표시용 (name)
+  locationCode?: RegionCode    // 필터링용 (단일 진실)
+  startDate?: string
+  endDate?: string
+}
+
+interface TransportCondition {
+  origin?: string
+  originCode?: RegionCode
+  destination?: string
+  destinationCode?: RegionCode
+  transportDate?: string
+}
+```
+
+### 좌표 체계 일원화
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  REGION_REPRESENTATIVE_COORDS = 좌표의 "단일 진실 소스"  │
+│  - 법정동 코드 기반 (예: '5011025300' → 애월읍 좌표)     │
+│  - 항만 특수 코드 (예: 'JEJU_PORT', 'BUSAN_PORT')       │
+│  - mockData.ts의 모든 상품이 이 좌표를 참조             │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 물량 필터 정책
+
+```typescript
+// 물량 미입력 시 minCubes/자원 필터 스킵
+if (!session.totalCubes || session.totalCubes === 0) {
+  // minCubes 규정 체크 스킵
+  // 자원(remainingCubes) 체크 스킵
+}
+```
+
+> **원칙**: 조건을 추가할수록 결과가 줄어드는 "누적 AND 필터" 정책
+
+### 지도 오프셋 보정
+
+```typescript
+// useMapbox.ts - 좌측 45% 블러 영역 보정
+function applyCameraOffset(map: mapboxgl.Map): void {
+  const container = map.getContainer()
+  const width = container.clientWidth
+  const offsetX = (width * 0.45) / 2
+  map.easeTo({ center: MAP_CONFIG.center, offset: [offsetX, 0], duration: 0 })
+}
+```
+
+- ResizeObserver로 컨테이너 크기 변경 감지
+- window resize 이벤트 핸들러
+- 마커/레이어와 무관하게 카메라 상태만 갱신
 
 ---
 
@@ -389,8 +473,9 @@ filterRouteByConditions(offers, conditions) → RouteProduct[]
 | PR4 | Regulation Engine + 검색/지도 연동 | ✅ 완료 |
 | PR5 | Resource Layer Wiring (자원 체크 + DemandSession) | ✅ 완료 |
 | PR6 | Matching Pipeline (단일 파이프라인 + UX 동기화 + 지도 동기화) | ✅ 완료 |
+| PR7-pre | 내부 데이터 체계화 (코드/좌표 일원화, 누적 필터 정책) | ✅ 완료 |
 | PR7 | 재고 차감 + 거래 확정 | 📋 예정 |
 
 ---
 
-**최종 수정**: 2026.02.02 (PR6 Matching Pipeline 완료)
+**최종 수정**: 2026.02.03 (PR7-pre 내부 데이터 체계화 완료)

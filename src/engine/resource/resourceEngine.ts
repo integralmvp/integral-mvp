@@ -103,37 +103,3 @@ export function filterRouteByResource(
   }
 }
 
-/**
- * 통합 자원 필터링
- *
- * mode에 따라 적절한 필터링 수행
- */
-export function filterOffersByResource<T extends StorageProduct | RouteProduct>(
-  regulationPassedOffers: T[],
-  demandCubes: number
-): ResourceFilterResult<T> {
-  const passed: T[] = []
-  const failed: T[] = []
-
-  for (const offer of regulationPassedOffers) {
-    const result = checkResource({
-      offerRemainingCubes: offer.remainingCubes,
-      demandCubes,
-    })
-
-    if (result.pass) {
-      passed.push(offer)
-    } else {
-      failed.push(offer)
-    }
-  }
-
-  return {
-    passed,
-    failed,
-    summary: {
-      passedCount: passed.length,
-      failedCount: failed.length,
-    },
-  }
-}
