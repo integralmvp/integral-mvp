@@ -242,7 +242,7 @@ export default function CargoRegistrationCard({
               onChange={(e) => handleWeightChange(Number(e.target.value))}
               onWheel={(e) => e.currentTarget.blur()}
               disabled={isConfirmed}
-              className="flex-1 px-2 py-1.5 border border-slate-300 rounded text-xs disabled:bg-slate-100"
+              className="flex-1 px-2 py-1.5 border border-slate-300 rounded text-xs text-black disabled:bg-slate-100"
               placeholder="중량 입력"
             />
             <span className="text-xs text-slate-600">kg</span>
