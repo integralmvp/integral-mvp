@@ -245,8 +245,8 @@ export default function BothTabSection({
           onClick={() => handleViewChange(firstButton)}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeView === firstButton
-              ? 'bg-slate-800 text-white shadow-md'
-              : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+              ? 'bg-teal-700 text-white shadow-md'
+              : 'bg-slate-800 text-slate-100 hover:bg-slate-200'
           }`}
         >
           {firstButton === 'storage' ? '보관' : '운송'}
@@ -268,8 +268,8 @@ export default function BothTabSection({
           onClick={() => handleViewChange(secondButton)}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
             activeView === secondButton
-              ? 'bg-slate-800 text-white shadow-md'
-              : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+              ? 'bg-teal-700 text-white shadow-md'
+              : 'bg-slate-800 text-slate-100 hover:bg-slate-200'
           }`}
         >
           {secondButton === 'storage' ? '보관' : '운송'}
