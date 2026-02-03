@@ -144,6 +144,10 @@ export default function CommandLayout() {
           <div className="flex items-center gap-4">
             <span className="text-white text-sm font-semibold tracking-wider">LOGISTICS MONITORING</span>
             <span className="text-white/70 text-xs font-mono">{currentTime}</span>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              <span className="text-white text-xs">LIVE</span>
+            </div>
           </div>
           <div className="flex items-center gap-6">
             {/* 지도 범례 - 이전 양식 */}
@@ -176,10 +180,6 @@ export default function CommandLayout() {
                 </svg>
                 <span className="text-white text-xs">출도</span>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-white text-xs">LIVE</span>
             </div>
           </div>
         </div>
