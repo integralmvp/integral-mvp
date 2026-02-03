@@ -84,23 +84,28 @@ export default function ServiceConsole() {
 
   return (
     <div
-      className="h-full flex flex-col overflow-hidden cyber-corner"
+      className="h-full flex flex-col overflow-hidden"
       style={{
-        background: 'rgba(10, 10, 15, 0.9)',
-        border: '1px solid rgba(0, 240, 255, 0.3)',
+        background: 'transparent',
         cursor: 'default'
       }}
     >
       {/* 타이틀 */}
-      <div className="p-6 border-b border-cyber-border">
-        <h1 className="text-2xl font-bold text-cyber-text">내 손 안의 작은 물류 허브</h1>
-        <p className="text-sm text-cyber-text-dim mt-1">
-          비어있는 공간과 경로를 원하는 조건으로 검색하고 결제까지! 신개념 물류 오픈마켓
+      <div
+        className="px-4 py-3"
+        style={{ borderBottom: '1px solid rgba(0, 240, 255, 0.3)' }}
+      >
+        <h1 className="text-lg font-bold text-cyber-text">내 손 안의 작은 물류 허브</h1>
+        <p className="text-xs text-cyber-text-dim mt-0.5">
+          비어있는 공간과 경로를 원하는 조건으로 검색하고 결제까지!
         </p>
       </div>
 
       {/* 탭 */}
-      <div className="flex border-b border-cyber-border">
+      <div
+        className="flex"
+        style={{ borderBottom: '1px solid rgba(0, 240, 255, 0.3)' }}
+      >
         <TabButton
           label="보관"
           isActive={state.activeTab === 'storage'}
@@ -122,7 +127,7 @@ export default function ServiceConsole() {
       </div>
 
       {/* 폼 영역 - 3행 그리드 레이아웃 */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto">
         {state.activeTab === 'storage' && (
           <StorageTabSection
             cargos={state.cargos}
@@ -190,7 +195,7 @@ export default function ServiceConsole() {
       </div>
 
       {/* 검색 버튼 - 하단 고정 */}
-      <div className="p-4 border-t border-cyber-border">
+      <div style={{ borderTop: '1px solid rgba(0, 240, 255, 0.3)' }}>
         <SearchButton
           activeTab={state.activeTab}
           productCount={displayCount}
