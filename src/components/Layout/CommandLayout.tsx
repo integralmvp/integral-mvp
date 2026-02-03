@@ -2,7 +2,7 @@
 // PR4: 검색 결과 하이라이트 연동 - 물방울 마커로 가능 상품 강조
 // PR6: 프리뷰 결과 기반 하이라이트 (실시간 동기화)
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ServiceConsole from './ServiceConsole'
 import MapboxContainer from '../Map/MapboxContainer'
 import { useSearchResult } from '../../contexts/SearchResultContext'
@@ -29,10 +29,23 @@ function createHighlightMarker(productId: string): HTMLDivElement {
   return el
 }
 
+// 현재 시간 포맷 (HH:MM:SS)
+function useCurrentTime() {
+  const [time, setTime] = useState(new Date())
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return time.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+}
+
 export default function CommandLayout() {
   // PR6: 프리뷰 결과 기반 하이라이트 (실시간 동기화)
   const { highlightedIds, previewResult } = useSearchResult()
   const highlightMarkersRef = useRef<HTMLDivElement[]>([])
+  const currentTime = useCurrentTime()
 
   // PR6: 프리뷰 결과에 따라 물방울 마커로 가능 상품 강조
   useEffect(() => {
@@ -96,8 +109,8 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
-            borderRight: '1px solid rgba(0, 240, 255, 0.3)',
-            borderBottom: '1px solid rgba(0, 240, 255, 0.3)',
+            borderRight: '2px solid rgba(0, 240, 255, 0.5)',
+            borderBottom: '2px solid rgba(0, 240, 255, 0.5)',
             display: 'flex',
             alignItems: 'center',
             padding: '0 24px',
@@ -125,17 +138,29 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
-            borderBottom: '1px solid rgba(0, 240, 255, 0.3)',
+            borderBottom: '2px solid rgba(0, 240, 255, 0.5)',
           }}
         >
           <div className="flex items-center gap-4">
             <span className="text-cyber-cyan text-sm font-semibold tracking-wider">LOGISTICS MONITORING</span>
-            <span className="text-cyber-text-dim text-xs">JEJU ISLAND</span>
+            <span className="text-white/70 text-xs font-mono">{currentTime}</span>
+            <span className="text-white/50 text-xs">JEJU ISLAND</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            {/* 지도 범례 */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm bg-teal-500"></span>
+                <span className="text-white/70 text-xs">보관</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+                <span className="text-white/70 text-xs">운송</span>
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-cyber-text-dim text-xs">LIVE</span>
+              <span className="text-white/70 text-xs">LIVE</span>
             </div>
           </div>
         </div>
@@ -146,7 +171,7 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
-            borderRight: '1px solid rgba(0, 240, 255, 0.3)',
+            borderRight: '2px solid rgba(0, 240, 255, 0.5)',
           }}
         >
           <ServiceConsole />

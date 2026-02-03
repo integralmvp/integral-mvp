@@ -59,7 +59,7 @@ export default function GridCell({
       }}
     >
       {/* 콘텐츠 영역 - 전체 칸 기준 수직/수평 중앙 정렬 */}
-      <div className="absolute inset-0 flex items-center justify-center text-sm font-medium text-cyber-text px-2">
+      <div className="absolute inset-0 flex items-center justify-center text-sm font-medium text-white px-2">
         {children}
       </div>
 

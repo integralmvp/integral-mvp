@@ -67,7 +67,7 @@ export default function ConversionResult({
                     border: '1px solid rgba(0, 240, 255, 0.15)',
                   }}
                 >
-                  <div className="text-xs text-cyber-text">
+                  <div className="text-xs text-white">
                     {mode === 'STORAGE' ? (
                       <span>
                         <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-cyber-cyan">{pallets} 파렛트</span>
@@ -91,18 +91,18 @@ export default function ConversionResult({
             border: '1px solid rgba(0, 240, 255, 0.15)',
           }}
         >
-          <div className="text-base font-bold text-cyber-text">
+          <div className="text-base font-bold text-white">
             {mode === 'STORAGE'
               ? isAreaInput ? `수용 가능: ${result.demandPallets} 파렛트` : `총 ${result.demandPallets} 파렛트`
               : `총 ${result.demandCubes} 큐브`}
           </div>
-          <div className="text-xs text-cyber-text-dim mt-0.5">
+          <div className="text-xs text-white/60 mt-0.5">
             {mode === 'STORAGE'
               ? `${palletsToCBM(result.demandPallets || 0)} CBM (구매 공간 기준 체적)`
               : `${cubesToCBM(result.demandCubes)} CBM (구매 공간 기준 체적)`}
           </div>
           {isAreaInput && mode === 'STORAGE' && (
-            <div className="text-[10px] text-cyber-text-dim mt-1">
+            <div className="text-[10px] text-white/60 mt-1">
               운영 동선 고려(÷{STORAGE_AREA_CONSTANTS.storageAreaFactor.toFixed(2)})
             </div>
           )}
@@ -118,7 +118,7 @@ export default function ConversionResult({
         }}
       >
         <div
-          className="text-sm font-bold text-cyber-cyan pb-2"
+          className="text-sm font-bold text-white pb-2"
           style={{ borderBottom: '1px solid rgba(0, 240, 255, 0.2)' }}
         >
           📋 안내사항
@@ -128,7 +128,7 @@ export default function ConversionResult({
         <div className="flex items-end justify-center gap-6">
           {/* 파렛트/큐브 */}
           <div className="flex flex-col items-center" style={{ width: '150px' }}>
-            <div className="text-xs font-semibold text-cyber-text-dim mb-2">
+            <div className="text-xs font-semibold text-white/70 mb-2">
               {mode === 'STORAGE' ? '<기준 파렛트>' : '<기준 큐브>'}
             </div>
             {mode === 'STORAGE' ? (
@@ -162,7 +162,7 @@ export default function ConversionResult({
         </div>
 
         {/* 안내 문구 */}
-        <div className="text-[10px] text-cyber-text-dim text-center leading-relaxed">
+        <div className="text-[10px] text-white/60 text-center leading-relaxed">
           구매자의 이해를 돕기 위한 정보이며, 현장 적재 상황에 따라 사용 형태는 달라질 수 있습니다.
         </div>
 
@@ -180,7 +180,7 @@ export default function ConversionResult({
           />
           <label
             htmlFor={`conversion-confirmed-${isAreaInput ? 'area' : 'box'}`}
-            className="text-xs text-cyber-text cursor-pointer select-none"
+            className="text-xs text-white cursor-pointer select-none"
           >
             환산 결과를 확인했습니다
           </label>

@@ -76,8 +76,8 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
     >
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <div className="font-bold text-cyber-text">{product.location.name}</div>
-          <div className="text-sm text-cyber-text-dim mt-1">
+          <div className="font-bold text-white">{product.location.name}</div>
+          <div className="text-sm text-white/60 mt-1">
             {product.storageType} · {product.capacity}
           </div>
           <div className="flex gap-1 mt-2 flex-wrap">
@@ -88,7 +88,7 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
                 style={{
                   background: 'rgba(0, 240, 255, 0.1)',
                   border: '1px solid rgba(0, 240, 255, 0.2)',
-                  color: 'var(--cyber-text-dim)',
+                  color: 'rgba(255, 255, 255, 0.7)',
                 }}
               >
                 {feature}
@@ -100,7 +100,7 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
           <div className="text-cyber-cyan font-bold text-lg">
             {product.price.toLocaleString()}원
           </div>
-          <div className="text-xs text-cyber-text-dim">/{product.priceUnit}</div>
+          <div className="text-xs text-white/60">/{product.priceUnit}</div>
         </div>
       </div>
     </button>
@@ -143,11 +143,11 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
             >
               {scopeBadge.label}
             </span>
-            <span className="font-bold text-cyber-text">
+            <span className="font-bold text-white">
               {product.origin.name} → {product.destination.name}
             </span>
           </div>
-          <div className="text-sm text-cyber-text-dim mt-1">
+          <div className="text-sm text-white/60 mt-1">
             {product.vehicleType} · {product.capacity} · {product.schedule}
           </div>
           <div className="flex gap-1 mt-2 flex-wrap">
@@ -158,7 +158,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
                 style={{
                   background: 'rgba(0, 240, 255, 0.1)',
                   border: '1px solid rgba(0, 240, 255, 0.2)',
-                  color: 'var(--cyber-text-dim)',
+                  color: 'rgba(255, 255, 255, 0.7)',
                 }}
               >
                 {type}
@@ -170,7 +170,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
           <div className="text-cyber-cyan font-bold text-lg">
             {product.price.toLocaleString()}원
           </div>
-          <div className="text-xs text-cyber-text-dim">/{product.priceUnit}</div>
+          <div className="text-xs text-white/60">/{product.priceUnit}</div>
         </div>
       </div>
     </button>
@@ -226,8 +226,8 @@ function ConditionSummary({
             border: '1px solid rgba(0, 240, 255, 0.15)',
           }}
         >
-          <div className="text-xs text-cyber-text-dim mb-1">화물</div>
-          <div className="font-medium text-cyber-text">
+          <div className="text-xs text-white/60 mb-1">화물</div>
+          <div className="font-medium text-white">
             {registeredCargos.length > 0
               ? `${registeredCargos.length}건 등록`
               : '미등록'}
@@ -242,8 +242,8 @@ function ConditionSummary({
             border: '1px solid rgba(0, 240, 255, 0.15)',
           }}
         >
-          <div className="text-xs text-cyber-text-dim mb-1">물량</div>
-          <div className="font-medium text-cyber-text">
+          <div className="text-xs text-white/60 mb-1">물량</div>
+          <div className="font-medium text-white">
             {totalCubes > 0
               ? activeTab === 'storage'
                 ? `${totalPallets} 파레트`
@@ -264,8 +264,8 @@ function ConditionSummary({
                 border: '1px solid rgba(0, 240, 255, 0.15)',
               }}
             >
-              <div className="text-xs text-cyber-text-dim mb-1">보관 장소</div>
-              <div className="font-medium text-cyber-text">
+              <div className="text-xs text-white/60 mb-1">보관 장소</div>
+              <div className="font-medium text-white">
                 {getLocationName(storageCondition.location)}
               </div>
             </div>
@@ -276,8 +276,8 @@ function ConditionSummary({
                 border: '1px solid rgba(0, 240, 255, 0.15)',
               }}
             >
-              <div className="text-xs text-cyber-text-dim mb-1">보관 기간</div>
-              <div className="font-medium text-cyber-text">
+              <div className="text-xs text-white/60 mb-1">보관 기간</div>
+              <div className="font-medium text-white">
                 {effectiveStorageStartDate && storageCondition.endDate
                   ? `${effectiveStorageStartDate} ~ ${storageCondition.endDate}`
                   : effectiveStorageStartDate || storageCondition.endDate || '-'}
@@ -296,8 +296,8 @@ function ConditionSummary({
                 border: '1px solid rgba(0, 240, 255, 0.15)',
               }}
             >
-              <div className="text-xs text-cyber-text-dim mb-1">출발지 → 도착지</div>
-              <div className="font-medium text-cyber-text">
+              <div className="text-xs text-white/60 mb-1">출발지 → 도착지</div>
+              <div className="font-medium text-white">
                 {transportCondition.origin && transportCondition.destination
                   ? `${getLocationName(transportCondition.origin)} → ${getLocationName(transportCondition.destination)}`
                   : getLocationName(transportCondition.origin) || getLocationName(transportCondition.destination) || '전체'}
@@ -310,8 +310,8 @@ function ConditionSummary({
                 border: '1px solid rgba(0, 240, 255, 0.15)',
               }}
             >
-              <div className="text-xs text-cyber-text-dim mb-1">운송일</div>
-              <div className="font-medium text-cyber-text">
+              <div className="text-xs text-white/60 mb-1">운송일</div>
+              <div className="font-medium text-white">
                 {effectiveTransportDate || '-'}
               </div>
             </div>
@@ -404,11 +404,11 @@ export default function SearchResultModal({
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold text-cyber-cyan">{header.title}</h2>
-              <p className="text-cyber-text-dim text-sm mt-1">{header.subtitle}</p>
+              <p className="text-white/60 text-sm mt-1">{header.subtitle}</p>
             </div>
             <button
               onClick={onClose}
-              className="text-cyber-text-dim hover:text-cyber-cyan text-2xl leading-none p-1"
+              className="text-white/60 hover:text-cyber-cyan text-2xl leading-none p-1"
             >
               ×
             </button>
@@ -427,7 +427,7 @@ export default function SearchResultModal({
               {totalCount}건의 상품
             </span>
             {summary && summary.failedCount > 0 && (
-              <span className="text-cyber-text-dim text-xs">
+              <span className="text-white/60 text-xs">
                 (조건 불일치 {summary.failedCount}건 제외)
               </span>
             )}
@@ -459,7 +459,7 @@ export default function SearchResultModal({
                     border: '1px solid rgba(0, 240, 255, 0.2)',
                   }}
                 >
-                  <p className="text-sm text-cyber-text-dim">{getBothGuideMessage()}</p>
+                  <p className="text-sm text-white/60">{getBothGuideMessage()}</p>
                 </div>
               </div>
 
@@ -476,7 +476,7 @@ export default function SearchResultModal({
                   className={`flex-1 py-3 text-sm font-medium transition-colors ${
                     bothTab === 'integrated'
                       ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
-                      : 'text-cyber-text-dim hover:text-cyber-text'
+                      : 'text-white/60 hover:text-white'
                   }`}
                 >
                   연계
@@ -488,7 +488,7 @@ export default function SearchResultModal({
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'storage'
                           ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
-                          : 'text-cyber-text-dim hover:text-cyber-text'
+                          : 'text-white/60 hover:text-white'
                       }`}
                     >
                       보관
@@ -498,7 +498,7 @@ export default function SearchResultModal({
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'transport'
                           ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
-                          : 'text-cyber-text-dim hover:text-cyber-text'
+                          : 'text-white/60 hover:text-white'
                       }`}
                     >
                       운송
@@ -511,7 +511,7 @@ export default function SearchResultModal({
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'transport'
                           ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
-                          : 'text-cyber-text-dim hover:text-cyber-text'
+                          : 'text-white/60 hover:text-white'
                       }`}
                     >
                       운송
@@ -521,7 +521,7 @@ export default function SearchResultModal({
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'storage'
                           ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
-                          : 'text-cyber-text-dim hover:text-cyber-text'
+                          : 'text-white/60 hover:text-white'
                       }`}
                     >
                       보관
@@ -549,7 +549,7 @@ export default function SearchResultModal({
 
             {/* 상품 리스트 */}
             {filteredCount === 0 ? (
-              <div className="text-center py-12 text-cyber-text-dim">
+              <div className="text-center py-12 text-white/60">
                 {activeTab === 'both' && bothTab === 'integrated' ? (
                   <>
                     <div className="text-4xl mb-3">📦</div>

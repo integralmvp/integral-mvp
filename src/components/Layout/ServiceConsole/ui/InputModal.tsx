@@ -54,7 +54,7 @@ export default function InputModal({
         </div>
 
         {/* 본문 */}
-        <div className="p-4 overflow-y-auto max-h-[calc(85vh-56px)] text-cyber-text">
+        <div className="p-4 overflow-y-auto max-h-[calc(85vh-56px)] text-white">
           {children}
         </div>
       </div>
