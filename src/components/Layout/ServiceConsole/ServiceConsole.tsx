@@ -50,7 +50,7 @@ function SearchButton({ activeTab: _activeTab, productCount, onClick }: SearchBu
   return (
     <button
       onClick={onClick}
-      className="w-full py-4 text-cyber-dark font-bold text-lg transition-all hover:shadow-lg"
+      className="w-full py-4 text-white font-bold text-lg transition-all hover:shadow-lg"
       style={{
         background: 'linear-gradient(135deg, #00F0FF 0%, #00B8C4 100%)',
         boxShadow: '0 0 20px rgba(0, 240, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
