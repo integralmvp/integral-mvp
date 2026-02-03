@@ -46,10 +46,10 @@ export default function WarehouseIcon({ pallets, size = 80, showLabel = true }: 
       {/* 면적 표시 (파레트가 있는 경우) */}
       {showLabel && pallets !== undefined && pallets > 0 && (
         <div className="text-center">
-          <div className="text-sm font-bold text-slate-800">
+          <div className="text-sm font-bold text-white">
             약 {areaM2}㎡ ({areaPyeong}평)
           </div>
-          <div className="text-[10px] text-slate-500">
+          <div className="text-[10px] text-white/70">
             운영 동선 고려(×1.30)
           </div>
         </div>

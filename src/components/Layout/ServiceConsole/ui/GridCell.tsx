@@ -80,7 +80,7 @@ export default function GridCell({
               style={{ filter: 'brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(150deg)' }}
             />
           )}
-          <span className="text-[11px] font-semibold text-cyber-cyan">{label}</span>
+          <span className="text-[11px] font-semibold text-white">{label}</span>
         </div>
         {headerAction && (
           <div

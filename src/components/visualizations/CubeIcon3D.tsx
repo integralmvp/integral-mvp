@@ -47,31 +47,31 @@ export default function CubeIcon3D({ showDimensions = true, size = 150, count }:
           {showDimensions && (
             <>
               {/* 높이 치수선 (오른쪽) */}
-              <line x1="38" y1="5" x2="38" y2="35" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-              <line x1="35" y1="5" x2="41" y2="5" stroke="#666" strokeWidth="1"/>
-              <line x1="35" y1="35" x2="41" y2="35" stroke="#666" strokeWidth="1"/>
+              <line x1="38" y1="5" x2="38" y2="35" stroke="#aaaaaa" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="35" y1="5" x2="41" y2="5" stroke="#aaaaaa" strokeWidth="1"/>
+              <line x1="35" y1="35" x2="41" y2="35" stroke="#aaaaaa" strokeWidth="1"/>
               {/* 중괄호 */}
-              <path d="M 43,5 Q 45,7 45,10 L 45,30 Q 45,33 43,35" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="48" y="22" fontSize="14" fill="#666" fontWeight="bold">250mm</text>
+              <path d="M 43,5 Q 45,7 45,10 L 45,30 Q 45,33 43,35" stroke="#aaaaaa" strokeWidth="1" fill="none"/>
+              <text x="48" y="22" fontSize="14" fill="#ffffff" fontWeight="bold">250mm</text>
 
               {/* 밑판 가로 치수선 (왼쪽 변 - 높이 치수 패턴 시계방향 57도 회전) */}
               <g transform="translate(30, 27) rotate(57)">
-                <line x1="8" y1="0" x2="8" y2="36" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-                <line x1="5" y1="0" x2="11" y2="0" stroke="#666" strokeWidth="1"/>
-                <line x1="5" y1="36" x2="11" y2="36" stroke="#666" strokeWidth="1"/>
+                <line x1="8" y1="0" x2="8" y2="36" stroke="#aaaaaa" strokeWidth="1" strokeDasharray="2,2"/>
+                <line x1="5" y1="0" x2="11" y2="0" stroke="#aaaaaa" strokeWidth="1"/>
+                <line x1="5" y1="36" x2="11" y2="36" stroke="#aaaaaa" strokeWidth="1"/>
                 {/* 중괄호 */}
-                <path d="M 13,0 Q 15,2 15,5 L 15,31 Q 15,34 13,36" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="4" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(-57)">250mm</text>
+                <path d="M 13,0 Q 15,2 15,5 L 15,31 Q 15,34 13,36" stroke="#aaaaaa" strokeWidth="1" fill="none"/>
+                <text x="4" y="25" fontSize="14" fill="#ffffff" fontWeight="bold" transform="rotate(-57)">250mm</text>
               </g>
 
               {/* 밑판 세로 치수선 (오른쪽 변 - 높이 치수 패턴 반시계방향 57도 회전) */}
               <g transform="translate(-30, 27) rotate(-57)">
-                <line x1="-8" y1="0" x2="-8" y2="36" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-                <line x1="-11" y1="0" x2="-5" y2="0" stroke="#666" strokeWidth="1"/>
-                <line x1="-11" y1="36" x2="-5" y2="36" stroke="#666" strokeWidth="1"/>
+                <line x1="-8" y1="0" x2="-8" y2="36" stroke="#aaaaaa" strokeWidth="1" strokeDasharray="2,2"/>
+                <line x1="-11" y1="0" x2="-5" y2="0" stroke="#aaaaaa" strokeWidth="1"/>
+                <line x1="-11" y1="36" x2="-5" y2="36" stroke="#aaaaaa" strokeWidth="1"/>
                 {/* 중괄호 */}
-                <path d="M -13,0 Q -15,2 -15,5 L -15,31 Q -15,34 -13,36" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="-52" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(57)">250mm</text>
+                <path d="M -13,0 Q -15,2 -15,5 L -15,31 Q -15,34 -13,36" stroke="#aaaaaa" strokeWidth="1" fill="none"/>
+                <text x="-52" y="25" fontSize="14" fill="#ffffff" fontWeight="bold" transform="rotate(57)">250mm</text>
               </g>
             </>
           )}
@@ -80,7 +80,7 @@ export default function CubeIcon3D({ showDimensions = true, size = 150, count }:
 
       {/* 카운트 */}
       {count !== undefined && (
-        <div className="text-sm font-bold text-slate-800">
+        <div className="text-sm font-bold text-white">
           {count} 큐브
         </div>
       )}

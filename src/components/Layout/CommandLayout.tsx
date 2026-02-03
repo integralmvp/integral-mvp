@@ -109,8 +109,8 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
-            borderRight: '2px solid rgba(0, 240, 255, 0.5)',
-            borderBottom: '2px solid rgba(0, 240, 255, 0.5)',
+            borderRight: '3px solid rgba(0, 240, 255, 0.6)',
+            borderBottom: '3px solid rgba(0, 240, 255, 0.6)',
             display: 'flex',
             alignItems: 'center',
             padding: '0 24px',
@@ -138,29 +138,48 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
-            borderBottom: '2px solid rgba(0, 240, 255, 0.5)',
+            borderBottom: '3px solid rgba(0, 240, 255, 0.6)',
           }}
         >
           <div className="flex items-center gap-4">
             <span className="text-cyber-cyan text-sm font-semibold tracking-wider">LOGISTICS MONITORING</span>
             <span className="text-white/70 text-xs font-mono">{currentTime}</span>
-            <span className="text-white/50 text-xs">JEJU ISLAND</span>
           </div>
           <div className="flex items-center gap-6">
-            {/* 지도 범례 */}
+            {/* 지도 범례 - 이전 양식 */}
             <div className="flex items-center gap-4">
+              {/* 공간상품: 파레트 아이콘 */}
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-sm bg-teal-500"></span>
-                <span className="text-white/70 text-xs">보관</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <rect x="2" y="14" width="20" height="8" fill="#14b8a6" stroke="#0d9488" strokeWidth="1"/>
+                  <rect x="4" y="8" width="16" height="6" fill="#5eead4" stroke="#14b8a6" strokeWidth="1"/>
+                  <rect x="6" y="4" width="12" height="4" fill="#99f6e4" stroke="#5eead4" strokeWidth="1"/>
+                </svg>
+                <span className="text-white text-xs">공간</span>
+              </div>
+              {/* 경로상품: 화살표 */}
+              <div className="flex items-center gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="#00F0FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-white text-xs">도내</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-                <span className="text-white/70 text-xs">운송</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-white text-xs">입도</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span className="text-white text-xs">출도</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-white/70 text-xs">LIVE</span>
+              <span className="text-white text-xs">LIVE</span>
             </div>
           </div>
         </div>
@@ -171,7 +190,7 @@ export default function CommandLayout() {
           style={{
             background: 'rgba(10, 10, 15, 0.85)',
             backdropFilter: 'blur(8px)',
-            borderRight: '2px solid rgba(0, 240, 255, 0.5)',
+            borderRight: '3px solid rgba(0, 240, 255, 0.6)',
           }}
         >
           <ServiceConsole />

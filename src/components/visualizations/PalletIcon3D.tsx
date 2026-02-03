@@ -36,40 +36,40 @@ export default function PalletIcon3D({ showDimensions = true, size = 150, count 
           {showDimensions && (
             <>
               {/* z축 점선 (상판 모서리에서 위로) - 최대 적재 높이 표현 */}
-              <line x1="-40" y1="0" x2="-40" y2="-50" stroke="#666" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
-              <line x1="40" y1="0" x2="40" y2="-50" stroke="#666" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
-              <line x1="0" y1="-20" x2="0" y2="-70" stroke="#666" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
-              <line x1="0" y1="20" x2="0" y2="-30" stroke="#666" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
+              <line x1="-40" y1="0" x2="-40" y2="-50" stroke="#aaaaaa" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
+              <line x1="40" y1="0" x2="40" y2="-50" stroke="#aaaaaa" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
+              <line x1="0" y1="-20" x2="0" y2="-70" stroke="#aaaaaa" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
+              <line x1="0" y1="20" x2="0" y2="-30" stroke="#aaaaaa" strokeWidth="1.5" strokeDasharray="3,3" opacity="0.6"/>
 
               {/* 가상 상단 공간 테두리 (점선) */}
-              <path d="M 0,-70 L 40,-50 L 0,-30 L -40,-50 Z" fill="none" stroke="#666" strokeWidth="1" strokeDasharray="3,3" opacity="0.4"/>
+              <path d="M 0,-70 L 40,-50 L 0,-30 L -40,-50 Z" fill="none" stroke="#aaaaaa" strokeWidth="1" strokeDasharray="3,3" opacity="0.4"/>
 
               {/* 높이 치수선 (오른쪽) */}
-              <line x1="48" y1="0" x2="48" y2="-50" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-              <line x1="45" y1="0" x2="51" y2="0" stroke="#666" strokeWidth="1"/>
-              <line x1="45" y1="-50" x2="51" y2="-50" stroke="#666" strokeWidth="1"/>
+              <line x1="48" y1="0" x2="48" y2="-50" stroke="#aaaaaa" strokeWidth="1" strokeDasharray="2,2"/>
+              <line x1="45" y1="0" x2="51" y2="0" stroke="#aaaaaa" strokeWidth="1"/>
+              <line x1="45" y1="-50" x2="51" y2="-50" stroke="#aaaaaa" strokeWidth="1"/>
               {/* 중괄호 */}
-              <path d="M 53,0 Q 55,-2 55,-5 L 55,-45 Q 55,-48 53,-50" stroke="#666" strokeWidth="1" fill="none"/>
-              <text x="58" y="-22" fontSize="14" fill="#666" fontWeight="bold">1800mm</text>
+              <path d="M 53,0 Q 55,-2 55,-5 L 55,-45 Q 55,-48 53,-50" stroke="#aaaaaa" strokeWidth="1" fill="none"/>
+              <text x="58" y="-22" fontSize="14" fill="#ffffff" fontWeight="bold">1800mm</text>
 
               {/* 밑판 가로 치수선 (왼쪽 변 - 높이 치수 패턴 시계방향 63도 회전) */}
               <g transform="translate(40, 27) rotate(63)">
-                <line x1="8" y1="0" x2="8" y2="45" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-                <line x1="5" y1="0" x2="11" y2="0" stroke="#666" strokeWidth="1"/>
-                <line x1="5" y1="45" x2="11" y2="45" stroke="#666" strokeWidth="1"/>
+                <line x1="8" y1="0" x2="8" y2="45" stroke="#aaaaaa" strokeWidth="1" strokeDasharray="2,2"/>
+                <line x1="5" y1="0" x2="11" y2="0" stroke="#aaaaaa" strokeWidth="1"/>
+                <line x1="5" y1="45" x2="11" y2="45" stroke="#aaaaaa" strokeWidth="1"/>
                 {/* 중괄호 */}
-                <path d="M 13,0 Q 15,2 15,5 L 15,40 Q 15,43 13,45" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="11" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(-63)">1100mm</text>
+                <path d="M 13,0 Q 15,2 15,5 L 15,40 Q 15,43 13,45" stroke="#aaaaaa" strokeWidth="1" fill="none"/>
+                <text x="11" y="25" fontSize="14" fill="#ffffff" fontWeight="bold" transform="rotate(-63)">1100mm</text>
               </g>
 
               {/* 밑판 세로 치수선 (오른쪽 변 - 높이 치수 패턴 시계방향 63도 회전) */}
               <g transform="translate(-40, 27) rotate(-63)">
-                <line x1="-8" y1="0" x2="-8" y2="45" stroke="#666" strokeWidth="1" strokeDasharray="2,2"/>
-                <line x1="-11" y1="0" x2="-5" y2="0" stroke="#666" strokeWidth="1"/>
-                <line x1="-11" y1="45" x2="-5" y2="45" stroke="#666" strokeWidth="1"/>
+                <line x1="-8" y1="0" x2="-8" y2="45" stroke="#aaaaaa" strokeWidth="1" strokeDasharray="2,2"/>
+                <line x1="-11" y1="0" x2="-5" y2="0" stroke="#aaaaaa" strokeWidth="1"/>
+                <line x1="-11" y1="45" x2="-5" y2="45" stroke="#aaaaaa" strokeWidth="1"/>
                 {/* 중괄호 */}
-                <path d="M -13,0 Q -15,2 -15,5 L -15,40 Q -15,43 -13,45" stroke="#666" strokeWidth="1" fill="none"/>
-                <text x="-60" y="25" fontSize="14" fill="#666" fontWeight="bold" transform="rotate(63)">1100mm</text>
+                <path d="M -13,0 Q -15,2 -15,5 L -15,40 Q -15,43 -13,45" stroke="#aaaaaa" strokeWidth="1" fill="none"/>
+                <text x="-60" y="25" fontSize="14" fill="#ffffff" fontWeight="bold" transform="rotate(63)">1100mm</text>
               </g>
             </>
           )}
@@ -79,10 +79,10 @@ export default function PalletIcon3D({ showDimensions = true, size = 150, count 
       {/* 카운트 */}
       {count !== undefined && (
         <div className="text-center">
-          <div className="text-sm font-bold text-slate-800">
+          <div className="text-sm font-bold text-white">
             {count} 파렛트
           </div>
-          <div className="text-[10px] text-slate-500">
+          <div className="text-[10px] text-white/70">
             최대 적재 높이 1800mm
           </div>
         </div>

@@ -35,13 +35,13 @@ export default function ConversionResult({
         }}
       >
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-cyber-cyan">
+          <span className="text-sm font-semibold text-white">
             환산 결과
           </span>
           {hasModuleDetails && (
             <button
               onClick={() => setShowModuleDetails(!showModuleDetails)}
-              className="text-xs text-cyber-text-dim hover:text-cyber-cyan font-medium"
+              className="text-xs text-white/60 hover:text-white font-medium"
             >
               상세
             </button>
@@ -70,11 +70,11 @@ export default function ConversionResult({
                   <div className="text-xs text-white">
                     {mode === 'STORAGE' ? (
                       <span>
-                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-cyber-cyan">{pallets} 파렛트</span>
+                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold">{pallets} 파렛트</span>
                       </span>
                     ) : (
                       <span>
-                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold text-cyber-cyan">{cubes} 큐브</span>
+                        <span className="font-bold">{summary.module} 모듈</span>, 높이 {summary.heightMax}mm, {summary.boxCount}개 박스 = 총 <span className="font-bold">{cubes} 큐브</span>
                       </span>
                     )}
                   </div>
@@ -139,7 +139,7 @@ export default function ConversionResult({
           </div>
 
           {/* 화살표 */}
-          <div className="text-3xl text-cyber-cyan pb-2">
+          <div className="text-3xl text-white pb-2">
             →
           </div>
 

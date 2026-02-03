@@ -93,7 +93,7 @@ export default function ServiceConsole() {
       {/* 타이틀 */}
       <div
         className="px-4 py-3"
-        style={{ borderBottom: '2px solid rgba(0, 240, 255, 0.5)' }}
+        style={{ borderBottom: '3px solid rgba(0, 240, 255, 0.6)' }}
       >
         <h1 className="text-lg font-bold text-white">내 손 안의 작은 물류 허브</h1>
         <p className="text-xs text-white/60 mt-0.5">
@@ -104,7 +104,7 @@ export default function ServiceConsole() {
       {/* 탭 */}
       <div
         className="flex"
-        style={{ borderBottom: '2px solid rgba(0, 240, 255, 0.5)' }}
+        style={{ borderBottom: '3px solid rgba(0, 240, 255, 0.6)' }}
       >
         <TabButton
           label="보관"
@@ -195,7 +195,7 @@ export default function ServiceConsole() {
       </div>
 
       {/* 검색 버튼 - 하단 고정 */}
-      <div style={{ borderTop: '2px solid rgba(0, 240, 255, 0.5)' }}>
+      <div style={{ borderTop: '3px solid rgba(0, 240, 255, 0.6)' }}>
         <SearchButton
           activeTab={state.activeTab}
           productCount={displayCount}

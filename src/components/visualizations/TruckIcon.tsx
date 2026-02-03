@@ -10,7 +10,7 @@ export default function TruckIcon({ count, size = 80, showLabel = true }: TruckI
     <div className="flex flex-col items-center gap-2">
       {/* 라벨 */}
       {showLabel && (
-        <div className="text-xs font-semibold text-slate-700">
+        <div className="text-xs font-semibold text-white/70">
           &lt;1톤 트럭&gt;
         </div>
       )}
@@ -46,7 +46,7 @@ export default function TruckIcon({ count, size = 80, showLabel = true }: TruckI
 
       {/* 카운트 */}
       {count !== undefined && (
-        <div className="text-sm font-bold text-slate-800">
+        <div className="text-sm font-bold text-white">
           약 {count}대
         </div>
       )}

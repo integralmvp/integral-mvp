@@ -97,7 +97,7 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
           </div>
         </div>
         <div className="text-right ml-4">
-          <div className="text-cyber-cyan font-bold text-lg">
+          <div className="text-white font-bold text-lg">
             {product.price.toLocaleString()}원
           </div>
           <div className="text-xs text-white/60">/{product.priceUnit}</div>
@@ -167,7 +167,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
           </div>
         </div>
         <div className="text-right ml-4">
-          <div className="text-cyber-cyan font-bold text-lg">
+          <div className="text-white font-bold text-lg">
             {product.price.toLocaleString()}원
           </div>
           <div className="text-xs text-white/60">/{product.priceUnit}</div>
@@ -216,7 +216,7 @@ function ConditionSummary({
         border: '1px solid rgba(0, 240, 255, 0.2)',
       }}
     >
-      <div className="text-xs font-semibold text-cyber-cyan mb-2">입력 조건 요약</div>
+      <div className="text-xs font-semibold text-white mb-2">입력 조건 요약</div>
       <div className="grid grid-cols-2 gap-3 text-sm">
         {/* 화물 정보 */}
         <div
@@ -403,7 +403,7 @@ export default function SearchResultModal({
         >
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="text-2xl font-bold text-cyber-cyan">{header.title}</h2>
+              <h2 className="text-2xl font-bold text-white">{header.title}</h2>
               <p className="text-white/60 text-sm mt-1">{header.subtitle}</p>
             </div>
             <button
@@ -569,7 +569,7 @@ export default function SearchResultModal({
                 {filtered.storage.length > 0 && (
                   <>
                     {activeTab === 'both' && bothTab !== 'storage' && (
-                      <div className="text-sm font-semibold text-cyber-cyan mt-4 mb-2">
+                      <div className="text-sm font-semibold text-white mt-4 mb-2">
                         공간상품 ({filtered.storage.length})
                       </div>
                     )}
@@ -583,7 +583,7 @@ export default function SearchResultModal({
                 {filtered.route.length > 0 && (
                   <>
                     {activeTab === 'both' && bothTab !== 'transport' && (
-                      <div className="text-sm font-semibold text-cyber-cyan mt-4 mb-2">
+                      <div className="text-sm font-semibold text-white mt-4 mb-2">
                         경로상품 ({filtered.route.length})
                       </div>
                     )}
