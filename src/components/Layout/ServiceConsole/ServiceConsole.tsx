@@ -104,7 +104,7 @@ export default function ServiceConsole() {
       {/* 탭 */}
       <div
         className="flex"
-        style={{ borderBottom: '3px solid rgba(0, 240, 255, 0.6)' }}
+        style={{ borderBottom: '1px solid rgba(0, 240, 255, 0.6)' }}
       >
         <TabButton
           label="보관"
