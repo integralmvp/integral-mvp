@@ -2,6 +2,7 @@
 // INTEGRAL MVP - 더미 데이터
 // ============================================
 // PR2: 제주 물류 특화 더미 데이터
+// PR7-pre: 좌표 체계 일원화 (대표좌표 참조)
 
 import type {
   RouteProduct,
@@ -14,21 +15,27 @@ import type {
   ModuleClassification,
   FeatureCode,
 } from '../types/models'
+import { REGION_REPRESENTATIVE_COORDS } from './regionRepresentativeCoords'
 
-// ============ 제주도 좌표 ============
+// ============ 대표좌표 참조 헬퍼 ============
+const getCoords = (code: string) => REGION_REPRESENTATIVE_COORDS[code]
+
+// ============ 제주도 좌표 (대표좌표 참조) ============
 export const JEJU_COORDS = {
-  jejuCity: { lat: 33.4996, lng: 126.5312 },
-  seogwipo: { lat: 33.2541, lng: 126.56 },
-  seongsan: { lat: 33.4362, lng: 126.927 },
-  aewol: { lat: 33.4631, lng: 126.3062 },
-  jejuPort: { lat: 33.5197, lng: 126.5234 },
+  jejuCity: getCoords('5011000000'),
+  seogwipo: getCoords('5013000000'),
+  seongsan: getCoords('5013025900'),
+  aewol: getCoords('5011025300'),
+  hallim: getCoords('5011025000'),
+  jocheon: getCoords('5011025900'),
+  jejuPort: getCoords('JEJU_PORT'),
 }
 
-// ============ 육지 항만 좌표 ============
+// ============ 육지 항만 좌표 (대표좌표 참조) ============
 export const MAINLAND_PORTS = {
-  busan: { lat: 35.0796, lng: 128.9612 },
-  incheon: { lat: 37.4563, lng: 126.6052 },
-  mokpo: { lat: 34.7806, lng: 126.3789 },
+  busan: getCoords('BUSAN_PORT'),
+  incheon: getCoords('INCHEON_PORT'),
+  mokpo: getCoords('MOKPO_PORT'),
 }
 
 // ============ 경로 상품 (8개) ============
@@ -41,13 +48,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     id: 'R1',
     origin: {
       name: '제주시',
-      lat: JEJU_COORDS.jejuCity.lat,
-      lng: JEJU_COORDS.jejuCity.lng,
+      lat: JEJU_COORDS.jejuCity!.lat,
+      lng: JEJU_COORDS.jejuCity!.lng,
     },
     destination: {
       name: '서귀포',
-      lat: JEJU_COORDS.seogwipo.lat,
-      lng: JEJU_COORDS.seogwipo.lng,
+      lat: JEJU_COORDS.seogwipo!.lat,
+      lng: JEJU_COORDS.seogwipo!.lng,
     },
     originCode: '5011000000',      // 제주시
     destinationCode: '5013000000', // 서귀포시
@@ -72,13 +79,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     id: 'R2',
     origin: {
       name: '제주시',
-      lat: JEJU_COORDS.jejuCity.lat,
-      lng: JEJU_COORDS.jejuCity.lng,
+      lat: JEJU_COORDS.jejuCity!.lat,
+      lng: JEJU_COORDS.jejuCity!.lng,
     },
     destination: {
       name: '성산',
-      lat: JEJU_COORDS.seongsan.lat,
-      lng: JEJU_COORDS.seongsan.lng,
+      lat: JEJU_COORDS.seongsan!.lat,
+      lng: JEJU_COORDS.seongsan!.lng,
     },
     originCode: '5011000000',      // 제주시
     destinationCode: '5013025900', // 서귀포시 성산읍
@@ -103,13 +110,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     id: 'R3',
     origin: {
       name: '애월',
-      lat: JEJU_COORDS.aewol.lat,
-      lng: JEJU_COORDS.aewol.lng,
+      lat: JEJU_COORDS.aewol!.lat,
+      lng: JEJU_COORDS.aewol!.lng,
     },
     destination: {
       name: '서귀포',
-      lat: JEJU_COORDS.seogwipo.lat,
-      lng: JEJU_COORDS.seogwipo.lng,
+      lat: JEJU_COORDS.seogwipo!.lat,
+      lng: JEJU_COORDS.seogwipo!.lng,
     },
     originCode: '5011025300',      // 제주시 애월읍
     destinationCode: '5013000000', // 서귀포시
@@ -134,13 +141,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     id: 'R4',
     origin: {
       name: '한림',
-      lat: 33.41,
-      lng: 126.27,
+      lat: JEJU_COORDS.hallim!.lat,
+      lng: JEJU_COORDS.hallim!.lng,
     },
     destination: {
       name: '조천',
-      lat: 33.538,
-      lng: 126.64,
+      lat: JEJU_COORDS.jocheon!.lat,
+      lng: JEJU_COORDS.jocheon!.lng,
     },
     originCode: '5011025000',      // 제주시 한림읍
     destinationCode: '5011025900', // 제주시 조천읍
@@ -167,13 +174,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     id: 'R5',
     origin: {
       name: '부산항',
-      lat: MAINLAND_PORTS.busan.lat,
-      lng: MAINLAND_PORTS.busan.lng,
+      lat: MAINLAND_PORTS.busan!.lat,
+      lng: MAINLAND_PORTS.busan!.lng,
     },
     destination: {
       name: '제주항',
-      lat: JEJU_COORDS.jejuPort.lat,
-      lng: JEJU_COORDS.jejuPort.lng,
+      lat: JEJU_COORDS.jejuPort!.lat,
+      lng: JEJU_COORDS.jejuPort!.lng,
     },
     originCode: '',                // 육지 (제주 법정동 외)
     destinationCode: '5011000000', // 제주시 (제주항)
@@ -200,13 +207,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     id: 'R6',
     origin: {
       name: '목포항',
-      lat: MAINLAND_PORTS.mokpo.lat,
-      lng: MAINLAND_PORTS.mokpo.lng,
+      lat: MAINLAND_PORTS.mokpo!.lat,
+      lng: MAINLAND_PORTS.mokpo!.lng,
     },
     destination: {
       name: '제주항',
-      lat: JEJU_COORDS.jejuPort.lat,
-      lng: JEJU_COORDS.jejuPort.lng,
+      lat: JEJU_COORDS.jejuPort!.lat,
+      lng: JEJU_COORDS.jejuPort!.lng,
     },
     originCode: '',                // 육지 (제주 법정동 외)
     destinationCode: '5011000000', // 제주시 (제주항)
@@ -236,13 +243,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     id: 'R7',
     origin: {
       name: '제주항',
-      lat: JEJU_COORDS.jejuPort.lat,
-      lng: JEJU_COORDS.jejuPort.lng,
+      lat: JEJU_COORDS.jejuPort!.lat,
+      lng: JEJU_COORDS.jejuPort!.lng,
     },
     destination: {
       name: '인천항',
-      lat: MAINLAND_PORTS.incheon.lat,
-      lng: MAINLAND_PORTS.incheon.lng,
+      lat: MAINLAND_PORTS.incheon!.lat,
+      lng: MAINLAND_PORTS.incheon!.lng,
     },
     originCode: '5011000000', // 제주시 (제주항)
     destinationCode: '',      // 육지 (제주 법정동 외)
@@ -269,13 +276,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     id: 'R8',
     origin: {
       name: '서귀포',
-      lat: JEJU_COORDS.seogwipo.lat,
-      lng: JEJU_COORDS.seogwipo.lng,
+      lat: JEJU_COORDS.seogwipo!.lat,
+      lng: JEJU_COORDS.seogwipo!.lng,
     },
     destination: {
       name: '부산항',
-      lat: MAINLAND_PORTS.busan.lat,
-      lng: MAINLAND_PORTS.busan.lng,
+      lat: MAINLAND_PORTS.busan!.lat,
+      lng: MAINLAND_PORTS.busan!.lng,
     },
     originCode: '5013000000', // 서귀포시
     destinationCode: '',      // 육지 (제주 법정동 외)
@@ -302,14 +309,14 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
 
 // ============ 공간 상품 (8개) ============
 // PR5: capacityCubes = Pallet 수 × 128
-// PR7-pre: regionCode 추가 + features를 FeatureCode로 표준화
+// PR7-pre: regionCode 추가 + features를 FeatureCode로 표준화 + 좌표 대표좌표 참조
 export const STORAGE_PRODUCTS: StorageProduct[] = [
   {
     id: 'S1',
     location: {
       name: '제주시 (제주항 인근)',
-      lat: 33.515,
-      lng: 126.525,
+      lat: JEJU_COORDS.jejuPort!.lat,
+      lng: JEJU_COORDS.jejuPort!.lng,
       region: '제주시',
       regionCode: '5011000000',  // 제주시
     },
@@ -332,8 +339,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     id: 'S2',
     location: {
       name: '제주시 (공항 인근)',
-      lat: 33.505,
-      lng: 126.49,
+      lat: JEJU_COORDS.jejuCity!.lat,
+      lng: JEJU_COORDS.jejuCity!.lng,
       region: '제주시',
       regionCode: '5011000000',  // 제주시
     },
@@ -357,8 +364,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     id: 'S3',
     location: {
       name: '서귀포시',
-      lat: 33.255,
-      lng: 126.56,
+      lat: JEJU_COORDS.seogwipo!.lat,
+      lng: JEJU_COORDS.seogwipo!.lng,
       region: '서귀포',
       regionCode: '5013000000',  // 서귀포시
     },
@@ -381,8 +388,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     id: 'S4',
     location: {
       name: '서귀포시 (항만 인근)',
-      lat: 33.245,
-      lng: 126.565,
+      lat: JEJU_COORDS.seogwipo!.lat,
+      lng: JEJU_COORDS.seogwipo!.lng,
       region: '서귀포',
       regionCode: '5013000000',  // 서귀포시
     },
@@ -406,8 +413,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     id: 'S5',
     location: {
       name: '성산',
-      lat: 33.44,
-      lng: 126.93,
+      lat: JEJU_COORDS.seongsan!.lat,
+      lng: JEJU_COORDS.seongsan!.lng,
       region: '성산',
       regionCode: '5013025900',  // 서귀포시 성산읍
     },
@@ -431,8 +438,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     id: 'S6',
     location: {
       name: '애월',
-      lat: 33.465,
-      lng: 126.31,
+      lat: JEJU_COORDS.aewol!.lat,
+      lng: JEJU_COORDS.aewol!.lng,
       region: '애월',
       regionCode: '5011025300',  // 제주시 애월읍
     },
@@ -456,8 +463,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     id: 'S7',
     location: {
       name: '한림',
-      lat: 33.41,
-      lng: 126.27,
+      lat: JEJU_COORDS.hallim!.lat,
+      lng: JEJU_COORDS.hallim!.lng,
       region: '한림',
       regionCode: '5011025000',  // 제주시 한림읍
     },
@@ -480,8 +487,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     id: 'S8',
     location: {
       name: '조천',
-      lat: 33.538,
-      lng: 126.64,
+      lat: JEJU_COORDS.jocheon!.lat,
+      lng: JEJU_COORDS.jocheon!.lng,
       region: '조천',
       regionCode: '5011025900',  // 제주시 조천읍
     },
