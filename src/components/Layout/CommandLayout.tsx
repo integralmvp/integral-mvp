@@ -142,25 +142,25 @@ export default function CommandLayout() {
           }}
         >
           <div className="flex items-center gap-4">
-            <span className="text-cyber-cyan text-sm font-semibold tracking-wider">LOGISTICS MONITORING</span>
+            <span className="text-white text-sm font-semibold tracking-wider">LOGISTICS MONITORING</span>
             <span className="text-white/70 text-xs font-mono">{currentTime}</span>
           </div>
           <div className="flex items-center gap-6">
             {/* 지도 범례 - 이전 양식 */}
             <div className="flex items-center gap-4">
-              {/* 공간상품: 파레트 아이콘 */}
+              {/* 공간상품: 파레트 아이콘 (주황색 - 지도 마커와 일치) */}
               <div className="flex items-center gap-1.5">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <rect x="2" y="14" width="20" height="8" fill="#14b8a6" stroke="#0d9488" strokeWidth="1"/>
-                  <rect x="4" y="8" width="16" height="6" fill="#5eead4" stroke="#14b8a6" strokeWidth="1"/>
-                  <rect x="6" y="4" width="12" height="4" fill="#99f6e4" stroke="#5eead4" strokeWidth="1"/>
+                  <rect x="2" y="14" width="20" height="8" fill="#ff6b35" stroke="#e65c2e" strokeWidth="1"/>
+                  <rect x="4" y="8" width="16" height="6" fill="#ff8c5a" stroke="#ff6b35" strokeWidth="1"/>
+                  <rect x="6" y="4" width="12" height="4" fill="#ffb088" stroke="#ff8c5a" strokeWidth="1"/>
                 </svg>
                 <span className="text-white text-xs">공간</span>
               </div>
               {/* 경로상품: 화살표 */}
               <div className="flex items-center gap-1.5">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12h14M13 6l6 6-6 6" stroke="#00F0FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <span className="text-white text-xs">도내</span>
               </div>

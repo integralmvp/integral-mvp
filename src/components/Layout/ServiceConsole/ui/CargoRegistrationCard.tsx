@@ -116,7 +116,7 @@ export default function CargoRegistrationCard({
               }}
               onWheel={(e) => e.currentTarget.blur()}
               disabled={isConfirmed}
-              className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs disabled:bg-slate-100"
+              className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs text-black disabled:bg-slate-100"
               placeholder="가로"
             />
           </div>
@@ -132,7 +132,7 @@ export default function CargoRegistrationCard({
               }}
               onWheel={(e) => e.currentTarget.blur()}
               disabled={isConfirmed}
-              className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs disabled:bg-slate-100"
+              className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs text-black disabled:bg-slate-100"
               placeholder="세로"
             />
           </div>
@@ -148,7 +148,7 @@ export default function CargoRegistrationCard({
               }}
               onWheel={(e) => e.currentTarget.blur()}
               disabled={isConfirmed}
-              className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs disabled:bg-slate-100"
+              className="w-full px-2 py-1.5 border border-slate-300 rounded text-xs text-black disabled:bg-slate-100"
               placeholder="높이"
             />
           </div>

@@ -99,7 +99,7 @@ export default function QuantityInputCard({
             }}
             onWheel={(e) => e.currentTarget.blur()}
             disabled={confirmed}
-            className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm disabled:bg-slate-100"
+            className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm text-black disabled:bg-slate-100"
             placeholder="수량 입력"
           />
           <span className="text-sm text-slate-600">개</span>

@@ -17,11 +17,11 @@ interface TabButtonProps {
   onClick: () => void
 }
 
-// 사이버펑크 스타일 (형광 청록)
+// 사이버펑크 스타일 (활성 탭 - 화이트)
 const tabActiveStyles: Record<ServiceType, string> = {
-  storage: 'text-cyber-cyan border-b-2 border-cyber-cyan',
-  transport: 'text-cyber-cyan border-b-2 border-cyber-cyan',
-  both: 'text-cyber-cyan border-b-2 border-cyber-cyan',
+  storage: 'text-white border-b-2 border-white',
+  transport: 'text-white border-b-2 border-white',
+  both: 'text-white border-b-2 border-white',
 }
 
 function TabButton({ label, isActive, tabType, onClick }: TabButtonProps) {

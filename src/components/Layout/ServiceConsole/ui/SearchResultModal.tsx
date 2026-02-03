@@ -408,7 +408,7 @@ export default function SearchResultModal({
             </div>
             <button
               onClick={onClose}
-              className="text-white/60 hover:text-cyber-cyan text-2xl leading-none p-1"
+              className="text-white/60 hover:text-white text-2xl leading-none p-1"
             >
               ×
             </button>
@@ -419,9 +419,9 @@ export default function SearchResultModal({
             <span
               className="px-3 py-1 text-sm"
               style={{
-                background: 'rgba(0, 240, 255, 0.15)',
-                border: '1px solid rgba(0, 240, 255, 0.3)',
-                color: 'var(--cyber-cyan)',
+                background: 'rgba(255, 255, 255, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: '#ffffff',
               }}
             >
               {totalCount}건의 상품
@@ -475,7 +475,7 @@ export default function SearchResultModal({
                   onClick={() => setBothTab('integrated')}
                   className={`flex-1 py-3 text-sm font-medium transition-colors ${
                     bothTab === 'integrated'
-                      ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                      ? 'text-white border-b-2 border-white'
                       : 'text-white/60 hover:text-white'
                   }`}
                 >
@@ -487,7 +487,7 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('storage')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'storage'
-                          ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                          ? 'text-white border-b-2 border-white'
                           : 'text-white/60 hover:text-white'
                       }`}
                     >
@@ -497,7 +497,7 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('transport')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'transport'
-                          ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                          ? 'text-white border-b-2 border-white'
                           : 'text-white/60 hover:text-white'
                       }`}
                     >
@@ -510,7 +510,7 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('transport')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'transport'
-                          ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                          ? 'text-white border-b-2 border-white'
                           : 'text-white/60 hover:text-white'
                       }`}
                     >
@@ -520,7 +520,7 @@ export default function SearchResultModal({
                       onClick={() => setBothTab('storage')}
                       className={`flex-1 py-3 text-sm font-medium transition-colors ${
                         bothTab === 'storage'
-                          ? 'text-cyber-cyan border-b-2 border-cyber-cyan'
+                          ? 'text-white border-b-2 border-white'
                           : 'text-white/60 hover:text-white'
                       }`}
                     >

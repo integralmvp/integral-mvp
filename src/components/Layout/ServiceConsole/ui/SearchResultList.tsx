@@ -39,7 +39,7 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-teal-700 font-bold text-sm">
+          <div className="text-slate-900 font-bold text-sm">
             {product.price.toLocaleString()}원
           </div>
           <div className="text-xs text-slate-400">/{product.priceUnit}</div>
@@ -69,7 +69,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
 
   // 경로 타입 뱃지
   const scopeBadge = product.routeScope === 'INTRA_JEJU'
-    ? { label: '도내', color: 'bg-teal-100 text-teal-700' }
+    ? { label: '도내', color: 'bg-teal-100 text-slate-900' }
     : product.direction === 'INBOUND'
       ? { label: '입도', color: 'bg-green-100 text-green-700' }
       : { label: '출도', color: 'bg-purple-100 text-purple-700' }
@@ -94,7 +94,7 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-teal-700 font-bold text-sm">
+          <div className="text-slate-900 font-bold text-sm">
             {product.price.toLocaleString()}원
           </div>
           <div className="text-xs text-slate-400">/{product.priceUnit}</div>
