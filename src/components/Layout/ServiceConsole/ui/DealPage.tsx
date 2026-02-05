@@ -12,7 +12,7 @@
  * 8. 동의 완료 시 거래 신청 완료 토스트
  */
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type {
   StorageProduct,
   RouteProduct,
@@ -71,11 +71,34 @@ export default function DealPage({
   const [showContractModal, setShowContractModal] = useState(false)
   const [contractAgreed, setContractAgreed] = useState(false)
 
-  // 완료 토스트
-  const [showCompleteToast, setShowCompleteToast] = useState(false)
+  // 완료 확인 카드
+  const [showConfirmCard, setShowConfirmCard] = useState(false)
 
   // 사용자 정보
   const user: UserInfo = DEMO_USER
+
+  // 모달 열릴 때마다 상태 리셋
+  useEffect(() => {
+    if (isOpen) {
+      // 부가 옵션 리셋
+      setOptions([
+        { id: 'OPT_INSURANCE', name: '화물 보험', description: '화물 가액의 0.5%', price: 5000, selected: false },
+        { id: 'OPT_PACKAGING', name: '포장 서비스', description: '전문 포장 서비스', price: 15000, selected: false },
+        { id: 'OPT_EXPRESS', name: '빠른 배송', description: '우선 처리', price: 20000, selected: false },
+      ])
+      // 픽업 상태 리셋
+      setPickupRequested(false)
+      setPickupLocation('')
+      setDropoffLocation('')
+      // 메모 리셋
+      setUserMemo('')
+      // 계약 동의 리셋
+      setContractAgreed(false)
+      setShowContractModal(false)
+      // 완료 확인 카드 리셋
+      setShowConfirmCard(false)
+    }
+  }, [isOpen])
 
   // 비용 계산
   const costCalculation = useMemo(() => {
@@ -136,12 +159,14 @@ export default function DealPage({
       return
     }
 
-    // 거래 신청 완료
-    setShowCompleteToast(true)
-    setTimeout(() => {
-      onDealComplete?.()
-      onClose()
-    }, 2000)
+    // 확인 카드 표시
+    setShowConfirmCard(true)
+  }
+
+  // 거래 확정
+  const handleConfirmDeal = () => {
+    onDealComplete?.()
+    onClose()
   }
 
   if (!isOpen) return null
@@ -447,13 +472,39 @@ export default function DealPage({
         </div>
       )}
 
-      {/* 8. 거래 신청 완료 토스트 */}
-      {showCompleteToast && (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[70] bg-teal-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
-          <div className="text-2xl">✓</div>
-          <div>
-            <div className="font-bold">거래 신청이 완료되었습니다!</div>
-            <div className="text-sm opacity-90">업체에서 확인 후 연락드리겠습니다.</div>
+      {/* 8. 거래 확정 확인 카드 */}
+      {showConfirmCard && (
+        <div className="fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl text-teal-600">✓</span>
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">거래를 확정하시겠습니까?</h3>
+              <p className="text-sm text-slate-600">
+                거래 신청이 완료되면 업체에서 확인 후 연락드립니다.
+              </p>
+              <div className="mt-4 p-4 bg-teal-50 rounded-lg">
+                <div className="text-sm text-slate-600">최종 예상 금액</div>
+                <div className="text-2xl font-bold text-teal-700 mt-1">
+                  {Math.round(costCalculation.totalCost).toLocaleString()}원
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmCard(false)}
+                className="flex-1 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium rounded-lg transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleConfirmDeal}
+                className="flex-1 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg transition-colors"
+              >
+                확정
+              </button>
+            </div>
           </div>
         </div>
       )}
