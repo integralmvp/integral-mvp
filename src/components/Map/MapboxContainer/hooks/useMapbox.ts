@@ -18,7 +18,7 @@ if (MAPBOX_TOKEN) {
 
 // 지도 설정
 const MAP_CONFIG = {
-  style: 'mapbox://styles/integralv0/cmkppsvoe003e01stgyts0nxy',
+  style: 'mapbox://styles/integralv0/cml9csjxt002l01sz7enl8s0n',
   center: [126.5312, 33.4996] as [number, number],
   zoom: 9,
   minZoom: 7,
@@ -30,7 +30,7 @@ const MAP_CONFIG = {
 }
 
 const MINIMAP_CONFIG = {
-  style: 'mapbox://styles/integralv0/cmkppsvoe003e01stgyts0nxy',
+  style: 'mapbox://styles/integralv0/cml9csjxt002l01sz7enl8s0n',
   center: [127.0, 36.0] as [number, number],
   zoom: 4,
   interactive: false,
