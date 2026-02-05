@@ -18,7 +18,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* 색상 변수 - White Cyberpunk HUD Theme */
+/* 색상 변수 - White Neon Green Cyberpunk HUD Theme V2 */
 :root {
   /* 네온 그린 계열 */
   --color-neon-green: #10b981;
@@ -26,98 +26,167 @@ html {
   --color-neon-green-dark: #059669;
   --color-neon-green-glow: #6ee7b7;
 
-  /* 배경 */
+  /* 배경 - 네온 그린 틴트 */
   --color-bg-white: #ffffff;
-  --color-bg-alt: #f8fafc;
-  --color-panel-bg: rgba(255, 255, 255, 0.85);
+  --color-bg-alt: #f0fdf4;
+  --color-panel-bg: rgba(16, 185, 129, 0.08);
+  --color-panel-bg-strong: rgba(16, 185, 129, 0.12);
 
   /* 보더 */
-  --color-border: #e2e8f0;
+  --color-border: #10b981;
   --color-border-accent: #10b981;
+  --color-border-thick: #059669;
 
-  /* 텍스트 */
-  --color-text: #0f172a;
-  --color-text-alt: #64748b;
+  /* 텍스트 - 진한 블랙 */
+  --color-text: #000000;
+  --color-text-alt: #1a1a1a;
+  --color-text-muted: #404040;
 
   /* 레거시 (호환성) */
   --color-header-bg-start: #ffffff;
-  --color-header-bg-end: #f8fafc;
-  --color-console-bg: rgba(255, 255, 255, 0.85);
+  --color-header-bg-end: #f0fdf4;
+  --color-console-bg: rgba(16, 185, 129, 0.08);
   --color-live: #10b981;
   --color-title-accent: #10b981;
 }
 
-/* 사이버펑크 HUD 프레임 스타일 */
+/* 사이버펑크 HUD 프레임 스타일 V2 */
 .cyber-panel {
   position: relative;
+  overflow: visible;
 }
 
-/* 코너 장식 - 좌상단 */
-.cyber-panel::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  width: 40px;
-  height: 40px;
-  border-top: 4px solid var(--color-neon-green);
-  border-left: 4px solid var(--color-neon-green);
-  z-index: 10;
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% 4px,
-    4px 4px,
-    4px 100%,
-    0 100%
-  );
-}
-
-/* 코너 장식 - 우하단 */
-.cyber-panel::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 40px;
-  height: 40px;
-  border-bottom: 4px solid var(--color-neon-green);
-  border-right: 4px solid var(--color-neon-green);
-  z-index: 10;
-  clip-path: polygon(
-    0 calc(100% - 4px),
-    calc(100% - 4px) calc(100% - 4px),
-    calc(100% - 4px) 0,
-    100% 0,
-    100% 100%,
-    0 100%
-  );
-}
-
-/* 사이버 프레임 스타일 - 각진 형태 */
-.cyber-frame {
+/* 메인 패널용 큰 프레임 */
+.cyber-panel-main {
   position: relative;
-  border: 1px solid var(--color-border-accent);
-  background: var(--color-bg-white);
+  border: 3px solid var(--color-neon-green);
+  background: var(--color-panel-bg);
+  backdrop-filter: blur(12px);
   clip-path: polygon(
-    0 8px,
+    0 20px,
+    20px 0,
+    calc(100% - 20px) 0,
+    100% 20px,
+    100% calc(100% - 20px),
+    calc(100% - 20px) 100%,
+    20px 100%,
+    0 calc(100% - 20px)
+  );
+}
+
+/* 위젯용 프레임 (상단 절개) */
+.cyber-frame-widget {
+  position: relative;
+  border: 2px solid var(--color-neon-green);
+  background: var(--color-panel-bg);
+  backdrop-filter: blur(10px);
+  clip-path: polygon(
+    15px 0,
+    calc(15px + 40px) 0,
+    calc(15px + 45px) 8px,
+    100% 8px,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    12px 100%,
+    0 calc(100% - 12px),
+    0 8px
+  );
+}
+
+/* 입력칸용 프레임 */
+.cyber-input {
+  position: relative;
+  border: 2px solid var(--color-neon-green);
+  background: rgba(255, 255, 255, 0.9);
+  clip-path: polygon(
     8px 0,
     100% 0,
     100% calc(100% - 8px),
     calc(100% - 8px) 100%,
-    0 100%
+    0 100%,
+    0 8px
   );
+  transition: all 0.2s ease;
+}
+
+.cyber-input:focus-within {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+}
+
+/* 탭 버튼용 프레임 */
+.cyber-tab {
+  position: relative;
+  clip-path: polygon(
+    6px 0,
+    100% 0,
+    100% calc(100% - 3px),
+    calc(100% - 6px) 100%,
+    0 100%,
+    0 6px
+  );
+  transition: all 0.2s ease;
+}
+
+.cyber-tab-active {
+  background: var(--color-panel-bg-strong);
+  border-bottom: 3px solid var(--color-neon-green);
 }
 
 /* 사이버 버튼 스타일 */
 .cyber-button {
   position: relative;
   clip-path: polygon(
-    0 4px,
-    4px 0,
-    100% 0,
-    100% calc(100% - 4px),
-    calc(100% - 4px) 100%,
-    0 100%
+    8px 0,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    0 calc(100% - 8px),
+    0 8px
   );
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  transition: all 0.2s ease;
+}
+
+.cyber-button:hover {
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+  transform: translateY(-1px);
+}
+
+/* 대각선 줄무늬 패턴 (SVG 대신 CSS로) */
+.cyber-stripes {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    var(--color-neon-green) 4px,
+    var(--color-neon-green) 6px
+  );
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* 인디케이터 점들 */
+.cyber-indicators {
+  display: flex;
+  gap: 4px;
+}
+
+.cyber-indicator {
+  width: 6px;
+  height: 6px;
+  background: var(--color-neon-green);
+  opacity: 0.6;
+}
+
+.cyber-indicator.active {
+  opacity: 1;
+  box-shadow: 0 0 8px var(--color-neon-green);
 }

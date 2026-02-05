@@ -16,12 +16,13 @@ export default {
         },
         cyber: {
           bg: '#ffffff',           // 화이트 배경
-          bgAlt: '#f8fafc',        // 아주 연한 쿨 그레이 (slate-50)
-          border: '#e2e8f0',       // 연한 보더 (slate-200)
+          bgAlt: '#f0fdf4',        // 네온 그린 틴트 배경
+          border: '#10b981',       // 네온 그린 보더
           borderAccent: '#10b981', // 네온 그린 보더
-          text: '#0f172a',         // 짙은 텍스트 (slate-900)
-          textAlt: '#64748b',      // 중간 톤 텍스트 (slate-500)
-          panel: 'rgba(255, 255, 255, 0.85)', // 반투명 화이트 패널
+          text: '#000000',         // 진한 블랙 텍스트
+          textAlt: '#1a1a1a',      // 블랙 텍스트
+          textMuted: '#404040',    // 중간 블랙
+          panel: 'rgba(16, 185, 129, 0.08)', // 네온 그린 틴트 패널
         },
         // 기존 컬러 (호환성 유지)
         primary: {

@@ -1,5 +1,6 @@
 // 헤더 위젯 컴포넌트 (모니터링 문구 + 시각 + 범례)
 import { useState, useEffect } from 'react'
+import { CyberCorners, CyberStripes } from '../../../common/CyberDecorations'
 
 export default function HeaderWidget() {
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -17,19 +18,22 @@ export default function HeaderWidget() {
   })
 
   return (
-    <div className="backdrop-blur-sm border-2 border-neonGreen shadow-lg px-4 py-3 cyber-frame"
+    <div className="cyber-frame-widget px-4 py-3 relative text-neonGreen"
       style={{
-        background: 'var(--color-panel-bg)',
-        boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)'
+        boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)'
       }}
     >
-      <div className="flex items-center gap-6">
+      {/* 사이버 데코레이션 */}
+      <CyberCorners variant="widget" />
+      <CyberStripes side="right" />
+
+      <div className="flex items-center gap-6 relative z-10">
         {/* 좌측: 모니터링 문구 + 시각 */}
         <div className="flex items-center gap-3">
-          <span className="text-cyber-text text-sm font-semibold whitespace-nowrap">
+          <span className="text-black text-sm font-semibold whitespace-nowrap">
             서비스 현황 실시간 모니터링
           </span>
-          <span className="text-neonGreen">|</span>
+          <span className="text-neonGreen font-bold">|</span>
           <span className="text-neonGreen font-mono text-sm font-bold">
             {formattedTime}
           </span>
@@ -91,7 +95,7 @@ function LegendItem({ icon, viewBox, label, width = 12, height = 9 }: LegendItem
       <svg width={width} height={height} viewBox={viewBox}>
         {icon}
       </svg>
-      <span className="text-cyber-text text-sm font-semibold whitespace-nowrap">
+      <span className="text-black text-sm font-semibold whitespace-nowrap">
         {label}
       </span>
     </div>

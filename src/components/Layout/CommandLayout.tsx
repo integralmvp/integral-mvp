@@ -85,8 +85,8 @@ export default function CommandLayout() {
       {/* 좌측 45%: 블러 배경 + 서비스 콘솔 */}
       <div className="row-start-1 col-start-1 flex flex-col z-10"
         style={{
-          backdropFilter: 'blur(8px)',
-          background: 'rgba(255,255,255,0.5)'
+          backdropFilter: 'blur(10px)',
+          background: 'linear-gradient(180deg, rgba(16,185,129,0.06) 0%, rgba(16,185,129,0.1) 100%)'
         }}
       >
         {/* 상단: 로고 영역 */}

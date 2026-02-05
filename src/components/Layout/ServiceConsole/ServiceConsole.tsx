@@ -8,6 +8,7 @@ import { useServiceConsoleState, type ServiceType } from './hooks'
 import { StorageTabSection, TransportTabSection, BothTabSection } from './sections'
 import { SlotCounter, SearchResultModal } from './ui'
 import { useSearchResult } from '../../../contexts/SearchResultContext'
+import { CyberCorners, CyberTopBar, CyberStripes } from '../../common/CyberDecorations'
 
 // 탭 버튼 컴포넌트
 interface TabButtonProps {
@@ -17,21 +18,21 @@ interface TabButtonProps {
   onClick: () => void
 }
 
-// Neon Green 통일 스타일 (White Cyberpunk HUD)
+// Neon Green 통일 스타일 (White Cyberpunk HUD V2)
 const tabActiveStyles: Record<ServiceType, string> = {
-  storage: 'text-neonGreen border-b-2 border-neonGreen',
-  transport: 'text-neonGreen border-b-2 border-neonGreen',
-  both: 'text-neonGreen border-b-2 border-neonGreen',
+  storage: 'text-black font-bold cyber-tab-active',
+  transport: 'text-black font-bold cyber-tab-active',
+  both: 'text-black font-bold cyber-tab-active',
 }
 
 function TabButton({ label, isActive, tabType, onClick }: TabButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`flex-1 py-4 text-sm font-semibold transition-colors ${
+      className={`flex-1 py-4 text-sm font-semibold transition-colors cyber-tab ${
         isActive
           ? tabActiveStyles[tabType]
-          : 'text-cyber-textAlt hover:text-cyber-text'
+          : 'text-black opacity-60 hover:opacity-100'
       }`}
     >
       {label}
@@ -82,26 +83,28 @@ export default function ServiceConsole() {
 
   return (
     <div
-      className="h-full flex flex-col overflow-hidden shadow-2xl cyber-panel"
+      className="h-full flex flex-col overflow-hidden shadow-2xl cyber-panel-main text-neonGreen"
       style={{
-        background: 'var(--color-panel-bg)',
-        backdropFilter: 'blur(8px)',
         cursor: 'default',
-        border: '2px solid var(--color-border-accent)',
-        borderRadius: '0',
-        position: 'relative'
+        position: 'relative',
+        boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)'
       }}
     >
+      {/* 사이버 데코레이션 */}
+      <CyberCorners variant="main" />
+      <CyberTopBar />
+      <CyberStripes side="right" />
+
       {/* 타이틀 */}
-      <div className="p-6 border-b-2 border-neonGreen">
-        <h1 className="text-2xl font-bold text-cyber-text">내 손 안의 작은 물류 허브</h1>
-        <p className="text-sm text-cyber-textAlt mt-1">
+      <div className="p-6 border-b-3 border-neonGreen relative" style={{ borderBottomWidth: '3px' }}>
+        <h1 className="text-2xl font-bold text-black">내 손 안의 작은 물류 허브</h1>
+        <p className="text-sm text-black opacity-70 mt-1">
           비어있는 공간과 경로를 원하는 조건으로 검색하고 결제까지! 신개념 물류 오픈마켓
         </p>
       </div>
 
       {/* 탭 */}
-      <div className="flex border-b border-cyber-border">
+      <div className="flex border-b-2 border-neonGreen">
         <TabButton
           label="보관"
           isActive={state.activeTab === 'storage'}
@@ -191,7 +194,7 @@ export default function ServiceConsole() {
       </div>
 
       {/* 검색 버튼 - 하단 고정 */}
-      <div className="p-4 border-t-2 border-neonGreen">
+      <div className="p-4 border-t-3 border-neonGreen relative" style={{ borderTopWidth: '3px' }}>
         <SearchButton
           activeTab={state.activeTab}
           productCount={displayCount}
