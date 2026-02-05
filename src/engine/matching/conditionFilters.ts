@@ -114,7 +114,8 @@ export function filterStorageByConditions(
       )
     }
 
-    return true
+    // 이 코드는 도달하지 않아야 함 (위 조건 체크에서 이미 걸러짐)
+    return false
   })
 }
 

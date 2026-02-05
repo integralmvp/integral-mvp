@@ -55,19 +55,22 @@ export function runMatchingPipeline(
   // 초기 건수
   const totalOffers = offers.length
 
-  // 화물이 없으면 전체 반환 (규정 체크 스킵)
+  // 화물이 없으면 규정/자원 체크 스킵하되, 조건 필터는 실행
   if (session.cargos.length === 0) {
     if (mode === 'STORAGE') {
       const storageOffers = offers as StorageProduct[]
-      const sorted = applySorting(storageOffers, sort)
+      // 조건 필터 실행 (지역 필터링)
+      const conditionFiltered = filterStorageByConditions(storageOffers, conditions)
+      const afterConditions = conditionFiltered.length
+      const sorted = applySorting(conditionFiltered, sort)
       return {
         matchedOffers: sorted,
         matchedOfferIds: sorted.map(o => o.id),
         counts: {
           totalOffers,
-          afterRegulation: totalOffers,
-          afterResource: totalOffers,
-          afterConditions: totalOffers,
+          afterRegulation: totalOffers, // 규정 체크 스킵
+          afterResource: totalOffers,   // 자원 체크 스킵
+          afterConditions,              // 조건 필터 적용
         },
         meta: {
           mode,
@@ -77,15 +80,18 @@ export function runMatchingPipeline(
       }
     } else {
       const routeOffers = offers as RouteProduct[]
-      const sorted = applySorting(routeOffers, sort)
+      // 조건 필터 실행 (출발지/도착지 필터링)
+      const conditionFiltered = filterRouteByConditions(routeOffers, conditions)
+      const afterConditions = conditionFiltered.length
+      const sorted = applySorting(conditionFiltered, sort)
       return {
         matchedOffers: sorted,
         matchedOfferIds: sorted.map(o => o.id),
         counts: {
           totalOffers,
-          afterRegulation: totalOffers,
-          afterResource: totalOffers,
-          afterConditions: totalOffers,
+          afterRegulation: totalOffers, // 규정 체크 스킵
+          afterResource: totalOffers,   // 자원 체크 스킵
+          afterConditions,              // 조건 필터 적용
         },
         meta: {
           mode,
