@@ -13,6 +13,7 @@ import type { StorageProduct, RouteProduct, StorageCondition, TransportCondition
 import type { RegulationSummary } from '../../../../engine/regulation'
 import type { ServiceType } from '../hooks/useServiceConsoleState'
 import { JEJU_LOCATIONS } from '../../../../data/mockData'
+import ProductDetailModal from './ProductDetailModal'
 
 // 장소 ID를 한글 이름으로 변환
 const getLocationName = (locationId?: string): string => {
@@ -337,6 +338,10 @@ export default function SearchResultModal({
   // 보관+운송 모달 내부 탭
   const [bothTab, setBothTab] = useState<BothModalTab>('integrated')
 
+  // PR7: 상세 모달 상태
+  const [detailProduct, setDetailProduct] = useState<StorageProduct | RouteProduct | null>(null)
+  const [detailProductType, setDetailProductType] = useState<'storage' | 'route'>('storage')
+
   if (!isOpen) return null
 
   const header = TAB_HEADERS[activeTab]
@@ -545,7 +550,10 @@ export default function SearchResultModal({
                         product={product}
                         isSelected={selectedStorageId === product.id}
                         onSelect={() => onSelectStorage?.(product.id)}
-                        onDetail={() => alert('상세 페이지는 다음 작업에서 구현됩니다.')}
+                        onDetail={() => {
+                          setDetailProduct(product)
+                          setDetailProductType('storage')
+                        }}
                       />
                     ))}
                   </>
@@ -565,7 +573,10 @@ export default function SearchResultModal({
                         product={product}
                         isSelected={selectedRouteId === product.id}
                         onSelect={() => onSelectRoute?.(product.id)}
-                        onDetail={() => alert('상세 페이지는 다음 작업에서 구현됩니다.')}
+                        onDetail={() => {
+                          setDetailProduct(product)
+                          setDetailProductType('route')
+                        }}
                       />
                     ))}
                   </>
@@ -669,6 +680,29 @@ export default function SearchResultModal({
           </div>
         </div>
       </div>
+
+      {/* PR7: 상품 상세 모달 */}
+      <ProductDetailModal
+        isOpen={detailProduct !== null}
+        onClose={() => setDetailProduct(null)}
+        product={detailProduct}
+        productType={detailProductType}
+        onSelect={() => {
+          if (detailProduct) {
+            if (detailProductType === 'storage') {
+              onSelectStorage?.(detailProduct.id)
+            } else {
+              onSelectRoute?.(detailProduct.id)
+            }
+            setDetailProduct(null)
+          }
+        }}
+        isSelected={
+          detailProductType === 'storage'
+            ? selectedStorageId === detailProduct?.id
+            : selectedRouteId === detailProduct?.id
+        }
+      />
     </div>
   )
 }

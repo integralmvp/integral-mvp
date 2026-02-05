@@ -16,3 +16,6 @@ export { default as ConversionResult } from './ConversionResult'
 // PR4: 검색 결과
 export { default as SearchResultList } from './SearchResultList'
 export { default as SearchResultModal } from './SearchResultModal'
+
+// PR7: 상품 상세
+export { default as ProductDetailModal } from './ProductDetailModal'
