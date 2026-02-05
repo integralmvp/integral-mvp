@@ -110,7 +110,7 @@ export default function CommandLayout() {
       </div>
 
       {/* 우측 55%: 헤더 위젯 영역 */}
-      <div className="row-start-1 col-start-2 z-10 pointer-events-none">
+      <div className="row-start-1 col-start-2 z-10 pointer-events-none relative">
         {/* 헤더 위젯 (우측 상단) */}
         <div className="absolute top-4 left-4 right-4 pointer-events-auto">
           <HeaderWidget />
