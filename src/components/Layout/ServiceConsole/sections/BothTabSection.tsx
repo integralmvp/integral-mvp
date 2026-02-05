@@ -11,6 +11,7 @@ import type {
 } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine'
 import { JEJU_LOCATIONS } from '../../../../data/mockData'
+import { getRegionByCode } from '../../../../data/regionCodesJeju'
 import {
   GridCell,
   CargoCarousel,
@@ -208,7 +209,16 @@ export default function BothTabSection({
 
   // 확정 핸들러들
   const confirmStorageLocation = () => {
-    if (tempStorageLocation) onUpdateStorageCondition({ location: tempStorageLocation })
+    if (tempStorageLocation) {
+      // RegionCode를 name으로 변환
+      const region = getRegionByCode(tempStorageLocation)
+      if (region) {
+        onUpdateStorageCondition({
+          location: region.name,
+          locationCode: tempStorageLocation,
+        })
+      }
+    }
     setActiveModal(null)
   }
 
@@ -218,12 +228,30 @@ export default function BothTabSection({
   }
 
   const confirmOrigin = () => {
-    if (tempOrigin) onUpdateTransportCondition({ origin: tempOrigin })
+    if (tempOrigin) {
+      // RegionCode를 name으로 변환
+      const region = getRegionByCode(tempOrigin)
+      if (region) {
+        onUpdateTransportCondition({
+          origin: region.name,
+          originCode: tempOrigin,
+        })
+      }
+    }
     setActiveModal(null)
   }
 
   const confirmDestination = () => {
-    if (tempDestination) onUpdateTransportCondition({ destination: tempDestination })
+    if (tempDestination) {
+      // RegionCode를 name으로 변환
+      const region = getRegionByCode(tempDestination)
+      if (region) {
+        onUpdateTransportCondition({
+          destination: region.name,
+          destinationCode: tempDestination,
+        })
+      }
+    }
     setActiveModal(null)
   }
 
