@@ -79,6 +79,19 @@ export default function ServiceConsole() {
     setIsDealPageOpen(true)
   }
 
+  // 검색 모달 닫기 핸들러 (선택 상태 리셋)
+  const handleCloseSearchModal = () => {
+    setIsModalOpen(false)
+    // 선택 상태 리셋
+    actions.selectStorage('')
+    actions.selectRoute('')
+  }
+
+  // 거래 페이지 닫기 핸들러
+  const handleCloseDealPage = () => {
+    setIsDealPageOpen(false)
+  }
+
   // 검색 버튼 클릭 핸들러
   const handleSearchClick = () => {
     actions.handleSearch()
@@ -203,7 +216,7 @@ export default function ServiceConsole() {
       {/* PR4: 검색 결과 모달 */}
       <SearchResultModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseSearchModal}
         storageProducts={searchResult?.storageProducts || []}
         routeProducts={searchResult?.routeProducts || []}
         activeTab={state.activeTab}
@@ -224,7 +237,7 @@ export default function ServiceConsole() {
       {/* PR7: 거래 페이지 */}
       <DealPage
         isOpen={isDealPageOpen}
-        onClose={() => setIsDealPageOpen(false)}
+        onClose={handleCloseDealPage}
         activeTab={state.activeTab}
         storageProduct={state.selectedStorageId ? STORAGE_PRODUCTS.find(p => p.id === state.selectedStorageId) : undefined}
         routeProduct={state.selectedRouteId ? ROUTE_PRODUCTS.find(p => p.id === state.selectedRouteId) : undefined}
