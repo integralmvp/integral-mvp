@@ -1,6 +1,5 @@
 // Mapbox 지도 컨테이너 - 조립 컴포넌트 (리팩토링 후)
 import { useMapbox } from './hooks/useMapbox'
-import HeaderWidget from './ui/HeaderWidget'
 
 export default function MapboxContainer() {
   const { mapContainer, miniMapContainer, hasToken } = useMapbox()
@@ -36,19 +35,13 @@ export default function MapboxContainer() {
       {/* 메인 지도 */}
       <div ref={mapContainer} className="w-full h-full" />
 
-      {/* 우측 상단 위젯 영역 */}
-      <div className="absolute top-4 right-4 left-[46%] z-10 flex flex-col gap-3">
-        {/* 헤더 위젯 */}
-        <HeaderWidget />
-
-        {/* 미니맵 */}
-        <div className="flex justify-end">
-          <div
-            className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden"
-            style={{ width: '200px', height: '170px' }}
-          >
-            <div ref={miniMapContainer} className="w-full h-full" />
-          </div>
+      {/* 우측 상단 미니맵 (헤더 위젯 아래) */}
+      <div className="absolute top-[88px] right-4 z-10">
+        <div
+          className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden"
+          style={{ width: '200px', height: '170px' }}
+        >
+          <div ref={miniMapContainer} className="w-full h-full" />
         </div>
       </div>
     </div>

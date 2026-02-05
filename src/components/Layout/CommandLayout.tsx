@@ -1,10 +1,11 @@
-// 전체 지도 배경 + 좌측 블러 오버레이 레이아웃
+// Grid 기반 레이아웃 - 좌측(45%) 서비스 콘솔 + 우측(55%) 지도
 // PR4: 검색 결과 하이라이트 연동 - 물방울 마커로 가능 상품 강조
 // PR6: 프리뷰 결과 기반 하이라이트 (실시간 동기화)
 
 import { useEffect, useRef } from 'react'
 import ServiceConsole from './ServiceConsole'
 import MapboxContainer from '../Map/MapboxContainer'
+import HeaderWidget from '../Map/MapboxContainer/ui/HeaderWidget'
 import { useSearchResult } from '../../contexts/SearchResultContext'
 import { createAvailableMarkerSvg } from '../Map/MapboxContainer/utils/style'
 import logoSvg from '../../assets/icons/console/logo.svg'
@@ -75,14 +76,14 @@ export default function CommandLayout() {
   }, [])
 
   return (
-    <div className="h-screen relative overflow-hidden">
-      {/* 배경: 전체 지도 */}
-      <div className="absolute inset-0 z-0">
+    <div className="h-screen grid grid-cols-[45%_55%] overflow-hidden">
+      {/* 배경 지도: 전체 화면 (grid의 모든 칸 차지) */}
+      <div className="col-span-2 row-start-1 col-start-1">
         <MapboxContainer />
       </div>
 
-      {/* 좌측 45%: 블러 오버레이 */}
-      <div className="absolute inset-y-0 left-0 w-[45%] z-10 flex flex-col"
+      {/* 좌측 45%: 블러 배경 + 서비스 콘솔 */}
+      <div className="row-start-1 col-start-1 flex flex-col z-10"
         style={{
           backdropFilter: 'blur(5px)',
           background: 'rgba(255,255,255,0.6)'
@@ -105,6 +106,14 @@ export default function CommandLayout() {
         {/* 하단: 서비스 콘솔 */}
         <div className="flex-1 p-6 pt-0 overflow-hidden">
           <ServiceConsole />
+        </div>
+      </div>
+
+      {/* 우측 55%: 헤더 위젯 영역 */}
+      <div className="row-start-1 col-start-2 z-10 pointer-events-none">
+        {/* 헤더 위젯 (우측 상단) */}
+        <div className="absolute top-4 left-4 right-4 pointer-events-auto">
+          <HeaderWidget />
         </div>
       </div>
     </div>

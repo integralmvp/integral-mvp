@@ -38,17 +38,24 @@ const MINIMAP_CONFIG = {
 }
 
 /**
- * 카메라 오프셋 적용 (좌측 45% 블러 영역 보정)
- * 마커/레이어와 무관하게 카메라 상태만 갱신
+ * 카메라 패딩 적용 (좌측 45% 블러 영역 보정)
+ * padding 기반으로 우측 55% 영역 중심에 지도 포커스
  */
-function applyCameraOffset(map: mapboxgl.Map): void {
+function applyCameraPadding(map: mapboxgl.Map): void {
   const container = map.getContainer()
   const width = container.clientWidth
-  const offsetX = (width * 0.45) / 2
+  const leftPadding = width * 0.45
 
+  map.setPadding({
+    left: leftPadding,
+    top: 0,
+    right: 0,
+    bottom: 0,
+  })
+
+  // padding 적용 후 중심 재설정
   map.easeTo({
     center: MAP_CONFIG.center,
-    offset: [offsetX, 0],
     duration: 0,
   })
 }
@@ -70,7 +77,7 @@ export function useMapbox(): UseMapboxResult {
   const handleResize = useCallback(() => {
     if (map.current) {
       map.current.resize()
-      applyCameraOffset(map.current)
+      applyCameraPadding(map.current)
     }
     if (miniMap.current) {
       miniMap.current.resize()
@@ -94,9 +101,9 @@ export function useMapbox(): UseMapboxResult {
     map.current.on('load', () => {
       if (!map.current) return
 
-      // load 시 resize 호출 후 offset 적용
+      // load 시 resize 호출 후 padding 적용
       map.current.resize()
-      applyCameraOffset(map.current)
+      applyCameraPadding(map.current)
 
       addPalletMarkers(map.current)
       addArrowImages(map.current)
