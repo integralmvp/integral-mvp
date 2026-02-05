@@ -372,3 +372,50 @@ export function logResourceChecked(
     fields: { passedCount, failedCount },
   })
 }
+
+// ============ PR7: 거래 관련 이벤트 ============
+
+/**
+ * 상품 선택 확정 이벤트 (리스트에서 [선택] 클릭)
+ */
+export function logMatchConfirmed(
+  demandId: string,
+  offerId: string,
+  offerType: 'storage' | 'route'
+): PlatformEvent {
+  return logEvent({
+    eventType: 'MATCH_CONFIRMED',
+    subject: { kind: 'demand', id: demandId },
+    fields: { offerId, offerType },
+  })
+}
+
+/**
+ * 거래 생성 이벤트 (거래 페이지 진입)
+ */
+export function logDealCreated(
+  dealId: string,
+  demandId: string,
+  selectedOfferIds: string[]
+): PlatformEvent {
+  return logEvent({
+    eventType: 'DEAL_CREATED',
+    subject: { kind: 'deal', id: dealId },
+    fields: { demandId, selectedOfferIds },
+  })
+}
+
+/**
+ * 거래 신청 완료 이벤트 (계약 동의 후 최종 제출)
+ */
+export function logDealSubmitted(
+  dealId: string,
+  totalCost: number,
+  contractAgreed: boolean
+): PlatformEvent {
+  return logEvent({
+    eventType: 'DEAL_SUBMITTED',
+    subject: { kind: 'deal', id: dealId },
+    fields: { totalCost, contractAgreed },
+  })
+}

@@ -14,6 +14,8 @@ import type {
   WeightRange,
   ModuleClassification,
   FeatureCode,
+  ProviderInfo,
+  UserInfo,
 } from '../types/models'
 import { REGION_REPRESENTATIVE_COORDS } from './regionRepresentativeCoords'
 
@@ -38,6 +40,108 @@ const MAINLAND_PORTS = {
   busan: getCoords('BUSAN_PORT'),
   incheon: getCoords('INCHEON_PORT'),
   mokpo: getCoords('MOKPO_PORT'),
+}
+
+// ============ PR7: 업체 정보 ============
+export const PROVIDERS: ProviderInfo[] = [
+  // 보관 업체
+  {
+    id: 'PROVIDER_S1',
+    name: '제주물류센터',
+    serviceType: '보관',
+    verified: true,
+    description: '제주항 인근 대형 물류센터, 24시간 입출고 가능',
+    contractTemplate: '제주물류센터 표준 계약서 v2.1',
+    pickupAvailable: true,
+    weightLimitKg: 25,
+  },
+  {
+    id: 'PROVIDER_S2',
+    name: '한라냉장',
+    serviceType: '보관',
+    verified: true,
+    description: '식품 전문 냉장/냉동 물류 서비스',
+    contractTemplate: '한라냉장 표준 계약서 v1.8',
+    pickupAvailable: false,
+    weightLimitKg: 20,
+  },
+  {
+    id: 'PROVIDER_S3',
+    name: '서귀창고',
+    serviceType: '보관',
+    verified: true,
+    description: '서귀포 지역 중심 물류 창고',
+    contractTemplate: '서귀창고 표준 계약서 v1.5',
+    pickupAvailable: true,
+    weightLimitKg: 30,
+  },
+  {
+    id: 'PROVIDER_S4',
+    name: '탐라스토리지',
+    serviceType: '보관',
+    verified: false,
+    description: '중소 규모 창고 전문',
+    contractTemplate: '탐라스토리지 계약서 v1.0',
+    pickupAvailable: false,
+    weightLimitKg: 20,
+  },
+  // 운송 업체
+  {
+    id: 'PROVIDER_R1',
+    name: '제주택배',
+    serviceType: '운송',
+    verified: true,
+    description: '도내 운송 전문, 정시 배송 보장',
+    contractTemplate: '제주택배 표준 계약서 v3.2',
+    pickupAvailable: true,
+    weightLimitKg: 25,
+  },
+  {
+    id: 'PROVIDER_R2',
+    name: '해운물류',
+    serviceType: '운송',
+    verified: true,
+    description: '제주-육지 간 해상 운송 전문',
+    contractTemplate: '해운물류 표준 계약서 v2.5',
+    pickupAvailable: false,
+    weightLimitKg: 30,
+  },
+  {
+    id: 'PROVIDER_R3',
+    name: '올레운송',
+    serviceType: '운송',
+    verified: true,
+    description: '소형 화물 빠른 배송',
+    contractTemplate: '올레운송 계약서 v1.2',
+    pickupAvailable: true,
+    weightLimitKg: 15,
+  },
+  // 통합 업체
+  {
+    id: 'PROVIDER_B1',
+    name: '제주통합물류',
+    serviceType: '통합',
+    verified: true,
+    description: '보관부터 운송까지 원스톱 서비스',
+    contractTemplate: '제주통합물류 표준 계약서 v2.0',
+    pickupAvailable: true,
+    weightLimitKg: 30,
+  },
+]
+
+// 업체 ID로 업체 정보 찾기 헬퍼
+const getProvider = (id: string): ProviderInfo => {
+  const provider = PROVIDERS.find(p => p.id === id)
+  if (!provider) throw new Error(`Provider ${id} not found`)
+  return provider
+}
+
+// ============ PR7: 사용자 정보 (MVP 더미) ============
+export const DEMO_USER: UserInfo = {
+  id: 'demo-user',
+  name: '김제주',
+  email: 'demo@integral.com',
+  phone: '010-1234-5678',
 }
 
 // ============ 경로 상품 (8개) ============
@@ -76,6 +180,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 5톤 차량 (여유 있음)
     capacityCubes: 400,
     remainingCubes: 350,
+    // PR7 업체
+    provider: getProvider('PROVIDER_R1'),
   },
   {
     id: 'R2',
@@ -107,6 +213,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 3.5톤 차량 (전체 가용)
     capacityCubes: 280,
     remainingCubes: 280,
+    // PR7 업체
+    provider: getProvider('PROVIDER_R3'),
   },
   {
     id: 'R3',
@@ -138,6 +246,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 5톤 차량 (거의 다 찼음 - 필터링 테스트용)
     capacityCubes: 400,
     remainingCubes: 100,
+    // PR7 업체
+    provider: getProvider('PROVIDER_R1'),
   },
   {
     id: 'R4',
@@ -169,6 +279,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 1톤 소형 차량 (전체 가용)
     capacityCubes: 80,
     remainingCubes: 80,
+    // PR7 업체
+    provider: getProvider('PROVIDER_R3'),
   },
 
   // 입도 경로 (2개) - 육지 출발, 제주 도착
@@ -204,6 +316,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 11톤 대용량 (여유 있음)
     capacityCubes: 880,
     remainingCubes: 600,
+    // PR7 업체
+    provider: getProvider('PROVIDER_R2'),
   },
   {
     id: 'R6',
@@ -238,6 +352,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 8톤 차량 (여유 있음)
     capacityCubes: 640,
     remainingCubes: 400,
+    // PR7 업체
+    provider: getProvider('PROVIDER_R2'),
   },
 
   // 출도 경로 (2개) - 제주 출발, 육지 도착
@@ -273,6 +389,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 11톤 대용량 (거의 다 찼음 - 필터링 테스트용)
     capacityCubes: 880,
     remainingCubes: 200,
+    // PR7 업체
+    provider: getProvider('PROVIDER_R2'),
   },
   {
     id: 'R8',
@@ -306,6 +424,8 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 5톤 차량 (전체 가용)
     capacityCubes: 400,
     remainingCubes: 400,
+    // PR7 업체
+    provider: getProvider('PROVIDER_R2'),
   },
 ]
 
@@ -336,6 +456,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 30 Pallet × 128 = 3840 큐브 (전체 가용)
     capacityCubes: 3840,
     remainingCubes: 3840,
+    // PR7 업체
+    provider: getProvider('PROVIDER_S1'),
   },
   {
     id: 'S2',
@@ -361,6 +483,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 15 Pallet × 128 = 1920 큐브 (일부 사용 중)
     capacityCubes: 1920,
     remainingCubes: 1000,
+    // PR7 업체
+    provider: getProvider('PROVIDER_S2'),
   },
   {
     id: 'S3',
@@ -385,6 +509,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 25 Pallet × 128 = 3200 큐브 (전체 가용)
     capacityCubes: 3200,
     remainingCubes: 3200,
+    // PR7 업체
+    provider: getProvider('PROVIDER_S3'),
   },
   {
     id: 'S4',
@@ -410,6 +536,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 20 Pallet × 128 = 2560 큐브 (거의 다 찼음 - 필터링 테스트용)
     capacityCubes: 2560,
     remainingCubes: 500,
+    // PR7 업체
+    provider: getProvider('PROVIDER_S3'),
   },
   {
     id: 'S5',
@@ -435,6 +563,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 10 Pallet × 128 = 1280 큐브 (전체 가용)
     capacityCubes: 1280,
     remainingCubes: 1280,
+    // PR7 업체
+    provider: getProvider('PROVIDER_S4'),
   },
   {
     id: 'S6',
@@ -460,6 +590,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 12 Pallet × 128 = 1536 큐브 (일부 사용 중)
     capacityCubes: 1536,
     remainingCubes: 800,
+    // PR7 업체
+    provider: getProvider('PROVIDER_S2'),
   },
   {
     id: 'S7',
@@ -484,6 +616,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 22 Pallet × 128 = 2816 큐브 (전체 가용)
     capacityCubes: 2816,
     remainingCubes: 2816,
+    // PR7 업체
+    provider: getProvider('PROVIDER_S1'),
   },
   {
     id: 'S8',
@@ -508,6 +642,8 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 18 Pallet × 128 = 2304 큐브 (거의 다 찼음 - 필터링 테스트용)
     capacityCubes: 2304,
     remainingCubes: 100,
+    // PR7 업체
+    provider: getProvider('PROVIDER_S2'),
   },
 ]
 

@@ -108,6 +108,10 @@ export interface ServiceConsoleState {
   // PR6: 검색 결과 (스냅샷)
   searchResult: SearchResult | null
   isSearching: boolean
+
+  // PR7: 선택 상태
+  selectedStorageId?: string
+  selectedRouteId?: string
 }
 
 export interface ServiceConsoleActions {
@@ -140,6 +144,10 @@ export interface ServiceConsoleActions {
 
   // 검색
   handleSearch: () => void
+
+  // PR7: 선택 액션
+  selectStorage: (id: string) => void
+  selectRoute: (id: string) => void
 }
 
 export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleActions] {
@@ -166,6 +174,10 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
   // PR6: 검색 결과 상태 (스냅샷)
   const [searchResult, setSearchResultLocal] = useState<SearchResult | null>(null)
   const [isSearching, setIsSearching] = useState(false)
+
+  // PR7: 선택 상태
+  const [selectedStorageId, setSelectedStorageId] = useState<string | undefined>()
+  const [selectedRouteId, setSelectedRouteId] = useState<string | undefined>()
 
   // PR6: Context 연동
   const { setPreviewResult, setSearchResult: setSearchResultContext } = useSearchResult()
@@ -536,11 +548,23 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setSearchResultContext(null)
     setPreviewResult(null)
     setIsSearching(false)
+    // PR7: 선택 상태 리셋
+    setSelectedStorageId(undefined)
+    setSelectedRouteId(undefined)
 
     // Code Data System: 새 DemandSession 시작
     const demand = resetActiveDemand(toModelServiceType(tab))
     setCurrentDemandId(demand.demandId)
   }
+
+  // PR7: 선택 핸들러
+  const selectStorage = useCallback((id: string) => {
+    setSelectedStorageId(id || undefined)
+  }, [])
+
+  const selectRoute = useCallback((id: string) => {
+    setSelectedRouteId(id || undefined)
+  }, [])
 
   // PR6: 검색 (프리뷰 결과를 스냅샷으로 저장)
   const handleSearch = useCallback(() => {
@@ -618,6 +642,8 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     currentDemandId,
     searchResult: searchResult,
     isSearching,
+    selectedStorageId,
+    selectedRouteId,
   }
 
   const actions: ServiceConsoleActions = {
@@ -638,6 +664,8 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     resetTransportCondition,
     setServiceOrder,
     handleSearch,
+    selectStorage,
+    selectRoute,
   }
 
   return [state, actions]
