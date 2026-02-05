@@ -32,6 +32,21 @@ export interface RegulationStatus {
   restrictions?: string[];
 }
 
+// ============ PR7: 업체 정보 ============
+/**
+ * ProviderInfo - 업체 정보
+ */
+export interface ProviderInfo {
+  id: string
+  name: string
+  serviceType: '보관' | '운송' | '통합'
+  verified: boolean               // 인증 여부
+  description?: string            // 업체 설명
+  contractTemplate?: string       // 전자 간이 계약서 템플릿
+  pickupAvailable?: boolean       // 픽업 서비스 제공 여부
+  weightLimitKg?: number          // 업체별 중량 제한 (초과 중량 계산용)
+}
+
 // ============ 경로 범위 및 방향 ============
 export type RouteScope = "INTRA_JEJU" | "SEA";
 export type Direction = "INBOUND" | "OUTBOUND";
@@ -68,6 +83,8 @@ export interface RouteProduct {
   // PR5 자원 필드
   capacityCubes: number;                 // 총 수용 가능 큐브 (정수)
   remainingCubes: number;                // 현재 남은 큐브 (정수, MVP: capacity와 동일)
+  // PR7 업체 정보
+  provider: ProviderInfo;                // 업체 정보
 }
 
 // ============ 공간 상품 (PR2에서 확장) ============
@@ -92,6 +109,8 @@ export interface StorageProduct {
   // PR5 자원 필드
   capacityCubes: number;                 // 총 수용 가능 큐브 (정수, Pallet × 128)
   remainingCubes: number;                // 현재 남은 큐브 (정수, MVP: capacity와 동일)
+  // PR7 업체 정보
+  provider: ProviderInfo;                // 업체 정보
 }
 
 // ============ ProductCard Props (PR1 용도) ============
@@ -452,6 +471,10 @@ export type PlatformEventType =
   // PR5: 세션/자원 관련
   | 'DEMAND_SESSION_CREATED'
   | 'RESOURCE_CHECKED'
+  // PR7: 거래 관련
+  | 'MATCH_CONFIRMED'
+  | 'DEAL_CREATED'
+  | 'DEAL_SUBMITTED'
 
 /**
  * PlatformEvent - 플랫폼 사건 데이터
@@ -502,4 +525,78 @@ export interface CubeCalculatedFields {
  */
 export interface SearchExecutedFields {
   resultCount: number
+}
+
+// ============ PR7: 거래 레이어 타입 ============
+
+/**
+ * UserInfo - 사용자 정보 (MVP 더미)
+ */
+export interface UserInfo {
+  id: string
+  name: string
+  email: string
+  phone: string
+}
+
+/**
+ * DealOption - 거래 부가 옵션
+ */
+export interface DealOption {
+  id: string
+  name: string
+  description: string
+  price: number
+  selected: boolean
+}
+
+/**
+ * DealStatus - 거래 상태
+ */
+export type DealStatus =
+  | 'DRAFT'           // 작성 중
+  | 'SUBMITTED'       // 신청 완료
+  | 'CONFIRMED'       // 확정
+  | 'CANCELLED'       // 취소
+
+/**
+ * Deal - 거래 데이터
+ */
+export interface Deal {
+  id: string
+  demandId: string
+  userId: string
+
+  // 선택 상품
+  selectedStorageId?: string
+  selectedRouteId?: string
+
+  // 거래 조건
+  pickupRequested: boolean
+  pickupLocation?: string
+  dropoffLocation?: string
+
+  // 부가 옵션
+  options: DealOption[]
+
+  // 비용 계산
+  baseCost: number
+  cubeCost: number
+  weightCost: number
+  optionsCost: number
+  totalCost: number
+
+  // 요청 메모
+  userMemo?: string
+
+  // 계약 동의
+  contractAgreed: boolean
+  contractAgreedAt?: string
+
+  // 상태
+  status: DealStatus
+
+  // 메타
+  createdAt: string
+  updatedAt: string
 }

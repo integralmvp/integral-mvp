@@ -206,6 +206,11 @@ export default function ServiceConsole() {
         storageCondition={state.storageCondition}
         transportCondition={state.transportCondition}
         serviceOrder={state.serviceOrder}
+        selectedStorageId={state.selectedStorageId}
+        selectedRouteId={state.selectedRouteId}
+        onSelectStorage={actions.selectStorage}
+        onSelectRoute={actions.selectRoute}
+        onStartDeal={actions.startDeal}
       />
     </div>
   )

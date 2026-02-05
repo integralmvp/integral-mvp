@@ -36,6 +36,12 @@ interface SearchResultModalProps {
   transportCondition: TransportCondition
   // 보관+운송 순서
   serviceOrder?: ServiceOrder
+  // PR7: 선택 상태 관리
+  selectedStorageId?: string
+  selectedRouteId?: string
+  onSelectStorage?: (id: string) => void
+  onSelectRoute?: (id: string) => void
+  onStartDeal?: () => void
 }
 
 // 탭별 헤더 정보
@@ -58,22 +64,34 @@ const TAB_HEADERS: Record<ServiceType, { title: string; subtitle: string }> = {
 type BothModalTab = 'integrated' | 'storage' | 'transport'
 
 // 보관 상품 카드
-function StorageProductCard({ product }: { product: StorageProduct }) {
-  const handleClick = () => {
-    console.log('보관 상품 선택:', product.id)
-    alert(`[${product.location.name}] 거래 기능은 PR5에서 연결됩니다.`)
-  }
-
+function StorageProductCard({
+  product,
+  isSelected,
+  onSelect,
+  onDetail
+}: {
+  product: StorageProduct
+  isSelected: boolean
+  onSelect: () => void
+  onDetail: () => void
+}) {
   return (
-    <button
-      onClick={handleClick}
-      className="w-full p-4 bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all text-left"
-    >
+    <div className={`w-full p-4 bg-white rounded-xl border transition-all ${
+      isSelected ? 'border-teal-500 shadow-md' : 'border-slate-200'
+    }`}>
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <div className="font-bold text-slate-900">{product.location.name}</div>
-          <div className="text-sm text-slate-500 mt-1">
-            {product.storageType} · {product.capacity}
+          <div className="flex items-start gap-2">
+            <div className="flex-1">
+              <div className="font-bold text-slate-900">{product.location.name}</div>
+              <div className="text-xs text-slate-500 mt-1">{product.provider.name}</div>
+              <div className="text-sm text-slate-600 mt-1">
+                {product.storageType} · {product.capacity}
+              </div>
+            </div>
+            {product.provider.verified && (
+              <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">인증</span>
+            )}
           </div>
           <div className="flex gap-1 mt-2 flex-wrap">
             {product.features.slice(0, 3).map((feature, i) => (
@@ -90,17 +108,43 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
           <div className="text-xs text-slate-400">/{product.priceUnit}</div>
         </div>
       </div>
-    </button>
+
+      {/* 버튼 영역 */}
+      <div className="flex gap-2 mt-3 pt-3 border-t border-slate-100">
+        <button
+          onClick={onDetail}
+          className="flex-1 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+        >
+          상세
+        </button>
+        <button
+          onClick={onSelect}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+            isSelected
+              ? 'bg-slate-200 text-slate-600 cursor-not-allowed'
+              : 'bg-teal-600 text-white hover:bg-teal-700'
+          }`}
+          disabled={isSelected}
+        >
+          {isSelected ? '선택됨' : '선택'}
+        </button>
+      </div>
+    </div>
   )
 }
 
 // 운송 상품 카드
-function RouteProductCard({ product }: { product: RouteProduct }) {
-  const handleClick = () => {
-    console.log('운송 상품 선택:', product.id)
-    alert(`[${product.origin.name} → ${product.destination.name}] 거래 기능은 PR5에서 연결됩니다.`)
-  }
-
+function RouteProductCard({
+  product,
+  isSelected,
+  onSelect,
+  onDetail
+}: {
+  product: RouteProduct
+  isSelected: boolean
+  onSelect: () => void
+  onDetail: () => void
+}) {
   const scopeBadge = product.routeScope === 'INTRA_JEJU'
     ? { label: '도내', color: 'bg-teal-100 text-teal-700' }
     : product.direction === 'INBOUND'
@@ -108,21 +152,24 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
       : { label: '출도', color: 'bg-purple-100 text-purple-700' }
 
   return (
-    <button
-      onClick={handleClick}
-      className="w-full p-4 bg-white rounded-xl border border-slate-200 hover:border-teal-400 hover:shadow-lg transition-all text-left"
-    >
+    <div className={`w-full p-4 bg-white rounded-xl border transition-all ${
+      isSelected ? 'border-teal-500 shadow-md' : 'border-slate-200'
+    }`}>
       <div className="flex justify-between items-start">
         <div className="flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${scopeBadge.color}`}>
               {scopeBadge.label}
             </span>
             <span className="font-bold text-slate-900">
               {product.origin.name} → {product.destination.name}
             </span>
+            {product.provider.verified && (
+              <span className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">인증</span>
+            )}
           </div>
-          <div className="text-sm text-slate-500 mt-1">
+          <div className="text-xs text-slate-500 mt-1">{product.provider.name}</div>
+          <div className="text-sm text-slate-600 mt-1">
             {product.vehicleType} · {product.capacity} · {product.schedule}
           </div>
           <div className="flex gap-1 mt-2 flex-wrap">
@@ -140,7 +187,28 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
           <div className="text-xs text-slate-400">/{product.priceUnit}</div>
         </div>
       </div>
-    </button>
+
+      {/* 버튼 영역 */}
+      <div className="flex gap-2 mt-3 pt-3 border-t border-slate-100">
+        <button
+          onClick={onDetail}
+          className="flex-1 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+        >
+          상세
+        </button>
+        <button
+          onClick={onSelect}
+          className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${
+            isSelected
+              ? 'bg-slate-200 text-slate-600 cursor-not-allowed'
+              : 'bg-teal-600 text-white hover:bg-teal-700'
+          }`}
+          disabled={isSelected}
+        >
+          {isSelected ? '선택됨' : '선택'}
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -260,6 +328,11 @@ export default function SearchResultModal({
   storageCondition,
   transportCondition,
   serviceOrder,
+  selectedStorageId,
+  selectedRouteId,
+  onSelectStorage,
+  onSelectRoute,
+  onStartDeal,
 }: SearchResultModalProps) {
   // 보관+운송 모달 내부 탭
   const [bothTab, setBothTab] = useState<BothModalTab>('integrated')
@@ -467,7 +540,13 @@ export default function SearchResultModal({
                       </div>
                     )}
                     {filtered.storage.map(product => (
-                      <StorageProductCard key={product.id} product={product} />
+                      <StorageProductCard
+                        key={product.id}
+                        product={product}
+                        isSelected={selectedStorageId === product.id}
+                        onSelect={() => onSelectStorage?.(product.id)}
+                        onDetail={() => alert('상세 페이지는 다음 작업에서 구현됩니다.')}
+                      />
                     ))}
                   </>
                 )}
@@ -481,10 +560,110 @@ export default function SearchResultModal({
                       </div>
                     )}
                     {filtered.route.map(product => (
-                      <RouteProductCard key={product.id} product={product} />
+                      <RouteProductCard
+                        key={product.id}
+                        product={product}
+                        isSelected={selectedRouteId === product.id}
+                        onSelect={() => onSelectRoute?.(product.id)}
+                        onDetail={() => alert('상세 페이지는 다음 작업에서 구현됩니다.')}
+                      />
                     ))}
                   </>
                 )}
+              </div>
+            )}
+
+            {/* 선택 요약 및 거래 버튼 */}
+            {filteredCount > 0 && (
+              <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="text-sm font-semibold text-slate-700 mb-3">선택한 상품</div>
+
+                {/* 선택 요약 */}
+                <div className="space-y-2">
+                  {activeTab === 'storage' && selectedStorageId && (
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                      <span className="text-sm text-slate-700">
+                        보관: {storageProducts.find(p => p.id === selectedStorageId)?.location.name}
+                      </span>
+                      <button
+                        onClick={() => onSelectStorage?.('')}
+                        className="text-xs text-slate-500 hover:text-slate-700"
+                      >
+                        취소
+                      </button>
+                    </div>
+                  )}
+
+                  {activeTab === 'transport' && selectedRouteId && (
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                      <span className="text-sm text-slate-700">
+                        운송: {routeProducts.find(p => p.id === selectedRouteId)?.origin.name} → {routeProducts.find(p => p.id === selectedRouteId)?.destination.name}
+                      </span>
+                      <button
+                        onClick={() => onSelectRoute?.('')}
+                        className="text-xs text-slate-500 hover:text-slate-700"
+                      >
+                        취소
+                      </button>
+                    </div>
+                  )}
+
+                  {activeTab === 'both' && (
+                    <>
+                      {selectedStorageId && (
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                          <span className="text-sm text-slate-700">
+                            보관: {storageProducts.find(p => p.id === selectedStorageId)?.location.name}
+                          </span>
+                          <button
+                            onClick={() => onSelectStorage?.('')}
+                            className="text-xs text-slate-500 hover:text-slate-700"
+                          >
+                            취소
+                          </button>
+                        </div>
+                      )}
+                      {selectedRouteId && (
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                          <span className="text-sm text-slate-700">
+                            운송: {routeProducts.find(p => p.id === selectedRouteId)?.origin.name} → {routeProducts.find(p => p.id === selectedRouteId)?.destination.name}
+                          </span>
+                          <button
+                            onClick={() => onSelectRoute?.('')}
+                            className="text-xs text-slate-500 hover:text-slate-700"
+                          >
+                            취소
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {!selectedStorageId && !selectedRouteId && (
+                    <div className="text-sm text-slate-400 text-center py-2">
+                      상품을 선택해주세요
+                    </div>
+                  )}
+                </div>
+
+                {/* 거래 버튼 */}
+                <button
+                  onClick={onStartDeal}
+                  disabled={
+                    (activeTab === 'storage' && !selectedStorageId) ||
+                    (activeTab === 'transport' && !selectedRouteId) ||
+                    (activeTab === 'both' && (!selectedStorageId || !selectedRouteId))
+                  }
+                  className={`w-full mt-4 py-3 rounded-lg font-medium transition-colors ${
+                    (activeTab === 'storage' && selectedStorageId) ||
+                    (activeTab === 'transport' && selectedRouteId) ||
+                    (activeTab === 'both' && selectedStorageId && selectedRouteId)
+                      ? 'bg-teal-600 text-white hover:bg-teal-700'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  거래 진행
+                </button>
               </div>
             )}
           </div>
