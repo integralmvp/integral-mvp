@@ -9,7 +9,7 @@
  */
 export interface ResourceCheckResult {
   pass: boolean
-  reason?: 'INSUFFICIENT_CAPACITY'
+  reason?: 'INSUFFICIENT_CAPACITY' | 'INSUFFICIENT_PAYLOAD'
 }
 
 /**
@@ -18,6 +18,16 @@ export interface ResourceCheckResult {
 export interface ResourceCheckParams {
   offerRemainingCubes: number
   demandCubes: number
+}
+
+/**
+ * PR7: 중량 재고 포함 자원 체크 파라미터
+ */
+export interface ResourceCheckWithPayloadParams {
+  offerRemainingCubes: number
+  demandCubes: number
+  offerRemainingPayloadKg?: number  // 남은 하중 (선택)
+  demandWeightKg?: number           // 수요 중량 (선택)
 }
 
 /**

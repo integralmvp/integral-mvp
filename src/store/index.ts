@@ -13,6 +13,7 @@ export {
   makeCargoId,
   makeDemandId,
   makeEventId,
+  makeDealId,
   getIdPrefix,
   isValidId,
 } from './id'
@@ -57,6 +58,20 @@ export {
   clearAllDemands,
   resetActiveDemand,
 } from './demandStore'
+
+// PR7: Deal Store
+export {
+  createDeal,
+  getDealById,
+  getDealsByDemandId,
+  getDealsByUserId,
+  updateDealStatus,
+  agreeToDealContract,
+  updateDeal,
+  deleteDeal,
+  getAllDeals,
+} from './dealStore'
+export type { CreateDealParams } from './dealStore'
 
 // Event Log
 export {

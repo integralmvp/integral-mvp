@@ -8,6 +8,7 @@
 export type {
   ResourceCheckResult,
   ResourceCheckParams,
+  ResourceCheckWithPayloadParams,
   OfferResourceCheckResult,
   ResourceFilterResult,
 } from './resourceTypes'
@@ -15,6 +16,7 @@ export type {
 // 함수 내보내기
 export {
   checkResource,
+  checkResourceWithPayload,
   filterStorageByResource,
   filterRouteByResource,
 } from './resourceEngine'
