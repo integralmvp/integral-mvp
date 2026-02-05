@@ -24,6 +24,12 @@ import type {
 } from '../../../../types/models'
 import { DEMO_USER } from '../../../../data/mockData'
 import type { ServiceType } from '../hooks/useServiceConsoleState'
+import {
+  calcBillableCubes,
+  calcEstimatedTotal,
+  calcStorageEstimate,
+  type OptionSurcharge,
+} from '../../../../engine/settlement/cubeSettlement'
 
 interface DealPageProps {
   isOpen: boolean
@@ -100,50 +106,82 @@ export default function DealPage({
     }
   }, [isOpen])
 
-  // 비용 계산
+  // PR7: 정산 엔진 기반 비용 계산
   const costCalculation = useMemo(() => {
-    let baseCost = 0
-    let cubeCost = 0
-    let weightCost = 0
+    // 중량 합계 계산
+    const totalWeightKg = registeredCargos.reduce((sum, cargo) => {
+      const quantity = cargo.quantity || 1
+      return sum + (cargo.weightKg || 0) * quantity
+    }, 0)
 
-    // 기본 가격
-    if (storageProduct) {
-      baseCost += storageProduct.price
-      // 큐브 기반 계산 (팔레트 단위)
-      cubeCost += totalPallets * storageProduct.price
-    }
-
-    if (routeProduct) {
-      baseCost += routeProduct.price
-      // 큐브 기반 계산
-      cubeCost += totalCubes * (routeProduct.price / routeProduct.capacityCubes)
-    }
-
-    // 초과 중량 계산
-    registeredCargos.forEach(cargo => {
-      const weightLimit = storageProduct?.provider.weightLimitKg || routeProduct?.provider.weightLimitKg || 20
-      if (cargo.weightKg && cargo.weightKg > weightLimit) {
-        const overweight = cargo.weightKg - weightLimit
-        weightCost += overweight * 1000 // 1kg당 1000원 추가
-      }
-    })
-
-    // 부가 옵션 비용
-    const optionsCost = options
+    // 부가 옵션 (정산 엔진 형식으로 변환)
+    const optionSurcharges: OptionSurcharge[] = options
       .filter(opt => opt.selected)
-      .reduce((sum, opt) => sum + opt.price, 0)
+      .map(opt => ({
+        id: opt.id,
+        name: opt.name,
+        amount: opt.price,
+      }))
 
-    // 최종 총액
-    const totalCost = baseCost + cubeCost + weightCost + optionsCost
+    let storageResult = null
+    let routeResult = null
+    let storageBillable = null
+    let routeBillable = null
+
+    // Storage 정산
+    if (storageProduct) {
+      // Storage 보관 일수 계산 (간단히 1일로 가정, 실제로는 날짜 차이 계산)
+      const days = 1 // TODO: storageCondition.startDate와 endDate로 계산
+
+      storageBillable = calcBillableCubes(
+        totalCubes,
+        totalWeightKg,
+        storageProduct.maxKgPerCube
+      )
+
+      storageResult = calcStorageEstimate(
+        storageBillable.billableCubes,
+        storageProduct.unitPricePerCube,
+        days,
+        optionSurcharges
+      )
+    }
+
+    // Route 정산
+    if (routeProduct) {
+      routeBillable = calcBillableCubes(
+        totalCubes,
+        totalWeightKg,
+        routeProduct.maxKgPerCube
+      )
+
+      routeResult = calcEstimatedTotal(
+        routeBillable.billableCubes,
+        routeProduct.unitPricePerCube,
+        optionSurcharges,
+        routeBillable.volumeCubes,
+        routeBillable.weightCubes
+      )
+    }
+
+    // 최종 합산
+    const totalCost = (storageResult?.total || 0) + (routeResult?.total || 0)
 
     return {
-      baseCost,
-      cubeCost,
-      weightCost,
-      optionsCost,
+      // 기존 호환
+      baseCost: (storageResult?.base || 0) + (routeResult?.base || 0),
+      cubeCost: (storageResult?.base || 0) + (routeResult?.base || 0),
+      weightCost: 0, // 중량은 큐브로 환산되어 baseCost에 포함됨
+      optionsCost: (storageResult?.options || 0) + (routeResult?.options || 0),
       totalCost,
+      // PR7: 정산 breakdown
+      totalWeightKg,
+      storageBillable,
+      routeBillable,
+      storageResult,
+      routeResult,
     }
-  }, [storageProduct, routeProduct, totalCubes, totalPallets, registeredCargos, options])
+  }, [storageProduct, routeProduct, totalCubes, registeredCargos, options])
 
   // 옵션 토글
   const toggleOption = (optionId: string) => {
@@ -328,36 +366,91 @@ export default function DealPage({
             </section>
           )}
 
-          {/* 4. 거래 요약 (비용 계산) */}
+          {/* 4. 거래 요약 (PR7: 정산 breakdown) */}
           <section>
             <h3 className="text-lg font-bold text-slate-900 mb-3">거래 요약</h3>
-            <div className="bg-slate-50 rounded-xl p-4 space-y-2">
-              <div className="flex justify-between">
-                <span className="text-slate-600">기본 금액</span>
-                <span className="font-medium text-slate-900">{costCalculation.baseCost.toLocaleString()}원</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600">큐브 기반 금액</span>
-                <span className="font-medium text-slate-900">{Math.round(costCalculation.cubeCost).toLocaleString()}원</span>
-              </div>
-              {costCalculation.weightCost > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-slate-600">초과 중량 추가</span>
-                  <span className="font-medium text-orange-600">+{costCalculation.weightCost.toLocaleString()}원</span>
+            <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+              {/* Storage 정산 */}
+              {storageProduct && costCalculation.storageBillable && (
+                <div className="pb-3 border-b border-slate-300">
+                  <div className="text-sm font-semibold text-slate-700 mb-2">보관 서비스</div>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between text-slate-600">
+                      <span>부피 큐브</span>
+                      <span>{costCalculation.storageBillable.volumeCubes} 큐브</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>중량 환산 큐브</span>
+                      <span>{costCalculation.storageBillable.weightCubes} 큐브</span>
+                    </div>
+                    <div className="flex justify-between font-medium text-teal-700">
+                      <span>과금 큐브 (max)</span>
+                      <span>{costCalculation.storageBillable.billableCubes} 큐브</span>
+                    </div>
+                    {costCalculation.storageBillable.weightSurchargeApplied && (
+                      <div className="text-xs text-orange-600 mt-1">
+                        ⚠ 중량 보정 적용됨
+                      </div>
+                    )}
+                    <div className="flex justify-between font-medium text-slate-900 pt-2 border-t border-slate-200">
+                      <span>보관 비용</span>
+                      <span>{costCalculation.storageResult?.base.toLocaleString()}원</span>
+                    </div>
+                  </div>
                 </div>
               )}
+
+              {/* Route 정산 */}
+              {routeProduct && costCalculation.routeBillable && (
+                <div className={storageProduct ? 'pb-3 border-b border-slate-300' : ''}>
+                  <div className="text-sm font-semibold text-slate-700 mb-2">운송 서비스</div>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between text-slate-600">
+                      <span>부피 큐브</span>
+                      <span>{costCalculation.routeBillable.volumeCubes} 큐브</span>
+                    </div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>중량 환산 큐브</span>
+                      <span>{costCalculation.routeBillable.weightCubes} 큐브</span>
+                    </div>
+                    <div className="flex justify-between font-medium text-teal-700">
+                      <span>과금 큐브 (max)</span>
+                      <span>{costCalculation.routeBillable.billableCubes} 큐브</span>
+                    </div>
+                    {costCalculation.routeBillable.weightSurchargeApplied && (
+                      <div className="text-xs text-orange-600 mt-1">
+                        ⚠ 중량 보정 적용됨
+                      </div>
+                    )}
+                    <div className="flex justify-between font-medium text-slate-900 pt-2 border-t border-slate-200">
+                      <span>운송 비용</span>
+                      <span>{costCalculation.routeResult?.base.toLocaleString()}원</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 총 중량 정보 */}
+              <div className="text-xs text-slate-600 bg-slate-100 rounded p-2">
+                총 중량: {costCalculation.totalWeightKg.toFixed(1)}kg
+              </div>
+
+              {/* 부가 옵션 */}
               {costCalculation.optionsCost > 0 && (
-                <div className="flex justify-between">
+                <div className="flex justify-between text-sm">
                   <span className="text-slate-600">부가 옵션</span>
                   <span className="font-medium text-teal-600">+{costCalculation.optionsCost.toLocaleString()}원</span>
                 </div>
               )}
+
+              {/* 최종 총액 */}
               <div className="pt-3 border-t border-slate-300 flex justify-between">
                 <span className="font-bold text-slate-900 text-lg">최종 예상 금액</span>
                 <span className="font-bold text-teal-700 text-2xl">{Math.round(costCalculation.totalCost).toLocaleString()}원</span>
               </div>
-              <div className="text-xs text-slate-500 pt-2">
-                * 최종 금액은 실제 사용량 및 중량에 따라 변동될 수 있습니다.
+              <div className="text-xs text-slate-500 pt-2 space-y-1">
+                <div>• 큐브 당 단가 기준으로 계산됩니다.</div>
+                <div>• 중량이 무거울 경우 과금 큐브가 증가합니다.</div>
               </div>
             </div>
           </section>
