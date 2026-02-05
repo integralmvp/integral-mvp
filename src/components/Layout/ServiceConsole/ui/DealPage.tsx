@@ -30,6 +30,16 @@ import {
   calcStorageEstimate,
   type OptionSurcharge,
 } from '../../../../engine/settlement/cubeSettlement'
+import {
+  allocateResource,
+  type AllocateResourceParams,
+} from '../../../../engine/resource'
+import {
+  logDealConfirmed,
+  logSettlementCalculated,
+  logResourceAllocated,
+  makeDealId,
+} from '../../../../store'
 
 interface DealPageProps {
   isOpen: boolean
@@ -201,8 +211,96 @@ export default function DealPage({
     setShowConfirmCard(true)
   }
 
-  // 거래 확정
+  // PR7: 거래 확정 (재고 차감 + 이벤트 로깅)
   const handleConfirmDeal = () => {
+    const dealId = makeDealId()
+
+    // 1. 거래 확정 이벤트 로깅
+    logDealConfirmed(
+      dealId,
+      (costCalculation.storageBillable?.billableCubes || 0) + (costCalculation.routeBillable?.billableCubes || 0),
+      costCalculation.totalWeightKg
+    )
+
+    // 2. Storage 재고 차감
+    if (storageProduct && costCalculation.storageBillable) {
+      const params: AllocateResourceParams = {
+        offerId: storageProduct.id,
+        offerType: 'storage',
+        billableCubes: costCalculation.storageBillable.billableCubes,
+        totalWeightKg: costCalculation.totalWeightKg,
+      }
+
+      const result = allocateResource(params)
+
+      if (result.success) {
+        // 정산 계산 이벤트
+        logSettlementCalculated(
+          dealId,
+          costCalculation.storageBillable.volumeCubes,
+          costCalculation.storageBillable.weightCubes,
+          costCalculation.storageBillable.billableCubes,
+          storageProduct.unitPricePerCube,
+          costCalculation.storageResult?.total || 0
+        )
+
+        // 자원 할당 이벤트
+        logResourceAllocated(
+          dealId,
+          storageProduct.id,
+          'storage',
+          costCalculation.storageBillable.billableCubes,
+          costCalculation.totalWeightKg
+        )
+
+        console.log('[Storage 재고 차감 완료]', result.message)
+      } else {
+        console.error('[Storage 재고 차감 실패]', result.message)
+        alert(`보관 서비스 재고 차감 실패: ${result.message}`)
+        return
+      }
+    }
+
+    // 3. Route 재고 차감
+    if (routeProduct && costCalculation.routeBillable) {
+      const params: AllocateResourceParams = {
+        offerId: routeProduct.id,
+        offerType: 'route',
+        billableCubes: costCalculation.routeBillable.billableCubes,
+        totalWeightKg: costCalculation.totalWeightKg,
+      }
+
+      const result = allocateResource(params)
+
+      if (result.success) {
+        // 정산 계산 이벤트
+        logSettlementCalculated(
+          dealId,
+          costCalculation.routeBillable.volumeCubes,
+          costCalculation.routeBillable.weightCubes,
+          costCalculation.routeBillable.billableCubes,
+          routeProduct.unitPricePerCube,
+          costCalculation.routeResult?.total || 0
+        )
+
+        // 자원 할당 이벤트
+        logResourceAllocated(
+          dealId,
+          routeProduct.id,
+          'route',
+          costCalculation.routeBillable.billableCubes,
+          costCalculation.totalWeightKg
+        )
+
+        console.log('[Route 재고 차감 완료]', result.message)
+      } else {
+        console.error('[Route 재고 차감 실패]', result.message)
+        alert(`운송 서비스 재고 차감 실패: ${result.message}`)
+        return
+      }
+    }
+
+    // 4. 완료 처리
     onDealComplete?.()
     onClose()
   }

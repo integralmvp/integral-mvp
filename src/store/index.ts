@@ -96,4 +96,12 @@ export {
   logTransportDestinationSet,
   logTransportDateSet,
   logSearchExecuted,
+  // PR7 거래 이벤트
+  logMatchConfirmed,
+  logDealCreated,
+  logDealSubmitted,
+  logDealConfirmed,
+  logSettlementCalculated,
+  logResourceAllocated,
+  logResourceReleased,
 } from './eventLog'

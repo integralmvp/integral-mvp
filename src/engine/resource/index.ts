@@ -20,3 +20,13 @@ export {
   filterStorageByResource,
   filterRouteByResource,
 } from './resourceEngine'
+
+// PR7: 자원 할당/복원
+export {
+  allocateResource,
+  releaseResource,
+} from './resourceAllocation'
+export type {
+  AllocateResourceParams,
+  AllocateResourceResult,
+} from './resourceAllocation'
