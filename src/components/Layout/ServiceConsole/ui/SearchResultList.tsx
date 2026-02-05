@@ -40,9 +40,9 @@ function StorageProductCard({ product }: { product: StorageProduct }) {
         </div>
         <div className="text-right">
           <div className="text-teal-700 font-bold text-sm">
-            {product.price.toLocaleString()}원
+            ₩{product.unitPricePerCube.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-400">/{product.priceUnit}</div>
+          <div className="text-xs text-slate-400">/Cube/일</div>
         </div>
       </div>
       <div className="flex gap-1 mt-2 flex-wrap">
@@ -95,9 +95,9 @@ function RouteProductCard({ product }: { product: RouteProduct }) {
         </div>
         <div className="text-right">
           <div className="text-teal-700 font-bold text-sm">
-            {product.price.toLocaleString()}원
+            ₩{product.unitPricePerCube.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-400">/{product.priceUnit}</div>
+          <div className="text-xs text-slate-400">/Cube</div>
         </div>
       </div>
       <div className="flex gap-1 mt-2 flex-wrap">
