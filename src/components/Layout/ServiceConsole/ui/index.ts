@@ -19,3 +19,6 @@ export { default as SearchResultModal } from './SearchResultModal'
 
 // PR7: 상품 상세
 export { default as ProductDetailModal } from './ProductDetailModal'
+
+// PR7: 거래 페이지
+export { default as DealPage } from './DealPage'

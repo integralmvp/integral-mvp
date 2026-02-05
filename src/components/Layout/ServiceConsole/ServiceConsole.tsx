@@ -6,8 +6,9 @@
 import { useState } from 'react'
 import { useServiceConsoleState, type ServiceType } from './hooks'
 import { StorageTabSection, TransportTabSection, BothTabSection } from './sections'
-import { SlotCounter, SearchResultModal } from './ui'
+import { SlotCounter, SearchResultModal, DealPage } from './ui'
 import { useSearchResult } from '../../../contexts/SearchResultContext'
+import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../data/mockData'
 
 // 탭 버튼 컴포넌트
 interface TabButtonProps {
@@ -62,6 +63,7 @@ export default function ServiceConsole() {
   const [state, actions] = useServiceConsoleState()
   const { searchResult } = useSearchResult()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDealPageOpen, setIsDealPageOpen] = useState(false)
 
   // PR6: previewCount를 직접 사용 (단일 파이프라인에서 계산됨)
   // 화물이 없으면 전체 상품 수를 표시 (8개)
@@ -70,6 +72,12 @@ export default function ServiceConsole() {
     : state.activeTab === 'storage' ? 8
     : state.activeTab === 'transport' ? 8
     : 16
+
+  // PR7: 거래 페이지 열기
+  const handleStartDeal = () => {
+    setIsModalOpen(false)
+    setIsDealPageOpen(true)
+  }
 
   // 검색 버튼 클릭 핸들러
   const handleSearchClick = () => {
@@ -210,7 +218,24 @@ export default function ServiceConsole() {
         selectedRouteId={state.selectedRouteId}
         onSelectStorage={actions.selectStorage}
         onSelectRoute={actions.selectRoute}
-        onStartDeal={actions.startDeal}
+        onStartDeal={handleStartDeal}
+      />
+
+      {/* PR7: 거래 페이지 */}
+      <DealPage
+        isOpen={isDealPageOpen}
+        onClose={() => setIsDealPageOpen(false)}
+        activeTab={state.activeTab}
+        storageProduct={state.selectedStorageId ? STORAGE_PRODUCTS.find(p => p.id === state.selectedStorageId) : undefined}
+        routeProduct={state.selectedRouteId ? ROUTE_PRODUCTS.find(p => p.id === state.selectedRouteId) : undefined}
+        registeredCargos={state.registeredCargos}
+        totalCubes={state.totalCubes}
+        totalPallets={state.totalPallets}
+        storageCondition={state.storageCondition}
+        transportCondition={state.transportCondition}
+        onDealComplete={() => {
+          console.log('거래 완료!')
+        }}
       />
     </div>
   )
