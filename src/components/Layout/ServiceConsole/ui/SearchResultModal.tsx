@@ -583,15 +583,47 @@ export default function SearchResultModal({
                 )}
               </div>
             )}
+          </div>
+        </div>
 
-            {/* 선택 요약 및 거래 버튼 */}
-            {filteredCount > 0 && (
-              <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <div className="text-sm font-semibold text-slate-700 mb-3">선택한 상품</div>
+        {/* 선택 요약 및 거래 버튼 - 하단 고정 */}
+        {filteredCount > 0 && (
+          <div className="border-t border-slate-200 bg-slate-50 p-4">
+            <div className="text-sm font-semibold text-slate-700 mb-3">선택한 상품</div>
 
-                {/* 선택 요약 */}
-                <div className="space-y-2">
-                  {activeTab === 'storage' && selectedStorageId && (
+            {/* 선택 요약 */}
+            <div className="space-y-2">
+              {activeTab === 'storage' && selectedStorageId && (
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm text-slate-700">
+                    보관: {storageProducts.find(p => p.id === selectedStorageId)?.location.name}
+                  </span>
+                  <button
+                    onClick={() => onSelectStorage?.('')}
+                    className="text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    취소
+                  </button>
+                </div>
+              )}
+
+              {activeTab === 'transport' && selectedRouteId && (
+                <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <span className="text-sm text-slate-700">
+                    운송: {routeProducts.find(p => p.id === selectedRouteId)?.origin.name} → {routeProducts.find(p => p.id === selectedRouteId)?.destination.name}
+                  </span>
+                  <button
+                    onClick={() => onSelectRoute?.('')}
+                    className="text-xs text-slate-500 hover:text-slate-700"
+                  >
+                    취소
+                  </button>
+                </div>
+              )}
+
+              {activeTab === 'both' && (
+                <>
+                  {selectedStorageId && (
                     <div className="flex items-center justify-between p-3 bg-white rounded-lg">
                       <span className="text-sm text-slate-700">
                         보관: {storageProducts.find(p => p.id === selectedStorageId)?.location.name}
@@ -604,8 +636,7 @@ export default function SearchResultModal({
                       </button>
                     </div>
                   )}
-
-                  {activeTab === 'transport' && selectedRouteId && (
+                  {selectedRouteId && (
                     <div className="flex items-center justify-between p-3 bg-white rounded-lg">
                       <span className="text-sm text-slate-700">
                         운송: {routeProducts.find(p => p.id === selectedRouteId)?.origin.name} → {routeProducts.find(p => p.id === selectedRouteId)?.destination.name}
@@ -618,67 +649,36 @@ export default function SearchResultModal({
                       </button>
                     </div>
                   )}
+                </>
+              )}
 
-                  {activeTab === 'both' && (
-                    <>
-                      {selectedStorageId && (
-                        <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                          <span className="text-sm text-slate-700">
-                            보관: {storageProducts.find(p => p.id === selectedStorageId)?.location.name}
-                          </span>
-                          <button
-                            onClick={() => onSelectStorage?.('')}
-                            className="text-xs text-slate-500 hover:text-slate-700"
-                          >
-                            취소
-                          </button>
-                        </div>
-                      )}
-                      {selectedRouteId && (
-                        <div className="flex items-center justify-between p-3 bg-white rounded-lg">
-                          <span className="text-sm text-slate-700">
-                            운송: {routeProducts.find(p => p.id === selectedRouteId)?.origin.name} → {routeProducts.find(p => p.id === selectedRouteId)?.destination.name}
-                          </span>
-                          <button
-                            onClick={() => onSelectRoute?.('')}
-                            className="text-xs text-slate-500 hover:text-slate-700"
-                          >
-                            취소
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {!selectedStorageId && !selectedRouteId && (
-                    <div className="text-sm text-slate-400 text-center py-2">
-                      상품을 선택해주세요
-                    </div>
-                  )}
+              {!selectedStorageId && !selectedRouteId && (
+                <div className="text-sm text-slate-400 text-center py-2">
+                  상품을 선택해주세요
                 </div>
+              )}
+            </div>
 
-                {/* 거래 버튼 */}
-                <button
-                  onClick={onStartDeal}
-                  disabled={
-                    (activeTab === 'storage' && !selectedStorageId) ||
-                    (activeTab === 'transport' && !selectedRouteId) ||
-                    (activeTab === 'both' && (!selectedStorageId || !selectedRouteId))
-                  }
-                  className={`w-full mt-4 py-3 rounded-lg font-medium transition-colors ${
-                    (activeTab === 'storage' && selectedStorageId) ||
-                    (activeTab === 'transport' && selectedRouteId) ||
-                    (activeTab === 'both' && selectedStorageId && selectedRouteId)
-                      ? 'bg-teal-600 text-white hover:bg-teal-700'
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  거래 진행
-                </button>
-              </div>
-            )}
+            {/* 거래 버튼 */}
+            <button
+              onClick={onStartDeal}
+              disabled={
+                (activeTab === 'storage' && !selectedStorageId) ||
+                (activeTab === 'transport' && !selectedRouteId) ||
+                (activeTab === 'both' && (!selectedStorageId || !selectedRouteId))
+              }
+              className={`w-full mt-4 py-3 rounded-lg font-medium transition-colors ${
+                (activeTab === 'storage' && selectedStorageId) ||
+                (activeTab === 'transport' && selectedRouteId) ||
+                (activeTab === 'both' && selectedStorageId && selectedRouteId)
+                  ? 'bg-teal-600 text-white hover:bg-teal-700'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+              }`}
+            >
+              거래 진행
+            </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* PR7: 상품 상세 모달 */}
