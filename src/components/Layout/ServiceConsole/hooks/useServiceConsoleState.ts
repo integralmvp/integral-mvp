@@ -148,7 +148,6 @@ export interface ServiceConsoleActions {
   // PR7: 선택 액션
   selectStorage: (id: string) => void
   selectRoute: (id: string) => void
-  startDeal: () => void
 }
 
 export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleActions] {
@@ -567,13 +566,6 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setSelectedRouteId(id || undefined)
   }, [])
 
-  const startDeal = useCallback(() => {
-    console.log('=== PR7 거래 시작 ===')
-    console.log('선택된 보관 상품:', selectedStorageId)
-    console.log('선택된 운송 상품:', selectedRouteId)
-    alert('거래 페이지는 다음 작업에서 구현됩니다.')
-  }, [selectedStorageId, selectedRouteId])
-
   // PR6: 검색 (프리뷰 결과를 스냅샷으로 저장)
   const handleSearch = useCallback(() => {
     console.log('=== PR6 검색 시작 (단일 파이프라인) ===')
@@ -674,7 +666,6 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     handleSearch,
     selectStorage,
     selectRoute,
-    startDeal,
   }
 
   return [state, actions]
