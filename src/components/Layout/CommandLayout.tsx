@@ -85,8 +85,8 @@ export default function CommandLayout() {
       {/* 좌측 45%: 블러 배경 + 서비스 콘솔 */}
       <div className="row-start-1 col-start-1 flex flex-col z-10"
         style={{
-          backdropFilter: 'blur(5px)',
-          background: 'rgba(255,255,255,0.6)'
+          backdropFilter: 'blur(8px)',
+          background: 'rgba(255,255,255,0.5)'
         }}
       >
         {/* 상단: 로고 영역 */}
@@ -96,7 +96,10 @@ export default function CommandLayout() {
             onClick={() => window.location.reload()}
           >
             <img src={logoSvg} alt="CUBE Logo" className="h-8 w-auto" />
-            <span className="text-teal-700 text-3xl font-black tracking-tight drop-shadow-lg">
+            <span className="text-neonGreen text-3xl font-black tracking-tight" style={{
+              textShadow: '0 0 10px rgba(16, 185, 129, 0.5)',
+              fontFamily: 'var(--font-cyber)'
+            }}>
               CUBE
             </span>
           </div>

@@ -18,11 +18,106 @@ html {
   scroll-behavior: smooth;
 }
 
-/* 색상 변수 */
+/* 색상 변수 - White Cyberpunk HUD Theme */
 :root {
-  --color-header-bg-start: #0f172a;
-  --color-header-bg-end: #1e293b;
-  --color-console-bg: rgba(15, 23, 42, 0.85);
-  --color-live: #34d399;
-  --color-title-accent: #22d3ee;
+  /* 네온 그린 계열 */
+  --color-neon-green: #10b981;
+  --color-neon-green-light: #34d399;
+  --color-neon-green-dark: #059669;
+  --color-neon-green-glow: #6ee7b7;
+
+  /* 배경 */
+  --color-bg-white: #ffffff;
+  --color-bg-alt: #f8fafc;
+  --color-panel-bg: rgba(255, 255, 255, 0.85);
+
+  /* 보더 */
+  --color-border: #e2e8f0;
+  --color-border-accent: #10b981;
+
+  /* 텍스트 */
+  --color-text: #0f172a;
+  --color-text-alt: #64748b;
+
+  /* 레거시 (호환성) */
+  --color-header-bg-start: #ffffff;
+  --color-header-bg-end: #f8fafc;
+  --color-console-bg: rgba(255, 255, 255, 0.85);
+  --color-live: #10b981;
+  --color-title-accent: #10b981;
+}
+
+/* 사이버펑크 HUD 프레임 스타일 */
+.cyber-panel {
+  position: relative;
+}
+
+/* 코너 장식 - 좌상단 */
+.cyber-panel::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 40px;
+  height: 40px;
+  border-top: 4px solid var(--color-neon-green);
+  border-left: 4px solid var(--color-neon-green);
+  z-index: 10;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 4px,
+    4px 4px,
+    4px 100%,
+    0 100%
+  );
+}
+
+/* 코너 장식 - 우하단 */
+.cyber-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 40px;
+  height: 40px;
+  border-bottom: 4px solid var(--color-neon-green);
+  border-right: 4px solid var(--color-neon-green);
+  z-index: 10;
+  clip-path: polygon(
+    0 calc(100% - 4px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 4px) 0,
+    100% 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+/* 사이버 프레임 스타일 - 각진 형태 */
+.cyber-frame {
+  position: relative;
+  border: 1px solid var(--color-border-accent);
+  background: var(--color-bg-white);
+  clip-path: polygon(
+    0 8px,
+    8px 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0 100%
+  );
+}
+
+/* 사이버 버튼 스타일 */
+.cyber-button {
+  position: relative;
+  clip-path: polygon(
+    0 4px,
+    4px 0,
+    100% 0,
+    100% calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    0 100%
+  );
 }

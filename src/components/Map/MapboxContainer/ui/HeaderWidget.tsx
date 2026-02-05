@@ -17,15 +17,20 @@ export default function HeaderWidget() {
   })
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg px-4 py-3">
+    <div className="backdrop-blur-sm border-2 border-neonGreen shadow-lg px-4 py-3 cyber-frame"
+      style={{
+        background: 'var(--color-panel-bg)',
+        boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)'
+      }}
+    >
       <div className="flex items-center gap-6">
         {/* 좌측: 모니터링 문구 + 시각 */}
         <div className="flex items-center gap-3">
-          <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+          <span className="text-cyber-text text-sm font-semibold whitespace-nowrap">
             서비스 현황 실시간 모니터링
           </span>
-          <span className="text-slate-400">|</span>
-          <span className="text-slate-600 font-mono text-sm font-medium">
+          <span className="text-neonGreen">|</span>
+          <span className="text-neonGreen font-mono text-sm font-bold">
             {formattedTime}
           </span>
         </div>
@@ -86,7 +91,7 @@ function LegendItem({ icon, viewBox, label, width = 12, height = 9 }: LegendItem
       <svg width={width} height={height} viewBox={viewBox}>
         {icon}
       </svg>
-      <span className="text-slate-900 text-sm font-semibold whitespace-nowrap">
+      <span className="text-cyber-text text-sm font-semibold whitespace-nowrap">
         {label}
       </span>
     </div>

@@ -38,8 +38,13 @@ export default function MapboxContainer() {
       {/* 우측 상단 미니맵 (헤더 위젯 아래) */}
       <div className="absolute top-[88px] right-4 z-10">
         <div
-          className="bg-white/90 backdrop-blur-sm rounded-lg border border-slate-300 shadow-lg overflow-hidden"
-          style={{ width: '200px', height: '170px' }}
+          className="backdrop-blur-sm border-2 border-neonGreen shadow-lg overflow-hidden cyber-frame"
+          style={{
+            width: '200px',
+            height: '170px',
+            background: 'var(--color-panel-bg)',
+            boxShadow: '0 0 15px rgba(16, 185, 129, 0.2)'
+          }}
         >
           <div ref={miniMapContainer} className="w-full h-full" />
         </div>
