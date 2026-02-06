@@ -63,6 +63,13 @@ export function makeEventId(): string {
 }
 
 /**
+ * PR7: 거래 ID 생성
+ */
+export function makeDealId(): string {
+  return makeId('deal')
+}
+
+/**
  * ID에서 prefix 추출
  */
 export function getIdPrefix(id: string): string | null {

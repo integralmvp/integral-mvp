@@ -8,6 +8,7 @@
 import type {
   ResourceCheckResult,
   ResourceCheckParams,
+  ResourceCheckWithPayloadParams,
   ResourceFilterResult,
 } from './resourceTypes'
 import type { StorageProduct, RouteProduct } from '../../types/models'
@@ -31,6 +32,44 @@ export function checkResource(params: ResourceCheckParams): ResourceCheckResult 
     pass: false,
     reason: 'INSUFFICIENT_CAPACITY',
   }
+}
+
+/**
+ * PR7: 중량 재고 포함 자원 체크
+ *
+ * 두 축 모두 만족해야 함:
+ * - remainingCubes >= demandCubes
+ * - remainingPayloadKg >= demandWeightKg
+ *
+ * @param params - 자원 체크 파라미터 (중량 포함)
+ * @returns 통과 여부 및 실패 사유
+ */
+export function checkResourceWithPayload(
+  params: ResourceCheckWithPayloadParams
+): ResourceCheckResult {
+  const { offerRemainingCubes, demandCubes, offerRemainingPayloadKg, demandWeightKg } = params
+
+  // 큐브 체크
+  if (offerRemainingCubes < demandCubes) {
+    return {
+      pass: false,
+      reason: 'INSUFFICIENT_CAPACITY',
+    }
+  }
+
+  // 중량 체크 (둘 다 있을 때만)
+  if (
+    offerRemainingPayloadKg !== undefined &&
+    demandWeightKg !== undefined &&
+    offerRemainingPayloadKg < demandWeightKg
+  ) {
+    return {
+      pass: false,
+      reason: 'INSUFFICIENT_PAYLOAD',
+    }
+  }
+
+  return { pass: true }
 }
 
 /**

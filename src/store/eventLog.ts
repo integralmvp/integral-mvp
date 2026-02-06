@@ -419,3 +419,70 @@ export function logDealSubmitted(
     fields: { totalCost, contractAgreed },
   })
 }
+
+/**
+ * 거래 확정 이벤트 (계약서 동의 완료)
+ */
+export function logDealConfirmed(
+  dealId: string,
+  billableCubes: number,
+  totalWeightKg: number
+): PlatformEvent {
+  return logEvent({
+    eventType: 'DEAL_CONFIRMED',
+    subject: { kind: 'deal', id: dealId },
+    fields: { billableCubes, totalWeightKg },
+  })
+}
+
+/**
+ * 정산 계산 완료 이벤트
+ */
+export function logSettlementCalculated(
+  dealId: string,
+  volumeCubes: number,
+  weightCubes: number,
+  billableCubes: number,
+  unitPricePerCube: number,
+  totalCost: number
+): PlatformEvent {
+  return logEvent({
+    eventType: 'SETTLEMENT_CALCULATED',
+    subject: { kind: 'deal', id: dealId },
+    fields: { volumeCubes, weightCubes, billableCubes, unitPricePerCube, totalCost },
+  })
+}
+
+/**
+ * 자원 할당 완료 이벤트 (재고 차감)
+ */
+export function logResourceAllocated(
+  dealId: string,
+  offerId: string,
+  offerType: 'storage' | 'route',
+  billableCubes: number,
+  totalWeightKg: number
+): PlatformEvent {
+  return logEvent({
+    eventType: 'RESOURCE_ALLOCATED',
+    subject: { kind: 'deal', id: dealId },
+    fields: { offerId, offerType, billableCubes, totalWeightKg },
+  })
+}
+
+/**
+ * 자원 복원 이벤트 (거래 취소 시)
+ */
+export function logResourceReleased(
+  dealId: string,
+  offerId: string,
+  offerType: 'storage' | 'route',
+  billableCubes: number,
+  totalWeightKg: number
+): PlatformEvent {
+  return logEvent({
+    eventType: 'RESOURCE_RELEASED',
+    subject: { kind: 'deal', id: dealId },
+    fields: { offerId, offerType, billableCubes, totalWeightKg },
+  })
+}

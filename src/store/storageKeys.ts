@@ -29,6 +29,9 @@ export const STORAGE_KEYS = {
   // 이벤트 로그
   EVENTS: `${APP_PREFIX}_${VERSION}_events`,
 
+  // PR7: 거래 데이터
+  DEALS: `${APP_PREFIX}_${VERSION}_deals`,
+
   // 설정
   SETTINGS: `${APP_PREFIX}_${VERSION}_settings`,
 } as const

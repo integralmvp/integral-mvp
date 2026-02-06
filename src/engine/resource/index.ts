@@ -8,6 +8,7 @@
 export type {
   ResourceCheckResult,
   ResourceCheckParams,
+  ResourceCheckWithPayloadParams,
   OfferResourceCheckResult,
   ResourceFilterResult,
 } from './resourceTypes'
@@ -15,6 +16,17 @@ export type {
 // 함수 내보내기
 export {
   checkResource,
+  checkResourceWithPayload,
   filterStorageByResource,
   filterRouteByResource,
 } from './resourceEngine'
+
+// PR7: 자원 할당/복원
+export {
+  allocateResource,
+  releaseResource,
+} from './resourceAllocation'
+export type {
+  AllocateResourceParams,
+  AllocateResourceResult,
+} from './resourceAllocation'

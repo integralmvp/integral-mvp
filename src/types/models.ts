@@ -83,6 +83,11 @@ export interface RouteProduct {
   // PR5 자원 필드
   capacityCubes: number;                 // 총 수용 가능 큐브 (정수)
   remainingCubes: number;                // 현재 남은 큐브 (정수, MVP: capacity와 동일)
+  // PR7 정산 필드
+  unitPricePerCube: number;              // ₩/Cube (단일 진실, 큐브 당 단가)
+  maxKgPerCube: number;                  // 1 Cube당 최대 허용 중량 (중량 환산 기준)
+  payloadCapacityKg?: number;            // 총 하중 (선택, 있으면 사용)
+  remainingPayloadKg?: number;           // 남은 하중 재고 (방어용)
   // PR7 업체 정보
   provider: ProviderInfo;                // 업체 정보
 }
@@ -109,6 +114,11 @@ export interface StorageProduct {
   // PR5 자원 필드
   capacityCubes: number;                 // 총 수용 가능 큐브 (정수, Pallet × 128)
   remainingCubes: number;                // 현재 남은 큐브 (정수, MVP: capacity와 동일)
+  // PR7 정산 필드
+  unitPricePerCube: number;              // ₩/Cube (단일 진실, 큐브 당 단가)
+  maxKgPerCube: number;                  // 1 Cube당 최대 허용 중량 (중량 환산 기준)
+  payloadCapacityKg?: number;            // 총 하중 (선택, 있으면 사용)
+  remainingPayloadKg?: number;           // 남은 하중 재고 (방어용)
   // PR7 업체 정보
   provider: ProviderInfo;                // 업체 정보
 }
@@ -396,6 +406,10 @@ export interface DemandSession {
   }>
   totalCubes?: number
   totalPallets?: number   // Storage/Both에서만 사용
+  // PR7 정산 관련 필드
+  volumeCubes?: number    // 부피 기반 큐브 (실질 큐브)
+  totalWeightKg?: number  // 총 중량 (kg)
+  billableCubes?: number  // 정산 큐브 (중량 보정 포함, 거래 단계에서 계산)
 
   // 조건 입력
   storageCondition?: StorageCondition
@@ -475,6 +489,11 @@ export type PlatformEventType =
   | 'MATCH_CONFIRMED'
   | 'DEAL_CREATED'
   | 'DEAL_SUBMITTED'
+  | 'DEAL_CONFIRMED'           // 계약서 동의 완료
+  | 'SETTLEMENT_CALCULATED'    // 정산 breakdown 생성
+  | 'RESOURCE_ALLOCATED'       // 재고 차감 완료
+  | 'DEAL_CANCELLED'           // 거래 취소
+  | 'RESOURCE_RELEASED'        // 재고 복원
 
 /**
  * PlatformEvent - 플랫폼 사건 데이터
@@ -585,6 +604,12 @@ export interface Deal {
   weightCost: number
   optionsCost: number
   totalCost: number
+  // PR7 정산 breakdown (큐브 단가 기반)
+  volumeCubes?: number          // 부피 기반 큐브
+  weightCubes?: number          // 중량 환산 큐브
+  billableCubes?: number        // 최종 과금 큐브 = max(volumeCubes, weightCubes)
+  unitPricePerCube?: number     // 적용된 큐브 당 단가
+  weightSurchargeApplied?: boolean  // 중량 보정 적용 여부
 
   // 요청 메모
   userMemo?: string

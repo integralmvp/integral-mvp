@@ -226,20 +226,33 @@ export default function ProductDetailModal({
             </div>
           </section>
 
-          {/* 가격 정보 */}
+          {/* 가격 정보 (PR7: 큐브 단가 기반) */}
           <section>
             <h3 className="text-lg font-bold text-slate-900 mb-3">가격 정보</h3>
             <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
               <div className="flex items-baseline justify-between">
                 <div>
                   <div className="text-3xl font-bold text-teal-700">
-                    {product.price.toLocaleString()}원
+                    ₩{product.unitPricePerCube.toLocaleString()}
                   </div>
-                  <div className="text-sm text-slate-600 mt-1">/{product.priceUnit}</div>
+                  <div className="text-sm text-slate-600 mt-1">
+                    /Cube{isStorage ? '/일' : ''}
+                  </div>
+                </div>
+                <div className="text-right text-sm text-slate-600">
+                  <div>큐브 당 단가</div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    (1 Cube = 250mm³)
+                  </div>
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-teal-200 text-xs text-slate-600">
-                * 최종 금액은 실제 사용 큐브 및 중량에 따라 달라질 수 있습니다.
+              <div className="mt-3 pt-3 border-t border-teal-200 space-y-1">
+                <div className="text-xs text-slate-600">
+                  • 최종 금액은 실제 사용 큐브 및 중량에 따라 달라질 수 있습니다.
+                </div>
+                <div className="text-xs text-slate-600">
+                  • 중량이 무거울 경우 과금 큐브가 증가할 수 있습니다.
+                </div>
               </div>
             </div>
           </section>
