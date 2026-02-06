@@ -66,8 +66,14 @@ export default function ServiceConsole() {
   const [isDealPageOpen, setIsDealPageOpen] = useState(false)
 
   // PR6: previewCount를 직접 사용 (단일 파이프라인에서 계산됨)
-  // 화물이 없으면 전체 상품 수를 표시 (8개)
-  const displayCount = state.registeredCargos.length > 0
+  // PR7 수정: 화물 또는 조건이 있으면 previewCount 사용
+  const hasCargoOrCondition =
+    state.registeredCargos.length > 0 ||
+    state.storageCondition.locationCode ||
+    state.transportCondition.originCode ||
+    state.transportCondition.destinationCode
+
+  const displayCount = hasCargoOrCondition
     ? state.previewCount
     : state.activeTab === 'storage' ? 8
     : state.activeTab === 'transport' ? 8
