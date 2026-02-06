@@ -104,9 +104,9 @@ function StorageProductCard({
         </div>
         <div className="text-right ml-4">
           <div className="text-teal-700 font-bold text-lg">
-            {product.price.toLocaleString()}원
+            ₩{product.unitPricePerCube.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-400">/{product.priceUnit}</div>
+          <div className="text-xs text-slate-400">/Cube/일</div>
         </div>
       </div>
 
@@ -183,9 +183,9 @@ function RouteProductCard({
         </div>
         <div className="text-right ml-4">
           <div className="text-teal-700 font-bold text-lg">
-            {product.price.toLocaleString()}원
+            ₩{product.unitPricePerCube.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-400">/{product.priceUnit}</div>
+          <div className="text-xs text-slate-400">/Cube</div>
         </div>
       </div>
 
