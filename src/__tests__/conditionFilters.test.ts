@@ -8,9 +8,9 @@ import { describe, it, expect } from 'vitest'
 import {
   filterStorageByConditions,
   filterRouteByConditions,
-} from '../engine/matching/conditionFilters'
-import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../data/mockData'
-import type { SearchConditions } from '../engine/matching/matchingPipelineTypes'
+} from '../layers/matching/condition/conditionFilters'
+import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../data/mock/mockData'
+import type { SearchConditions } from '../layers/types/matchingTypes'
 
 describe('지역 범위 필터링 (PR7-pre)', () => {
   describe('Storage 지역 필터', () => {

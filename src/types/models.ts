@@ -5,8 +5,8 @@
 // PR2: 상세 타입 확장 예정
 
 // Code Data System 타입 import
-import type { WeightBand, SizeBand } from '../data/bands'
-import type { FeatureCode } from '../data/featureCodes'
+import type { WeightBand, SizeBand } from '../infra/dataspec/codedata/bands/bands'
+import type { FeatureCode } from '../infra/dataspec/codedata/features/featureCodes'
 export type { WeightBand, SizeBand }
 export type { FeatureCode }
 

@@ -1,0 +1,5 @@
+export * from './cargo.fields'
+export * from './offer.fields'
+export * from './provider.fields'
+export * from './demandSession.fields'
+export * from './deal.fields'
