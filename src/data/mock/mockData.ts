@@ -16,8 +16,8 @@ import type {
   FeatureCode,
   ProviderInfo,
   UserInfo,
-} from '../../types/models'
-import { REGION_REPRESENTATIVE_COORDS } from '../../infra/dataspec/codedata/regions/regionRepresentativeCoords'
+} from '../types/models'
+import { REGION_REPRESENTATIVE_COORDS } from './regionRepresentativeCoords'
 
 // ============ 대표좌표 참조 헬퍼 ============
 const getCoords = (code: string) => REGION_REPRESENTATIVE_COORDS[code]
@@ -180,11 +180,12 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 5톤 차량 (여유 있음)
     capacityCubes: 400,
     remainingCubes: 350,
-    // PR7 정산: 큐브 단가 기반 (기존 180000원/회 → 450원/Cube)
-    unitPricePerCube: 450,
-    maxKgPerCube: 8,  // 5톤 차량, 1 Cube당 8kg 기준
-    payloadCapacityKg: 5000,  // 5톤
-    remainingPayloadKg: 4375,  // 일부 사용 중 (5000 - 350*8*0.78)
+    // PR7 정산: 큐브 단가 기반 (SHORT 밴드: 300-900 ₩/Cube/trip - 도내 근거리)
+    unitPricePerCube: 650,  // SHORT 밴드
+    // 필수 케이스: 중량 보정 시연용 (maxKgPerCube 낮게 설정)
+    maxKgPerCube: 9,  // 경량 트럭: 8-12 kg/cube (중량 보정 발생 쉬움)
+    payloadCapacityKg: 3600,  // 400 * 9
+    remainingPayloadKg: 3000,  // 일부 사용 중 (350 * 9 * 0.95 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_R1'),
   },
@@ -218,11 +219,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 3.5톤 차량 (전체 가용)
     capacityCubes: 280,
     remainingCubes: 280,
-    // PR7 정산: 큐브 단가 기반 (기존 90000원/회 → 320원/Cube)
-    unitPricePerCube: 320,
-    maxKgPerCube: 7,  // 3.5톤 차량, 1 Cube당 7kg 기준
-    payloadCapacityKg: 3500,  // 3.5톤
-    remainingPayloadKg: 3500,  // 전체 가용
+    // PR7 정산: 큐브 단가 기반 (SHORT 밴드: 300-900 ₩/Cube/trip - 도내 근거리)
+    unitPricePerCube: 520,  // SHORT 밴드
+    maxKgPerCube: 11,  // 경량: 8-12 kg/cube
+    payloadCapacityKg: 3080,  // 280 * 11
+    remainingPayloadKg: 3080,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
     provider: getProvider('PROVIDER_R3'),
   },
@@ -256,11 +257,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 5톤 차량 (거의 다 찼음 - 필터링 테스트용)
     capacityCubes: 400,
     remainingCubes: 100,
-    // PR7 정산: 큐브 단가 기반 (기존 160000원/회 → 400원/Cube)
-    unitPricePerCube: 400,
-    maxKgPerCube: 8,  // 5톤 차량, 1 Cube당 8kg 기준
-    payloadCapacityKg: 5000,  // 5톤
-    remainingPayloadKg: 2600,  // 거의 다 찼음 (5000 - 300*8)
+    // PR7 정산: 큐브 단가 기반 (MID 밴드: 900-2,200 ₩/Cube/trip - 도내 장거리)
+    unitPricePerCube: 1350,  // MID 밴드
+    maxKgPerCube: 15,  // 일반: 12-18 kg/cube
+    payloadCapacityKg: 6000,  // 400 * 15
+    remainingPayloadKg: 1425,  // 거의 다 찼음 (100 * 15 * 0.95 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_R1'),
   },
@@ -294,11 +295,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 1톤 소형 차량 (전체 가용)
     capacityCubes: 80,
     remainingCubes: 80,
-    // PR7 정산: 큐브 단가 기반 (기존 75000원/회 → 940원/Cube)
-    unitPricePerCube: 940,
-    maxKgPerCube: 6,  // 1톤 차량, 1 Cube당 6kg 기준
-    payloadCapacityKg: 1000,  // 1톤
-    remainingPayloadKg: 1000,  // 전체 가용
+    // PR7 정산: 큐브 단가 기반 (SHORT 밴드: 300-900 ₩/Cube/trip - 도내 근거리)
+    unitPricePerCube: 780,  // SHORT 밴드
+    maxKgPerCube: 10,  // 경량: 8-12 kg/cube
+    payloadCapacityKg: 800,  // 80 * 10
+    remainingPayloadKg: 800,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
     provider: getProvider('PROVIDER_R3'),
   },
@@ -336,11 +337,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 11톤 대용량 (여유 있음)
     capacityCubes: 880,
     remainingCubes: 600,
-    // PR7 정산: 큐브 단가 기반 (기존 352000원/회 → 400원/Cube)
-    unitPricePerCube: 400,
-    maxKgPerCube: 10,  // 11톤 차량, 1 Cube당 10kg 기준
-    payloadCapacityKg: 11000,  // 11톤
-    remainingPayloadKg: 8200,  // 일부 사용 중 (11000 - 280*10)
+    // PR7 정산: 큐브 단가 기반 (MID 밴드: 900-2,200 ₩/Cube/trip - 해상 운송)
+    unitPricePerCube: 1850,  // MID 밴드
+    maxKgPerCube: 18,  // 중량 대응: 18-25 kg/cube
+    payloadCapacityKg: 15840,  // 880 * 18
+    remainingPayloadKg: 10260,  // 여유 있음 (600 * 18 * 0.95 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_R2'),
   },
@@ -377,11 +378,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 8톤 차량 (여유 있음)
     capacityCubes: 640,
     remainingCubes: 400,
-    // PR7 정산: 큐브 단가 기반 (기존 224000원/회 → 350원/Cube)
-    unitPricePerCube: 350,
-    maxKgPerCube: 9,  // 8톤 차량, 1 Cube당 9kg 기준
-    payloadCapacityKg: 8000,  // 8톤
-    remainingPayloadKg: 5840,  // 일부 사용 중 (8000 - 240*9)
+    // PR7 정산: 큐브 단가 기반 (MID 밴드: 900-2,200 ₩/Cube/trip - 해상 운송)
+    unitPricePerCube: 1550,  // MID 밴드
+    maxKgPerCube: 16,  // 일반: 12-18 kg/cube
+    payloadCapacityKg: 10240,  // 640 * 16
+    remainingPayloadKg: 6080,  // 여유 있음 (400 * 16 * 0.95 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_R2'),
   },
@@ -418,12 +419,13 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     minCubes: 32,
     // PR5 자원: 11톤 대용량 (거의 다 찼음 - 필터링 테스트용)
     capacityCubes: 880,
-    remainingCubes: 200,
-    // PR7 정산: 큐브 단가 기반 (기존 495000원/회 → 562원/Cube)
-    unitPricePerCube: 562,
-    maxKgPerCube: 10,  // 11톤 차량, 1 Cube당 10kg 기준
-    payloadCapacityKg: 11000,  // 11톤
-    remainingPayloadKg: 4200,  // 거의 다 찼음 (11000 - 680*10)
+    // 필수 케이스: remainingCubes 부족 (150-300)
+    remainingCubes: 250,
+    // PR7 정산: 큐브 단가 기반 (LONG 밴드: 2,200-4,500 ₩/Cube/trip - 장거리 해상)
+    unitPricePerCube: 3200,  // LONG 밴드
+    maxKgPerCube: 20,  // 중량 대응: 18-25 kg/cube
+    payloadCapacityKg: 17600,  // 880 * 20
+    remainingPayloadKg: 4750,  // 타이트 (250 * 20 * 0.95 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_R2'),
   },
@@ -459,11 +461,11 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     // PR5 자원: 5톤 차량 (전체 가용)
     capacityCubes: 400,
     remainingCubes: 400,
-    // PR7 정산: 큐브 단가 기반 (기존 190000원/회 → 475원/Cube)
-    unitPricePerCube: 475,
-    maxKgPerCube: 8,  // 5톤 차량, 1 Cube당 8kg 기준
-    payloadCapacityKg: 5000,  // 5톤
-    remainingPayloadKg: 5000,  // 전체 가용
+    // PR7 정산: 큐브 단가 기반 (MID 밴드: 900-2,200 ₩/Cube/trip - 해상 운송)
+    unitPricePerCube: 1750,  // MID 밴드
+    maxKgPerCube: 14,  // 일반: 12-18 kg/cube
+    payloadCapacityKg: 5600,  // 400 * 14
+    remainingPayloadKg: 5600,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
     provider: getProvider('PROVIDER_R2'),
   },
@@ -496,11 +498,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 30 Pallet × 128 = 3840 큐브 (전체 가용)
     capacityCubes: 3840,
     remainingCubes: 3840,
-    // PR7 정산: 큐브 단가 기반 (기존 45000원/일 → 11.7원/Cube/일)
-    unitPricePerCube: 12,  // 반올림
-    maxKgPerCube: 5,  // 1 Cube당 5kg 기준 (보수적)
-    payloadCapacityKg: 15000,  // 30 Pallet × 500kg
-    remainingPayloadKg: 15000,  // 전체 가용
+    // PR7 정산: 큐브 단가 기반 (MID 밴드: 70-120 ₩/Cube/day)
+    unitPricePerCube: 95,  // MID 밴드
+    maxKgPerCube: 20,  // MID 밴드: 18-25 kg/cube
+    payloadCapacityKg: 76800,  // 3840 * 20
+    remainingPayloadKg: 76800,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
     provider: getProvider('PROVIDER_S1'),
   },
@@ -528,11 +530,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 15 Pallet × 128 = 1920 큐브 (일부 사용 중)
     capacityCubes: 1920,
     remainingCubes: 1000,
-    // PR7 정산: 큐브 단가 기반 (기존 80000원/일 → 41.7원/Cube/일)
-    unitPricePerCube: 42,  // 반올림
-    maxKgPerCube: 5,  // 1 Cube당 5kg 기준
-    payloadCapacityKg: 7500,  // 15 Pallet × 500kg
-    remainingPayloadKg: 3906,  // 일부 사용 중 (7500 × 1000/1920)
+    // PR7 정산: 큐브 단가 기반 (HIGH 밴드: 130-180 ₩/Cube/day - 프리미엄 냉장)
+    unitPricePerCube: 155,  // HIGH 밴드
+    maxKgPerCube: 28,  // HIGH 밴드: 25-35 kg/cube
+    payloadCapacityKg: 53760,  // 1920 * 28
+    remainingPayloadKg: 26880,  // 일부 사용 중 (1000 * 28 * 0.96 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_S2'),
   },
@@ -559,11 +561,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 25 Pallet × 128 = 3200 큐브 (전체 가용)
     capacityCubes: 3200,
     remainingCubes: 3200,
-    // PR7 정산: 큐브 단가 기반 (기존 40000원/일 → 12.5원/Cube/일)
-    unitPricePerCube: 13,  // 반올림
-    maxKgPerCube: 6,  // 1 Cube당 6kg 기준 (대형 화물 가능)
-    payloadCapacityKg: 12500,  // 25 Pallet × 500kg
-    remainingPayloadKg: 12500,  // 전체 가용
+    // PR7 정산: 큐브 단가 기반 (MID 밴드: 70-120 ₩/Cube/day)
+    unitPricePerCube: 85,  // MID 밴드
+    maxKgPerCube: 22,  // MID 밴드: 18-25 kg/cube (대형 화물 가능)
+    payloadCapacityKg: 70400,  // 3200 * 22
+    remainingPayloadKg: 70400,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
     provider: getProvider('PROVIDER_S3'),
   },
@@ -591,11 +593,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 20 Pallet × 128 = 2560 큐브 (거의 다 찼음 - 필터링 테스트용)
     capacityCubes: 2560,
     remainingCubes: 500,
-    // PR7 정산: 큐브 단가 기반 (기존 120000원/일 → 46.9원/Cube/일)
-    unitPricePerCube: 47,  // 반올림
-    maxKgPerCube: 5,  // 1 Cube당 5kg 기준
-    payloadCapacityKg: 10000,  // 20 Pallet × 500kg
-    remainingPayloadKg: 1953,  // 거의 다 찼음 (10000 × 500/2560)
+    // PR7 정산: 큐브 단가 기반 (HIGH 밴드: 130-180 ₩/Cube/day - 프리미엄 냉동)
+    unitPricePerCube: 170,  // HIGH 밴드
+    maxKgPerCube: 30,  // HIGH 밴드: 25-35 kg/cube
+    payloadCapacityKg: 76800,  // 2560 * 30
+    remainingPayloadKg: 14250,  // 거의 다 찼음 (500 * 30 * 0.95 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_S3'),
   },
@@ -623,11 +625,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 10 Pallet × 128 = 1280 큐브 (전체 가용)
     capacityCubes: 1280,
     remainingCubes: 1280,
-    // PR7 정산: 큐브 단가 기반 (기존 35000원/일 → 27.3원/Cube/일)
-    unitPricePerCube: 27,  // 반올림
-    maxKgPerCube: 5,  // 1 Cube당 5kg 기준
-    payloadCapacityKg: 5000,  // 10 Pallet × 500kg
-    remainingPayloadKg: 5000,  // 전체 가용
+    // PR7 정산: 큐브 단가 기반 (LOW 밴드: 30-60 ₩/Cube/day - 외곽/기본)
+    unitPricePerCube: 45,  // LOW 밴드
+    maxKgPerCube: 15,  // LOW 밴드: 12-18 kg/cube
+    payloadCapacityKg: 19200,  // 1280 * 15
+    remainingPayloadKg: 19200,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
     provider: getProvider('PROVIDER_S4'),
   },
@@ -655,11 +657,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 12 Pallet × 128 = 1536 큐브 (일부 사용 중)
     capacityCubes: 1536,
     remainingCubes: 800,
-    // PR7 정산: 큐브 단가 기반 (기존 70000원/일 → 45.6원/Cube/일)
-    unitPricePerCube: 46,  // 반올림
-    maxKgPerCube: 5,  // 1 Cube당 5kg 기준
-    payloadCapacityKg: 6000,  // 12 Pallet × 500kg
-    remainingPayloadKg: 3125,  // 일부 사용 중 (6000 × 800/1536)
+    // PR7 정산: 큐브 단가 기반 (MID 밴드: 70-120 ₩/Cube/day)
+    unitPricePerCube: 105,  // MID 밴드
+    maxKgPerCube: 20,  // MID 밴드: 18-25 kg/cube
+    payloadCapacityKg: 30720,  // 1536 * 20
+    remainingPayloadKg: 15200,  // 일부 사용 중 (800 * 20 * 0.95 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_S2'),
   },
@@ -686,11 +688,11 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // PR5 자원: 22 Pallet × 128 = 2816 큐브 (전체 가용)
     capacityCubes: 2816,
     remainingCubes: 2816,
-    // PR7 정산: 큐브 단가 기반 (기존 38000원/일 → 13.5원/Cube/일)
-    unitPricePerCube: 14,  // 반올림
-    maxKgPerCube: 5,  // 1 Cube당 5kg 기준
-    payloadCapacityKg: 11000,  // 22 Pallet × 500kg
-    remainingPayloadKg: 11000,  // 전체 가용
+    // PR7 정산: 큐브 단가 기반 (LOW 밴드: 30-60 ₩/Cube/day - 외곽/기본)
+    unitPricePerCube: 52,  // LOW 밴드
+    maxKgPerCube: 16,  // LOW 밴드: 12-18 kg/cube
+    payloadCapacityKg: 45056,  // 2816 * 16
+    remainingPayloadKg: 45056,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
     provider: getProvider('PROVIDER_S1'),
   },
@@ -714,14 +716,15 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     maxSumCm: 170,
     tempSupported: true,
     minCubes: 4,
-    // PR5 자원: 18 Pallet × 128 = 2304 큐브 (거의 다 찼음 - 필터링 테스트용)
+    // PR5 자원: 18 Pallet × 128 = 2304 큐브 (넉넉)
     capacityCubes: 2304,
-    remainingCubes: 100,
-    // PR7 정산: 큐브 단가 기반 (기존 75000원/일 → 32.6원/Cube/일)
-    unitPricePerCube: 33,  // 반올림
-    maxKgPerCube: 5,  // 1 Cube당 5kg 기준
-    payloadCapacityKg: 9000,  // 18 Pallet × 500kg
-    remainingPayloadKg: 391,  // 거의 다 찼음 (9000 × 100/2304)
+    remainingCubes: 1800,  // 큐브는 충분
+    // PR7 정산: 큐브 단가 기반 (MID 밴드: 70-120 ₩/Cube/day)
+    unitPricePerCube: 110,  // MID 밴드
+    maxKgPerCube: 22,  // MID 밴드: 18-25 kg/cube
+    payloadCapacityKg: 50688,  // 2304 * 22
+    // 필수 케이스: 큐브는 남는데 하중 부족 (payloadFactor 0.5)
+    remainingPayloadKg: 19800,  // 하중 타이트 (1800 * 22 * 0.5 payloadFactor)
     // PR7 업체
     provider: getProvider('PROVIDER_S2'),
   },
@@ -809,3 +812,69 @@ export const JEJU_LOCATIONS: LocationOption[] = [
   { id: 'daejeong-eup', name: '대정읍', level: 'district', parentId: 'seogwipo-city' },
   { id: 'andeok-myeon', name: '안덕면', level: 'district', parentId: 'seogwipo-city' },
 ]
+
+// ============================================================================
+// PR7 단가/재고 체계 검증 정보 (2026-02-06)
+// ============================================================================
+/*
+## 단가 밴드 분배 (unitPricePerCube)
+
+### Storage (8개) - ₩/Cube/day
+- LOW (2개): S5 (45), S7 (52)          [밴드: 30-60]
+- MID (4개): S1 (95), S3 (85), S6 (105), S8 (110)  [밴드: 70-120]
+- HIGH (2개): S2 (155), S4 (170)       [밴드: 130-180]
+
+### Route (8개) - ₩/Cube/trip
+- SHORT (3개): R1 (650), R2 (520), R4 (780)        [밴드: 300-900]
+- MID (4개): R3 (1350), R5 (1850), R6 (1550), R8 (1750)  [밴드: 900-2,200]
+- LONG (1개): R7 (3200)                [밴드: 2,200-4,500]
+
+## maxKgPerCube 분배
+
+### Storage
+- LOW: S5 (15), S7 (16)                [밴드: 12-18 kg/cube]
+- MID: S1 (20), S3 (22), S6 (20), S8 (22)  [밴드: 18-25 kg/cube]
+- HIGH: S2 (28), S4 (30)               [밴드: 25-35 kg/cube]
+
+### Route
+- 경량: R1 (9), R2 (11), R4 (10)       [밴드: 8-12 kg/cube]
+- 일반: R3 (15), R6 (16), R8 (14)      [밴드: 12-18 kg/cube]
+- 중량: R5 (18), R7 (20)               [밴드: 18-25 kg/cube]
+
+## 필수 데모 케이스 (4가지)
+
+### 1. 중량 보정 과금 시연
+- **R1**: maxKgPerCube = 9 (낮은 값)
+- 시나리오: volumeCubes=30, totalWeightKg=500
+  → weightCubes = ceil(500/9) = 56
+  → billableCubes = max(30, 56) = 56 (중량 보정 발생)
+
+### 2. 큐브는 남는데 하중 부족
+- **S8**: remainingCubes = 1800 (충분), payloadFactor = 0.5
+  → remainingPayloadKg = 19800 (1800 * 22 * 0.5)
+  → 큐브 체크 통과하지만 하중 체크에서 실패 가능
+
+### 3. remainingCubes 부족으로 거래 실패
+- **R7**: remainingCubes = 250 (150-300 타이트 범위)
+  → 대형 수요(예: 300 큐브)는 용량 부족으로 필터링됨
+
+### 4. Storage 가격 계층 가시화
+- LOW 2개, MID 4개, HIGH 2개로 분배
+- UI 리스트에서 30-180 ₩/Cube/day 범위 가시화
+
+## 정합성 체크 (모든 offer 통과 필수)
+
+✓ capacityCubes, remainingCubes는 정수
+✓ 0 <= remainingCubes <= capacityCubes
+✓ maxKgPerCube > 0 (정수)
+✓ payloadCapacityKg = capacityCubes * maxKgPerCube
+✓ 0 <= remainingPayloadKg <= payloadCapacityKg
+✓ remainingPayloadKg <= remainingCubes * maxKgPerCube
+✓ unitPricePerCube > 0
+
+## payloadFactor 적용 현황
+- 대부분: 0.95-1.0 (현실적 여유)
+- S8: 0.5 (하중 부족 데모용)
+- R1, R3, R5, R6, R7: 0.95 (일부 사용 중)
+- 나머지: 1.0 (전체 가용)
+*/
