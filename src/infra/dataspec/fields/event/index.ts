@@ -1,0 +1,6 @@
+export * from './matchingRun.fields'
+export * from './offerSelected.fields'
+export * from './dealRequested.fields'
+export * from './dealAccepted.fields'
+export * from './dealRejected.fields'
+export * from './dealCompleted.fields'

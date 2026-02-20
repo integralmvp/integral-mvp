@@ -27,10 +27,10 @@ import {
   addCargoToDemand,
   setQuantitiesAndCubes,
   getDemandById,
-} from '../store'
-import { checkQuickRulesWithLogging } from '../engine/rules'
-import { computeDemand } from '../engine'
-import { calculateSumCm } from '../data/bands'
+} from '../infra/storage'
+import { checkQuickRulesWithLogging } from '../layers/matching/regulation/rules'
+import { computeDemand } from '../engine/cube'
+import { calculateSumCm } from '../infra/dataspec/codedata/bands/bands'
 
 console.log('='.repeat(60))
 console.log('Code Data System 배선 테스트')

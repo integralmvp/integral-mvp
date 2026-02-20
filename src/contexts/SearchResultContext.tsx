@@ -12,7 +12,7 @@
 
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react'
 import type { StorageProduct, RouteProduct } from '../types/models'
-import type { PipelineCounts } from '../engine/matching'
+import type { PipelineCounts } from '../layers/matching'
 
 // 검색 결과 타입 (스냅샷용)
 export interface SearchResultData {

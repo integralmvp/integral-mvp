@@ -3,11 +3,11 @@
 // PR6: 프리뷰 결과 기반 하이라이트 (실시간 동기화)
 
 import { useEffect, useRef } from 'react'
-import ServiceConsole from './ServiceConsole'
-import MapboxContainer from '../Map/MapboxContainer'
-import HeaderWidget from '../Map/MapboxContainer/ui/HeaderWidget'
+import ServiceConsole from '../Features/ServiceConsole'
+import MapboxContainer from '../Features/Map/MapboxContainer'
+import HeaderWidget from '../Features/Map/MapboxContainer/ui/HeaderWidget'
 import { useSearchResult } from '../../contexts/SearchResultContext'
-import { createAvailableMarkerSvg } from '../Map/MapboxContainer/utils/style'
+import { createAvailableMarkerSvg } from '../Features/Map/MapboxContainer/utils/style'
 import logoSvg from '../../assets/icons/console/logo.svg'
 
 // 하이라이트 마커 생성
