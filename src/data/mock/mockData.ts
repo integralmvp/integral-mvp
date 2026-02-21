@@ -9,15 +9,17 @@ import type {
   StorageProduct,
   CargoType,
   StorageType,
-  ProductCategory,
-  LocationOption,
-  WeightRange,
   ModuleClassification,
   FeatureCode,
-  ProviderInfo,
   UserInfo,
-} from '../types/models'
-import { REGION_REPRESENTATIVE_COORDS } from './regionRepresentativeCoords'
+} from '../../types/models'
+import { REGION_REPRESENTATIVE_COORDS } from '../../infra/dataspec/codedata/regions/regionRepresentativeCoords'
+import { findProvider } from './records/providers'
+
+// UI 옵션 어댑터 (표시용, 필터링/거래 로직에 사용 금지)
+export { PRODUCT_CATEGORIES, WEIGHT_RANGES, JEJU_LOCATIONS } from './adapters'
+// records re-export
+export { PROVIDERS } from './records/providers'
 
 // ============ 대표좌표 참조 헬퍼 ============
 const getCoords = (code: string) => REGION_REPRESENTATIVE_COORDS[code]
@@ -40,100 +42,6 @@ const MAINLAND_PORTS = {
   busan: getCoords('BUSAN_PORT'),
   incheon: getCoords('INCHEON_PORT'),
   mokpo: getCoords('MOKPO_PORT'),
-}
-
-// ============ PR7: 업체 정보 ============
-export const PROVIDERS: ProviderInfo[] = [
-  // 보관 업체
-  {
-    id: 'PROVIDER_S1',
-    name: '제주물류센터',
-    serviceType: '보관',
-    verified: true,
-    description: '제주항 인근 대형 물류센터, 24시간 입출고 가능',
-    contractTemplate: '제주물류센터 표준 계약서 v2.1',
-    pickupAvailable: true,
-    weightLimitKg: 25,
-  },
-  {
-    id: 'PROVIDER_S2',
-    name: '한라냉장',
-    serviceType: '보관',
-    verified: true,
-    description: '식품 전문 냉장/냉동 물류 서비스',
-    contractTemplate: '한라냉장 표준 계약서 v1.8',
-    pickupAvailable: false,
-    weightLimitKg: 20,
-  },
-  {
-    id: 'PROVIDER_S3',
-    name: '서귀창고',
-    serviceType: '보관',
-    verified: true,
-    description: '서귀포 지역 중심 물류 창고',
-    contractTemplate: '서귀창고 표준 계약서 v1.5',
-    pickupAvailable: true,
-    weightLimitKg: 30,
-  },
-  {
-    id: 'PROVIDER_S4',
-    name: '탐라스토리지',
-    serviceType: '보관',
-    verified: false,
-    description: '중소 규모 창고 전문',
-    contractTemplate: '탐라스토리지 계약서 v1.0',
-    pickupAvailable: false,
-    weightLimitKg: 20,
-  },
-  // 운송 업체
-  {
-    id: 'PROVIDER_R1',
-    name: '제주택배',
-    serviceType: '운송',
-    verified: true,
-    description: '도내 운송 전문, 정시 배송 보장',
-    contractTemplate: '제주택배 표준 계약서 v3.2',
-    pickupAvailable: true,
-    weightLimitKg: 25,
-  },
-  {
-    id: 'PROVIDER_R2',
-    name: '해운물류',
-    serviceType: '운송',
-    verified: true,
-    description: '제주-육지 간 해상 운송 전문',
-    contractTemplate: '해운물류 표준 계약서 v2.5',
-    pickupAvailable: false,
-    weightLimitKg: 30,
-  },
-  {
-    id: 'PROVIDER_R3',
-    name: '올레운송',
-    serviceType: '운송',
-    verified: true,
-    description: '소형 화물 빠른 배송',
-    contractTemplate: '올레운송 계약서 v1.2',
-    pickupAvailable: true,
-    weightLimitKg: 15,
-  },
-  // 통합 업체
-  {
-    id: 'PROVIDER_B1',
-    name: '제주통합물류',
-    serviceType: '통합',
-    verified: true,
-    description: '보관부터 운송까지 원스톱 서비스',
-    contractTemplate: '제주통합물류 표준 계약서 v2.0',
-    pickupAvailable: true,
-    weightLimitKg: 30,
-  },
-]
-
-// 업체 ID로 업체 정보 찾기 헬퍼
-const getProvider = (id: string): ProviderInfo => {
-  const provider = PROVIDERS.find(p => p.id === id)
-  if (!provider) throw new Error(`Provider ${id} not found`)
-  return provider
 }
 
 // ============ PR7: 사용자 정보 (MVP 더미) ============
@@ -187,7 +95,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     payloadCapacityKg: 3600,  // 400 * 9
     remainingPayloadKg: 3000,  // 일부 사용 중 (350 * 9 * 0.95 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_R1'),
+    provider: findProvider('PROVIDER_R1'),
   },
   {
     id: 'R2',
@@ -225,7 +133,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     payloadCapacityKg: 3080,  // 280 * 11
     remainingPayloadKg: 3080,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
-    provider: getProvider('PROVIDER_R3'),
+    provider: findProvider('PROVIDER_R3'),
   },
   {
     id: 'R3',
@@ -263,7 +171,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     payloadCapacityKg: 6000,  // 400 * 15
     remainingPayloadKg: 1425,  // 거의 다 찼음 (100 * 15 * 0.95 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_R1'),
+    provider: findProvider('PROVIDER_R1'),
   },
   {
     id: 'R4',
@@ -301,7 +209,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     payloadCapacityKg: 800,  // 80 * 10
     remainingPayloadKg: 800,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
-    provider: getProvider('PROVIDER_R3'),
+    provider: findProvider('PROVIDER_R3'),
   },
 
   // 입도 경로 (2개) - 육지 출발, 제주 도착
@@ -343,7 +251,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     payloadCapacityKg: 15840,  // 880 * 18
     remainingPayloadKg: 10260,  // 여유 있음 (600 * 18 * 0.95 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_R2'),
+    provider: findProvider('PROVIDER_R2'),
   },
   {
     id: 'R6',
@@ -384,7 +292,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     payloadCapacityKg: 10240,  // 640 * 16
     remainingPayloadKg: 6080,  // 여유 있음 (400 * 16 * 0.95 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_R2'),
+    provider: findProvider('PROVIDER_R2'),
   },
 
   // 출도 경로 (2개) - 제주 출발, 육지 도착
@@ -427,7 +335,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     payloadCapacityKg: 17600,  // 880 * 20
     remainingPayloadKg: 4750,  // 타이트 (250 * 20 * 0.95 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_R2'),
+    provider: findProvider('PROVIDER_R2'),
   },
   {
     id: 'R8',
@@ -467,7 +375,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     payloadCapacityKg: 5600,  // 400 * 14
     remainingPayloadKg: 5600,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
-    provider: getProvider('PROVIDER_R2'),
+    provider: findProvider('PROVIDER_R2'),
   },
 ]
 
@@ -504,7 +412,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     payloadCapacityKg: 76800,  // 3840 * 20
     remainingPayloadKg: 76800,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
-    provider: getProvider('PROVIDER_S1'),
+    provider: findProvider('PROVIDER_S1'),
   },
   {
     id: 'S2',
@@ -536,7 +444,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     payloadCapacityKg: 53760,  // 1920 * 28
     remainingPayloadKg: 26880,  // 일부 사용 중 (1000 * 28 * 0.96 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_S2'),
+    provider: findProvider('PROVIDER_S2'),
   },
   {
     id: 'S3',
@@ -567,7 +475,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     payloadCapacityKg: 70400,  // 3200 * 22
     remainingPayloadKg: 70400,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
-    provider: getProvider('PROVIDER_S3'),
+    provider: findProvider('PROVIDER_S3'),
   },
   {
     id: 'S4',
@@ -599,7 +507,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     payloadCapacityKg: 76800,  // 2560 * 30
     remainingPayloadKg: 14250,  // 거의 다 찼음 (500 * 30 * 0.95 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_S3'),
+    provider: findProvider('PROVIDER_S3'),
   },
   {
     id: 'S5',
@@ -631,7 +539,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     payloadCapacityKg: 19200,  // 1280 * 15
     remainingPayloadKg: 19200,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
-    provider: getProvider('PROVIDER_S4'),
+    provider: findProvider('PROVIDER_S4'),
   },
   {
     id: 'S6',
@@ -663,7 +571,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     payloadCapacityKg: 30720,  // 1536 * 20
     remainingPayloadKg: 15200,  // 일부 사용 중 (800 * 20 * 0.95 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_S2'),
+    provider: findProvider('PROVIDER_S2'),
   },
   {
     id: 'S7',
@@ -694,7 +602,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     payloadCapacityKg: 45056,  // 2816 * 16
     remainingPayloadKg: 45056,  // 전체 가용 (payloadFactor: 1.0)
     // PR7 업체
-    provider: getProvider('PROVIDER_S1'),
+    provider: findProvider('PROVIDER_S1'),
   },
   {
     id: 'S8',
@@ -726,155 +634,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     // 필수 케이스: 큐브는 남는데 하중 부족 (payloadFactor 0.5)
     remainingPayloadKg: 19800,  // 하중 타이트 (1800 * 22 * 0.5 payloadFactor)
     // PR7 업체
-    provider: getProvider('PROVIDER_S2'),
+    provider: findProvider('PROVIDER_S2'),
   },
 ]
-
-// ============ PR3-3: UI 재설계 - 품목 카테고리 (우체국 품목 코드 체계 기반) ============
-export const PRODUCT_CATEGORIES: ProductCategory[] = [
-  {
-    code: 'FOOD',
-    name: '식품',
-    subCategories: [
-      { code: 'FOOD-FRESH', name: '신선식품' },
-      { code: 'FOOD-PROCESSED', name: '가공식품' },
-      { code: 'FOOD-FROZEN', name: '냉동식품' },
-      { code: 'FOOD-BEVERAGE', name: '음료' },
-    ]
-  },
-  {
-    code: 'AGRI',
-    name: '농산물',
-    subCategories: [
-      { code: 'AGRI-FRUIT', name: '과일류' },
-      { code: 'AGRI-VEG', name: '채소류' },
-      { code: 'AGRI-GRAIN', name: '곡류' },
-    ]
-  },
-  {
-    code: 'MARINE',
-    name: '수산물',
-    subCategories: [
-      { code: 'MARINE-FRESH', name: '활어/선어' },
-      { code: 'MARINE-DRIED', name: '건어물' },
-      { code: 'MARINE-PROCESSED', name: '수산가공품' },
-    ]
-  },
-  {
-    code: 'INDUSTRIAL',
-    name: '공산품',
-    subCategories: [
-      { code: 'INDUSTRIAL-ELEC', name: '전자제품' },
-      { code: 'INDUSTRIAL-HOME', name: '생활용품' },
-      { code: 'INDUSTRIAL-MATERIAL', name: '원자재' },
-    ]
-  },
-  {
-    code: 'ETC',
-    name: '기타',
-    subCategories: [
-      { code: 'ETC-DOC', name: '서류/문서' },
-      { code: 'ETC-SAMPLE', name: '샘플/시제품' },
-      { code: 'ETC-OTHER', name: '기타' },
-    ]
-  },
-]
-
-// ============ PR3-3: UI 재설계 - 중량 구간 ============
-export const WEIGHT_RANGES: { value: WeightRange; label: string }[] = [
-  { value: '0-5kg', label: '5kg 이하' },
-  { value: '5-10kg', label: '5kg ~ 10kg' },
-  { value: '10-20kg', label: '10kg ~ 20kg' },
-  { value: '20-30kg', label: '20kg ~ 30kg' },
-  { value: '30kg+', label: '30kg 초과' },
-]
-
-// ============ PR3-3: UI 재설계 - 제주 지역 목록 (범위 개념) ============
-export const JEJU_LOCATIONS: LocationOption[] = [
-  // 도 전체
-  { id: 'jeju-all', name: '제주도 전체', level: 'island' },
-  // 시 단위
-  { id: 'jeju-city', name: '제주시', level: 'city', parentId: 'jeju-all' },
-  { id: 'seogwipo-city', name: '서귀포시', level: 'city', parentId: 'jeju-all' },
-  // 읍면동 단위 (제주시)
-  { id: 'ara-dong', name: '아라동', level: 'district', parentId: 'jeju-city' },
-  { id: 'nohyeong-dong', name: '노형동', level: 'district', parentId: 'jeju-city' },
-  { id: 'yeon-dong', name: '연동', level: 'district', parentId: 'jeju-city' },
-  { id: 'ido-dong', name: '이도동', level: 'district', parentId: 'jeju-city' },
-  { id: 'aewol-eup', name: '애월읍', level: 'district', parentId: 'jeju-city' },
-  { id: 'hallim-eup', name: '한림읍', level: 'district', parentId: 'jeju-city' },
-  { id: 'jocheon-eup', name: '조천읍', level: 'district', parentId: 'jeju-city' },
-  { id: 'gujwa-eup', name: '구좌읍', level: 'district', parentId: 'jeju-city' },
-  // 읍면동 단위 (서귀포시)
-  { id: 'seogwipo-dong', name: '서귀동', level: 'district', parentId: 'seogwipo-city' },
-  { id: 'seongsan-eup', name: '성산읍', level: 'district', parentId: 'seogwipo-city' },
-  { id: 'namwon-eup', name: '남원읍', level: 'district', parentId: 'seogwipo-city' },
-  { id: 'daejeong-eup', name: '대정읍', level: 'district', parentId: 'seogwipo-city' },
-  { id: 'andeok-myeon', name: '안덕면', level: 'district', parentId: 'seogwipo-city' },
-]
-
-// ============================================================================
-// PR7 단가/재고 체계 검증 정보 (2026-02-06)
-// ============================================================================
-/*
-## 단가 밴드 분배 (unitPricePerCube)
-
-### Storage (8개) - ₩/Cube/day
-- LOW (2개): S5 (45), S7 (52)          [밴드: 30-60]
-- MID (4개): S1 (95), S3 (85), S6 (105), S8 (110)  [밴드: 70-120]
-- HIGH (2개): S2 (155), S4 (170)       [밴드: 130-180]
-
-### Route (8개) - ₩/Cube/trip
-- SHORT (3개): R1 (650), R2 (520), R4 (780)        [밴드: 300-900]
-- MID (4개): R3 (1350), R5 (1850), R6 (1550), R8 (1750)  [밴드: 900-2,200]
-- LONG (1개): R7 (3200)                [밴드: 2,200-4,500]
-
-## maxKgPerCube 분배
-
-### Storage
-- LOW: S5 (15), S7 (16)                [밴드: 12-18 kg/cube]
-- MID: S1 (20), S3 (22), S6 (20), S8 (22)  [밴드: 18-25 kg/cube]
-- HIGH: S2 (28), S4 (30)               [밴드: 25-35 kg/cube]
-
-### Route
-- 경량: R1 (9), R2 (11), R4 (10)       [밴드: 8-12 kg/cube]
-- 일반: R3 (15), R6 (16), R8 (14)      [밴드: 12-18 kg/cube]
-- 중량: R5 (18), R7 (20)               [밴드: 18-25 kg/cube]
-
-## 필수 데모 케이스 (4가지)
-
-### 1. 중량 보정 과금 시연
-- **R1**: maxKgPerCube = 9 (낮은 값)
-- 시나리오: volumeCubes=30, totalWeightKg=500
-  → weightCubes = ceil(500/9) = 56
-  → billableCubes = max(30, 56) = 56 (중량 보정 발생)
-
-### 2. 큐브는 남는데 하중 부족
-- **S8**: remainingCubes = 1800 (충분), payloadFactor = 0.5
-  → remainingPayloadKg = 19800 (1800 * 22 * 0.5)
-  → 큐브 체크 통과하지만 하중 체크에서 실패 가능
-
-### 3. remainingCubes 부족으로 거래 실패
-- **R7**: remainingCubes = 250 (150-300 타이트 범위)
-  → 대형 수요(예: 300 큐브)는 용량 부족으로 필터링됨
-
-### 4. Storage 가격 계층 가시화
-- LOW 2개, MID 4개, HIGH 2개로 분배
-- UI 리스트에서 30-180 ₩/Cube/day 범위 가시화
-
-## 정합성 체크 (모든 offer 통과 필수)
-
-✓ capacityCubes, remainingCubes는 정수
-✓ 0 <= remainingCubes <= capacityCubes
-✓ maxKgPerCube > 0 (정수)
-✓ payloadCapacityKg = capacityCubes * maxKgPerCube
-✓ 0 <= remainingPayloadKg <= payloadCapacityKg
-✓ remainingPayloadKg <= remainingCubes * maxKgPerCube
-✓ unitPricePerCube > 0
-
-## payloadFactor 적용 현황
-- 대부분: 0.95-1.0 (현실적 여유)
-- S8: 0.5 (하중 부족 데모용)
-- R1, R3, R5, R6, R7: 0.95 (일부 사용 중)
-- 나머지: 1.0 (전체 가용)
-*/

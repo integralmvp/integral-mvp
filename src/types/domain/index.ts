@@ -1,69 +1,68 @@
 /**
- * Domain Types - 플랫폼 핵심 도메인 타입
- * (호환 레이어: types/models.ts에서 재export, 완전 전환은 다음 작업)
+ * Domain Types - barrel
+ * 플랫폼 핵심 도메인 타입 (새 파일에서 직접 export)
  */
 
-// Cargo domain
 export type {
-  CargoUI,
-  RegisteredCargo,
-  CargoInfo,
-  CargoCondition,
+  CargoType,
   BoxInput,
   BoxInputUI,
+  ModuleClassification,
+  BoxSize,
   ClassifiedBox,
   ModuleAggregate,
-  BoxBasedAreaSelection,
-  StorageAreaSelection,
+  AreaInputType,
   ModuleInput,
   ModuleInputs,
-} from '../models'
+  StorageAreaSelection,
+  BoxBasedAreaSelection,
+  CargoInfo,
+  RuleCheckedFields,
+  CubeCalculatedFields,
+} from './cargo'
 
-// Offer domain
 export type {
-  StorageProduct,
-  RouteProduct,
+  Location,
+  RegulationStatus,
   StorageType,
-  CargoType,
+  StorageProduct,
   RouteScope,
   Direction,
   TripType,
-  Location,
-  RegulationStatus,
-} from '../models'
+  RouteProduct,
+} from './offer'
 
-// Provider domain
 export type {
   ProviderInfo,
-} from '../models'
+} from './provider'
 
-// DemandSession domain
 export type {
-  DemandSession,
-  DemandStatus,
   ServiceType,
   ServiceOrder,
   StorageCondition,
   TransportCondition,
-} from '../models'
+  DemandStatus,
+  DemandSession,
+} from './demandSession'
 
-// Deal domain
 export type {
-  Deal,
+  UserInfo,
   DealStatus,
   DealOption,
-  UserInfo,
-} from '../models'
+  Deal,
+} from './deal'
 
-// Code types
 export type {
   RegionCode,
   WeightBand,
   SizeBand,
   FeatureCode,
-  ModuleClassification,
-  BoxSize,
-  WeightRange,
-  ProductCategory,
-  LocationOption,
-} from '../models'
+} from './codes'
+
+export type {
+  EventSubject,
+  EventSignature,
+  PlatformEventType,
+  PlatformEvent,
+  SearchExecutedFields,
+} from './events'

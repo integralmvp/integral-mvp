@@ -1,14 +1,28 @@
 /**
- * UI Types - UI 전용 Props/ViewModel 타입
- * (호환 레이어: types/models.ts에서 재export)
+ * UI Types - barrel
+ * UI 전용 Props/ViewModel 타입
  */
 
 export type {
   ProductCardProps,
+} from './productCard'
+
+export type {
+  WeightRange,
+  ProductCategory,
+  CargoUI,
+  RegisteredCargo,
+  LocationOption,
   UnitLoadModule,
   HandlingOption,
+  CargoCondition,
   MatchStatus,
   MatchResult,
   CostEstimate,
+  BoxSize,
+  RegionCode,
+} from './serviceConsole'
+
+export type {
   AreaInputType,
-} from '../models'
+} from '../domain/cargo'
