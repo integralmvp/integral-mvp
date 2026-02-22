@@ -84,7 +84,7 @@ export function addPalletMarkers(map: mapboxgl.Map): void {
         <div class="p-3 bg-white border border-slate-300 text-slate-900 rounded-lg shadow-lg">
           <h3 class="font-bold text-sm">${storage.location.name}</h3>
           <p class="text-xs text-slate-600 mt-1">${storage.storageType} | ${storage.capacity}</p>
-          <p class="text-sm font-bold text-orange-600 mt-2">₩${storage.price.toLocaleString()}/${storage.priceUnit}</p>
+          <p class="text-sm font-bold text-orange-600 mt-2">₩${storage.unitPricePerCube.toLocaleString()}/Cube/일</p>
         </div>
       `)
 

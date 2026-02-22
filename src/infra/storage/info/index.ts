@@ -2,6 +2,24 @@
  * Storage Info Repos - Export
  */
 
+// Offer Repository
+export {
+  getAllStorageOffers,
+  getAllRouteOffers,
+  getStorageOfferById,
+  getRouteOfferById,
+  getOfferById,
+  updateStorageOfferResource,
+  updateRouteOfferResource,
+} from './offer.repo'
+
+// Provider Repository
+export {
+  getAllProviders,
+  getProviderById,
+  getProvidersByServiceType,
+} from './provider.repo'
+
 // Cargo Store
 export {
   addCargo,

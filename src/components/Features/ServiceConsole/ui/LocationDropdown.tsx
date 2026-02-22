@@ -6,7 +6,7 @@
  * - 표시 레이블은 name을 사용
  */
 import { useMemo } from 'react'
-import { JEJU_REGION_CODES, getRegionByCode, type RegionCode as RegionCodeType } from '../../../../infra/dataspec/codedata/regions/regionCodesJeju'
+import { JEJU_REGION_CODES, getRegionByCode, type JejuRegionEntry } from '../../../../infra/dataspec/codedata/regions/regionCodesJeju'
 
 interface LocationDropdownProps {
   value?: string              // RegionCode (10자리)
@@ -154,7 +154,7 @@ function getSimpleName(fullName: string): string {
  * 주요 동인지 판단 (MVP에서는 대표 동만 표시)
  * 일도일동, 이도이동 등 세부 동은 제외하고 대표 동만 표시
  */
-function isMainDistrict(region: RegionCodeType): boolean {
+function isMainDistrict(region: JejuRegionEntry): boolean {
   const name = region.name
   // "일동", "이동", "삼동" 등 세부 분할된 동은 제외
   if (/[일이삼]동$/.test(name) && !/^[가-힣]+동$/.test(getSimpleName(name))) {

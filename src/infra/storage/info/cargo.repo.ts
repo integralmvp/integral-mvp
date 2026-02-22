@@ -81,8 +81,8 @@ export function addCargo(params: CreateCargoParams): CargoInfo {
   // 3변합 계산
   const sumCm = calculateSumCm(widthMm, depthMm, heightMm)
 
-  // 시그니처 계산
-  const signature = {
+  // 택소노미 계산 (분류 객체)
+  const taxonomy = {
     moduleClass,
     itemCode,
     weightBand: getWeightBand(weightKg),
@@ -92,8 +92,9 @@ export function addCargo(params: CreateCargoParams): CargoInfo {
   // CargoInfo 생성
   const cargo: CargoInfo = {
     id: makeCargoId(),
+    signature: 'INFO_CARGO',
     ownerId,
-    signature,
+    taxonomy,
     fields: {
       dimsMm: { w: widthMm, d: depthMm, h: heightMm },
       sumCm,
@@ -110,18 +111,18 @@ export function addCargo(params: CreateCargoParams): CargoInfo {
 
   // 이벤트 로깅
   logCargoCreated(cargo.id, {
-    moduleClass: signature.moduleClass,
-    itemCode: signature.itemCode,
-    weightBand: signature.weightBand,
-    sizeBand: signature.sizeBand,
+    moduleClass: taxonomy.moduleClass,
+    itemCode: taxonomy.itemCode,
+    weightBand: taxonomy.weightBand,
+    sizeBand: taxonomy.sizeBand,
   })
 
-  // 시그니처 설정 이벤트 (초기 설정도 추적)
+  // 택소노미 설정 이벤트 (초기 설정도 추적)
   logCargoSignatureUpdated(cargo.id, {
-    moduleClass: signature.moduleClass,
-    itemCode: signature.itemCode,
-    weightBand: signature.weightBand,
-    sizeBand: signature.sizeBand,
+    moduleClass: taxonomy.moduleClass,
+    itemCode: taxonomy.itemCode,
+    weightBand: taxonomy.weightBand,
+    sizeBand: taxonomy.sizeBand,
   })
 
   return cargo
@@ -191,15 +192,15 @@ export function updateCargo(cargoId: string, updates: Partial<Pick<CargoInfo, 'f
 
       const sumCm = calculateSumCm(dimsMm.w, dimsMm.d, dimsMm.h)
       cargo.fields.sumCm = sumCm
-      cargo.signature.sizeBand = getSizeBand(sumCm)
-      cargo.signature.weightBand = getWeightBand(weightKg)
+      cargo.taxonomy.sizeBand = getSizeBand(sumCm)
+      cargo.taxonomy.weightBand = getWeightBand(weightKg)
 
-      // 시그니처 변경 이벤트
+      // 택소노미 변경 이벤트
       logCargoSignatureUpdated(cargoId, {
-        moduleClass: cargo.signature.moduleClass,
-        itemCode: cargo.signature.itemCode,
-        weightBand: cargo.signature.weightBand,
-        sizeBand: cargo.signature.sizeBand,
+        moduleClass: cargo.taxonomy.moduleClass,
+        itemCode: cargo.taxonomy.itemCode,
+        weightBand: cargo.taxonomy.weightBand,
+        sizeBand: cargo.taxonomy.sizeBand,
       })
     }
   }
@@ -211,11 +212,11 @@ export function updateCargo(cargoId: string, updates: Partial<Pick<CargoInfo, 'f
 }
 
 /**
- * 화물 시그니처 업데이트
+ * 화물 택소노미 업데이트
  */
 export function updateCargoSignature(
   cargoId: string,
-  signatureUpdates: Partial<CargoInfo['signature']>
+  taxonomyUpdates: Partial<CargoInfo['taxonomy']>
 ): CargoInfo | undefined {
   const cargos = loadAllCargos()
   const index = cargos.findIndex(c => c.id === cargoId)
@@ -223,17 +224,17 @@ export function updateCargoSignature(
   if (index === -1) return undefined
 
   const cargo = cargos[index]
-  cargo.signature = { ...cargo.signature, ...signatureUpdates }
+  cargo.taxonomy = { ...cargo.taxonomy, ...taxonomyUpdates }
 
   cargos[index] = cargo
   saveAllCargos(cargos)
 
   // 이벤트 로깅
   logCargoSignatureUpdated(cargoId, {
-    moduleClass: cargo.signature.moduleClass,
-    itemCode: cargo.signature.itemCode,
-    weightBand: cargo.signature.weightBand,
-    sizeBand: cargo.signature.sizeBand,
+    moduleClass: cargo.taxonomy.moduleClass,
+    itemCode: cargo.taxonomy.itemCode,
+    weightBand: cargo.taxonomy.weightBand,
+    sizeBand: cargo.taxonomy.sizeBand,
   })
 
   return cargo

@@ -62,7 +62,7 @@ export function checkCargoRules(cargo: CargoInfo): RuleCheckResult {
   }
 
   // 3. 위험물/제한 품목 체크
-  const itemCode = cargo.signature.itemCode
+  const itemCode = cargo.taxonomy.itemCode
   if (RESTRICTED_CODES.includes(itemCode)) {
     reasons.push('NOT_ALLOWED')
   } else if (SPECIAL_HANDLING_CODES.includes(itemCode)) {
@@ -70,7 +70,7 @@ export function checkCargoRules(cargo: CargoInfo): RuleCheckResult {
   }
 
   // 4. UNCLASSIFIED 체크 (fallback 허용, 기록만)
-  if (cargo.signature.moduleClass === 'UNCLASSIFIED') {
+  if (cargo.taxonomy.moduleClass === 'UNCLASSIFIED') {
     reasons.push('UNCLASSIFIED_FALLBACK')
   }
 

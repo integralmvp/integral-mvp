@@ -7,8 +7,7 @@ export interface ProductCardProps {
   id: string
   title: string
   subtitle?: string
-  price: number
-  priceUnit: string
+  unitPricePerCube: number
   badges?: string[]
   onClick?: () => void
 }

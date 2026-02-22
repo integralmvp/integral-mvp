@@ -60,6 +60,7 @@ export const DEMO_USER: UserInfo = {
 export const ROUTE_PRODUCTS: RouteProduct[] = [
   {
     id: 'R1',
+    signature: 'INFO_OFFER',
     origin: {
       name: '제주시',
       lat: JEJU_COORDS.jejuCity!.lat,
@@ -76,8 +77,6 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '5톤',
     vehicleType: '카고',
     cargoTypes: ['일반', '냉장'] as CargoType[],
-    price: 180000,
-    priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
     // PR4 규정: 넉넉한 조건 (대부분 통과)
@@ -99,6 +98,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
   },
   {
     id: 'R2',
+    signature: 'INFO_OFFER',
     origin: {
       name: '제주시',
       lat: JEJU_COORDS.jejuCity!.lat,
@@ -115,8 +115,6 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '3.5톤',
     vehicleType: '다마스',
     cargoTypes: ['일반'] as CargoType[],
-    price: 90000,
-    priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
     // PR4 규정: 소형 화물 전용 (중량/규격 제한)
@@ -137,6 +135,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
   },
   {
     id: 'R3',
+    signature: 'INFO_OFFER',
     origin: {
       name: '애월',
       lat: JEJU_COORDS.aewol!.lat,
@@ -153,8 +152,6 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '5톤',
     vehicleType: '윙바디',
     cargoTypes: ['일반', '냉동'] as CargoType[],
-    price: 160000,
-    priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
     // PR4 규정: 냉동 지원, 최소 물량 요구
@@ -175,6 +172,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
   },
   {
     id: 'R4',
+    signature: 'INFO_OFFER',
     origin: {
       name: '한림',
       lat: JEJU_COORDS.hallim!.lat,
@@ -191,8 +189,6 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '1톤',
     vehicleType: '라보',
     cargoTypes: ['일반'] as CargoType[],
-    price: 75000,
-    priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'INTRA_JEJU',
     // PR4 규정: 소형 차량 제한 (엄격한 규격/중량)
@@ -215,6 +211,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
   // 입도 경로 (2개) - 육지 출발, 제주 도착
   {
     id: 'R5',
+    signature: 'INFO_OFFER',
     origin: {
       name: '부산항',
       lat: MAINLAND_PORTS.busan!.lat,
@@ -231,8 +228,6 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '11톤',
     vehicleType: '윙바디',
     cargoTypes: ['일반', '냉장', '냉동'] as CargoType[],
-    price: 352000,
-    priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'SEA',
     direction: 'INBOUND',
@@ -255,6 +250,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
   },
   {
     id: 'R6',
+    signature: 'INFO_OFFER',
     origin: {
       name: '목포항',
       lat: MAINLAND_PORTS.mokpo!.lat,
@@ -271,8 +267,6 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '8톤',
     vehicleType: '윙바디',
     cargoTypes: ['일반', '냉장'] as CargoType[],
-    price: 224000,
-    priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'SEA',
     direction: 'INBOUND',
@@ -298,6 +292,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
   // 출도 경로 (2개) - 제주 출발, 육지 도착
   {
     id: 'R7',
+    signature: 'INFO_OFFER',
     origin: {
       name: '제주항',
       lat: JEJU_COORDS.jejuPort!.lat,
@@ -314,8 +309,6 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '11톤',
     vehicleType: '카고',
     cargoTypes: ['일반'] as CargoType[],
-    price: 495000,
-    priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'SEA',
     direction: 'OUTBOUND',
@@ -339,6 +332,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
   },
   {
     id: 'R8',
+    signature: 'INFO_OFFER',
     origin: {
       name: '서귀포',
       lat: JEJU_COORDS.seogwipo!.lat,
@@ -355,8 +349,6 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
     capacity: '5톤',
     vehicleType: '윙바디',
     cargoTypes: ['일반', '냉장'] as CargoType[],
-    price: 190000,
-    priceUnit: '회',
     regulationStatus: { allowed: true },
     routeScope: 'SEA',
     direction: 'OUTBOUND',
@@ -385,6 +377,7 @@ export const ROUTE_PRODUCTS: RouteProduct[] = [
 export const STORAGE_PRODUCTS: StorageProduct[] = [
   {
     id: 'S1',
+    signature: 'INFO_OFFER',
     location: {
       name: '제주시 (제주항 인근)',
       lat: JEJU_COORDS.jejuPort!.lat,
@@ -394,8 +387,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     },
     storageType: '상온' as StorageType,
     capacity: '파렛트 30개',
-    price: 45000,
-    priceUnit: '일',
     features: ['F_24H_INOUT', 'F_FORKLIFT', 'F_CCTV'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 일반 창고 (넉넉한 조건)
@@ -416,6 +407,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
   },
   {
     id: 'S2',
+    signature: 'INFO_OFFER',
     location: {
       name: '제주시 (공항 인근)',
       lat: JEJU_COORDS.jejuCity!.lat,
@@ -425,8 +417,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     },
     storageType: '냉장' as StorageType,
     capacity: '파렛트 15개',
-    price: 80000,
-    priceUnit: '일',
     features: ['F_FOOD_SPECIALIZED', 'F_TEMP_MONITORING'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 냉장 창고, 식품 전용
@@ -448,6 +438,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
   },
   {
     id: 'S3',
+    signature: 'INFO_OFFER',
     location: {
       name: '서귀포시',
       lat: JEJU_COORDS.seogwipo!.lat,
@@ -457,8 +448,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     },
     storageType: '상온' as StorageType,
     capacity: '파렛트 25개',
-    price: 40000,
-    priceUnit: '일',
     features: ['F_PARKING', 'F_FORKLIFT'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 대형 화물 가능
@@ -479,6 +468,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
   },
   {
     id: 'S4',
+    signature: 'INFO_OFFER',
     location: {
       name: '서귀포시 (항만 인근)',
       lat: JEJU_COORDS.seogwipo!.lat,
@@ -488,8 +478,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     },
     storageType: '냉동' as StorageType,
     capacity: '파렛트 20개',
-    price: 120000,
-    priceUnit: '일',
     features: ['F_FOOD_SPECIALIZED', 'F_TEMP_MONITORING', 'F_FAST_FREEZE'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 냉동 창고, 수산물/냉동식품
@@ -511,6 +499,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
   },
   {
     id: 'S5',
+    signature: 'INFO_OFFER',
     location: {
       name: '성산',
       lat: JEJU_COORDS.seongsan!.lat,
@@ -520,8 +509,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     },
     storageType: '상온' as StorageType,
     capacity: '파렛트 10개',
-    price: 35000,
-    priceUnit: '일',
     features: ['F_PARKING'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 소규모 창고 (제한적)
@@ -543,6 +530,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
   },
   {
     id: 'S6',
+    signature: 'INFO_OFFER',
     location: {
       name: '애월',
       lat: JEJU_COORDS.aewol!.lat,
@@ -552,8 +540,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     },
     storageType: '냉장' as StorageType,
     capacity: '파렛트 12개',
-    price: 70000,
-    priceUnit: '일',
     features: ['F_AGRI_SPECIALIZED', 'F_TEMP_MONITORING'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 농산물 냉장 창고
@@ -575,6 +561,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
   },
   {
     id: 'S7',
+    signature: 'INFO_OFFER',
     location: {
       name: '한림',
       lat: JEJU_COORDS.hallim!.lat,
@@ -584,8 +571,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     },
     storageType: '상온' as StorageType,
     capacity: '파렛트 22개',
-    price: 38000,
-    priceUnit: '일',
     features: ['F_PARKING', 'F_FORKLIFT'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 일반 창고
@@ -606,6 +591,7 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
   },
   {
     id: 'S8',
+    signature: 'INFO_OFFER',
     location: {
       name: '조천',
       lat: JEJU_COORDS.jocheon!.lat,
@@ -615,8 +601,6 @@ export const STORAGE_PRODUCTS: StorageProduct[] = [
     },
     storageType: '냉장' as StorageType,
     capacity: '파렛트 18개',
-    price: 75000,
-    priceUnit: '일',
     features: ['F_TEMP_MONITORING'] as FeatureCode[],
     regulationStatus: { allowed: true },
     // PR4 규정: 냉장 창고, 중형 물량 요구

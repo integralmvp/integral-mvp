@@ -12,8 +12,11 @@ export interface EventSubject {
   id: string
 }
 
-// ============ 이벤트 시그니처 (선택적) ============
-export interface EventSignature {
+// ============ 화물 택소노미 컨텍스트 (이벤트 부가 정보) ============
+/** @deprecated EventSignature → CargoTaxonomyContext로 리네임 */
+export type EventSignature = CargoTaxonomyContext
+
+export interface CargoTaxonomyContext {
   itemCode?: string
   weightBand?: WeightBand
   sizeBand?: SizeBand
@@ -25,7 +28,7 @@ export interface EventSignature {
 export type PlatformEventType =
   | 'CARGO_CREATED'
   | 'CARGO_REMOVED'
-  | 'CARGO_SIGNATURE_UPDATED'
+  | 'CARGO_TAXONOMY_UPDATED'
   | 'RULE_CHECKED'
   | 'RULES_PASSED'
   | 'QUANTITY_SET'
@@ -57,7 +60,7 @@ export interface PlatformEvent {
   actorId: string
 
   subject: EventSubject
-  signature?: EventSignature
+  context?: CargoTaxonomyContext
   fields?: Record<string, unknown>
 }
 

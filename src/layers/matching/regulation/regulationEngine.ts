@@ -220,7 +220,7 @@ export function filterOffersByRegulation<T extends OfferRegulationFields & { id:
  */
 export function adaptCargoForRegulation(cargo: {
   id: string
-  signature?: CargoSignature
+  taxonomy?: CargoSignature
   fields?: { sumCm: number; weightKg: number }
   // CargoUI 필드
   sumCm?: number
@@ -230,15 +230,15 @@ export function adaptCargoForRegulation(cargo: {
   weightBand?: string
   sizeBand?: string
 }): CargoForRegulation {
-  // CargoInfo 형식인 경우
-  if (cargo.signature && cargo.fields) {
-    const isHazmat = RESTRICTED_CODES.includes(cargo.signature.itemCode) ||
-                     SPECIAL_HANDLING_CODES.includes(cargo.signature.itemCode)
-    const requiresTemp = isTempRequiredItem(cargo.signature.itemCode)
+  // CargoInfo 형식인 경우 (taxonomy + fields)
+  if (cargo.taxonomy && cargo.fields) {
+    const isHazmat = RESTRICTED_CODES.includes(cargo.taxonomy.itemCode) ||
+                     SPECIAL_HANDLING_CODES.includes(cargo.taxonomy.itemCode)
+    const requiresTemp = isTempRequiredItem(cargo.taxonomy.itemCode)
 
     return {
       id: cargo.id,
-      signature: cargo.signature,
+      signature: cargo.taxonomy,
       fields: {
         sumCm: cargo.fields.sumCm,
         weightKg: cargo.fields.weightKg,

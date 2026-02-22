@@ -7,14 +7,14 @@
 
 export type RegionLevel = 'province' | 'city' | 'town' | 'district' | 'ri'
 
-export interface RegionCode {
+export interface JejuRegionEntry {
   code: string
   name: string
   level: RegionLevel
   active: boolean
 }
 
-export const JEJU_REGION_CODES: RegionCode[] = [
+export const JEJU_REGION_CODES: JejuRegionEntry[] = [
   { code: "5000000000", name: "제주특별자치도", level: "province", active: true },
 
   { code: "5011000000", name: "제주특별자치도 제주시", level: "city", active: true },

@@ -6,7 +6,12 @@
  */
 
 import type { StorageProduct, RouteProduct } from '../../../types/models'
-import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../data/mock/mockData'
+import {
+  getStorageOfferById,
+  getRouteOfferById,
+  updateStorageOfferResource,
+  updateRouteOfferResource,
+} from '../../../infra/storage/info/offer.repo'
 
 /**
  * 자원 할당 파라미터
@@ -39,9 +44,10 @@ export interface AllocateResourceResult {
 export function allocateResource(params: AllocateResourceParams): AllocateResourceResult {
   const { offerId, offerType, billableCubes, totalWeightKg } = params
 
-  // 상품 찾기
-  const offers = offerType === 'storage' ? STORAGE_PRODUCTS : ROUTE_PRODUCTS
-  const offer = offers.find(o => o.id === offerId)
+  // 상품 찾기 (repo 경유)
+  const offer = offerType === 'storage'
+    ? getStorageOfferById(offerId)
+    : getRouteOfferById(offerId)
 
   if (!offer) {
     return {
@@ -65,17 +71,20 @@ export function allocateResource(params: AllocateResourceParams): AllocateResour
     }
   }
 
-  // 재고 차감
-  offer.remainingCubes -= billableCubes
+  // 재고 차감 (repo 경유)
+  const newRemainingCubes = offer.remainingCubes - billableCubes
+  const newRemainingPayloadKg = offer.remainingPayloadKg !== undefined
+    ? offer.remainingPayloadKg - totalWeightKg
+    : undefined
 
-  if (offer.remainingPayloadKg !== undefined) {
-    offer.remainingPayloadKg -= totalWeightKg
-  }
+  const updatedOffer = offerType === 'storage'
+    ? updateStorageOfferResource(offerId, { remainingCubes: newRemainingCubes, remainingPayloadKg: newRemainingPayloadKg })
+    : updateRouteOfferResource(offerId, { remainingCubes: newRemainingCubes, remainingPayloadKg: newRemainingPayloadKg })
 
   return {
     success: true,
     message: `자원 할당 완료 (큐브: ${billableCubes}, 중량: ${totalWeightKg}kg)`,
-    updatedOffer: offer,
+    updatedOffer: updatedOffer as StorageProduct | RouteProduct,
   }
 }
 
@@ -91,9 +100,10 @@ export function allocateResource(params: AllocateResourceParams): AllocateResour
 export function releaseResource(params: AllocateResourceParams): AllocateResourceResult {
   const { offerId, offerType, billableCubes, totalWeightKg } = params
 
-  // 상품 찾기
-  const offers = offerType === 'storage' ? STORAGE_PRODUCTS : ROUTE_PRODUCTS
-  const offer = offers.find(o => o.id === offerId)
+  // 상품 찾기 (repo 경유)
+  const offer = offerType === 'storage'
+    ? getStorageOfferById(offerId)
+    : getRouteOfferById(offerId)
 
   if (!offer) {
     return {
@@ -102,22 +112,19 @@ export function releaseResource(params: AllocateResourceParams): AllocateResourc
     }
   }
 
-  // 재고 복원
-  offer.remainingCubes = Math.min(
-    offer.remainingCubes + billableCubes,
-    offer.capacityCubes
-  )
+  // 재고 복원 (repo 경유, 상한 클리핑)
+  const newRemainingCubes = Math.min(offer.remainingCubes + billableCubes, offer.capacityCubes)
+  const newRemainingPayloadKg = (offer.remainingPayloadKg !== undefined && offer.payloadCapacityKg !== undefined)
+    ? Math.min(offer.remainingPayloadKg + totalWeightKg, offer.payloadCapacityKg)
+    : undefined
 
-  if (offer.remainingPayloadKg !== undefined && offer.payloadCapacityKg !== undefined) {
-    offer.remainingPayloadKg = Math.min(
-      offer.remainingPayloadKg + totalWeightKg,
-      offer.payloadCapacityKg
-    )
-  }
+  const updatedOffer = offerType === 'storage'
+    ? updateStorageOfferResource(offerId, { remainingCubes: newRemainingCubes, remainingPayloadKg: newRemainingPayloadKg })
+    : updateRouteOfferResource(offerId, { remainingCubes: newRemainingCubes, remainingPayloadKg: newRemainingPayloadKg })
 
   return {
     success: true,
     message: `자원 복원 완료 (큐브: ${billableCubes}, 중량: ${totalWeightKg}kg)`,
-    updatedOffer: offer,
+    updatedOffer: updatedOffer as StorageProduct | RouteProduct,
   }
 }
