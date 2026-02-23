@@ -24,6 +24,9 @@ export interface Coordinates {
 export const REGION_REPRESENTATIVE_COORDS: Record<string, Coordinates> = {
   // ============ 제주도 법정동 코드 기반 ============
 
+  // 도 단위 (최상위 선택 시 지도 중심점 용도 — 필터는 conditionFilters에서 처리)
+  '5000000000': { lat: 33.364805, lng: 126.542671 },  // 제주특별자치도 중심점
+
   // 시 단위
   '5011000000': { lat: 33.499621, lng: 126.531188 },  // 제주시
   '5013000000': { lat: 33.254120, lng: 126.560076 },  // 서귀포시

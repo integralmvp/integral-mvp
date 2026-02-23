@@ -305,6 +305,7 @@ export default function StorageTabSection({
               key={cargo.id}
               cargo={cargo}
               onQuantityChange={onUpdateQuantity}
+              mode="STORAGE"
             />
           ))}
 

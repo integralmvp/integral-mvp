@@ -138,10 +138,17 @@ export default function DealPage({
     let storageBillable = null
     let routeBillable = null
 
+    // 보관 일수 계산: startDate/endDate 존재 시 실제 차이, 없으면 1일 추정
+    const storageDaysIsEstimated = !(storageCondition.startDate && storageCondition.endDate)
+    const storageDays = storageDaysIsEstimated
+      ? 1
+      : Math.max(1, Math.ceil(
+          (new Date(storageCondition.endDate!).getTime() - new Date(storageCondition.startDate!).getTime())
+          / (1000 * 60 * 60 * 24)
+        ))
+
     // Storage 정산
     if (storageProduct) {
-      // Storage 보관 일수 계산 (간단히 1일로 가정, 실제로는 날짜 차이 계산)
-      const days = 1 // TODO: storageCondition.startDate와 endDate로 계산
 
       storageBillable = calcBillableCubes(
         totalCubes,
@@ -152,7 +159,7 @@ export default function DealPage({
       storageResult = calcStorageEstimate(
         storageBillable.billableCubes,
         storageProduct.unitPricePerCube,
-        days,
+        storageDays,
         optionSurcharges
       )
     }
@@ -190,8 +197,10 @@ export default function DealPage({
       routeBillable,
       storageResult,
       routeResult,
+      storageDays,
+      storageDaysIsEstimated,
     }
-  }, [storageProduct, routeProduct, totalCubes, registeredCargos, options])
+  }, [storageProduct, routeProduct, totalCubes, registeredCargos, options, storageCondition])
 
   // 옵션 토글
   const toggleOption = (optionId: string) => {
@@ -517,6 +526,11 @@ export default function DealPage({
                       <span className="font-bold text-teal-700">{costCalculation.storageBillable.billableCubes}큐브</span>
                       <span className="text-slate-400">×</span>
                       <span className="font-medium text-slate-700">₩{storageProduct.unitPricePerCube.toLocaleString()}/큐브</span>
+                      <span className="text-slate-400">×</span>
+                      <span className="font-medium text-slate-700">
+                        {costCalculation.storageDays}일
+                        {costCalculation.storageDaysIsEstimated && <span className="text-slate-400 text-xs ml-1">(추정)</span>}
+                      </span>
                       <span className="text-slate-400">=</span>
                       <span className="font-bold text-slate-900">₩{costCalculation.storageResult?.base.toLocaleString()}</span>
                     </div>

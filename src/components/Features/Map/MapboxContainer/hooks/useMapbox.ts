@@ -6,8 +6,10 @@ import {
   addMiniMapArrowImages,
   addPalletMarkers,
   addCurvedRoutes,
-  addMiniMapRoutes
+  addMiniMapRoutes,
+  updateMarkerHighlights,
 } from './useMapLayers'
+import { useSearchResult } from '../../../../../contexts/SearchResultContext'
 
 // Mapbox Access Token
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || ''
@@ -72,6 +74,10 @@ export function useMapbox(): UseMapboxResult {
   const map = useRef<mapboxgl.Map | null>(null)
   const miniMap = useRef<mapboxgl.Map | null>(null)
   const resizeObserver = useRef<ResizeObserver | null>(null)
+  // offerId → marker HTMLElement 맵 (하이라이트 제어용)
+  const markerElementMap = useRef<Map<string, HTMLElement>>(new Map())
+
+  const { highlightedIds, previewResult } = useSearchResult()
 
   // 리사이즈 핸들러 (메모이제이션)
   const handleResize = useCallback(() => {
@@ -105,7 +111,8 @@ export function useMapbox(): UseMapboxResult {
       map.current.resize()
       applyCameraPadding(map.current)
 
-      addPalletMarkers(map.current)
+      // 마커 추가 후 markerElementMap 저장 (하이라이트 제어용)
+      markerElementMap.current = addPalletMarkers(map.current)
       addArrowImages(map.current)
 
       setTimeout(() => {
@@ -150,10 +157,20 @@ export function useMapbox(): UseMapboxResult {
       // cleanup: observer disconnect, event listener 제거
       resizeObserver.current?.disconnect()
       window.removeEventListener('resize', handleResize)
+      markerElementMap.current.clear()
       map.current?.remove()
       miniMap.current?.remove()
     }
   }, [handleResize])
+
+  // highlightedIds 변경 시 마커 하이라이트 업데이트
+  // previewResult가 null이면 highlightedIds는 빈 Set → 전체 해제
+  useEffect(() => {
+    updateMarkerHighlights(
+      previewResult ? highlightedIds : null,
+      markerElementMap.current
+    )
+  }, [highlightedIds, previewResult])
 
   return {
     mapContainer,

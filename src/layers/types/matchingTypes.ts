@@ -140,3 +140,15 @@ export interface PreviewResult {
   /** Route 매칭 결과 */
   routeOffers?: RouteProduct[]
 }
+
+/**
+ * 검색 결과 스냅샷 (검색 버튼 클릭 시 확정)
+ * 단일 진실 소스: layers/types/matchingTypes.ts
+ * → SearchResultContext와 useServiceConsoleState 모두 이 타입을 사용
+ */
+export interface SearchResult {
+  storageProducts: StorageProduct[]
+  routeProducts: RouteProduct[]
+  counts: PipelineCounts
+  searchedAt: string
+}

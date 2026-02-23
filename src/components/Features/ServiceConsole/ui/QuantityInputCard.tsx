@@ -7,11 +7,14 @@ import { PRODUCT_CATEGORIES, WEIGHT_RANGES } from '../../../../data/mock/mockDat
 interface QuantityInputCardProps {
   cargo: RegisteredCargo
   onQuantityChange: (cargoId: string, quantity: number, estimatedCubes: number) => void
+  /** 서비스 모드: 보관(STORAGE, 팽창율 1.15) vs 운송(ROUTE, 팽창율 1.10). 기본값 'ROUTE' */
+  mode?: 'STORAGE' | 'ROUTE'
 }
 
 export default function QuantityInputCard({
   cargo,
   onQuantityChange,
+  mode = 'ROUTE',
 }: QuantityInputCardProps) {
   const [quantity, setQuantity] = useState<number>(cargo.quantity || 0)
   const [confirmed, setConfirmed] = useState(cargo.quantity !== undefined && cargo.quantity > 0)
@@ -31,7 +34,7 @@ export default function QuantityInputCard({
       count: qty,
     }
 
-    const result = computeDemand([boxInput], 'ROUTE')
+    const result = computeDemand([boxInput], mode)
     return result.demandCubes
   }
 

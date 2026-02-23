@@ -1,2 +1,2 @@
 export { useMapbox } from './useMapbox'
-export { addPalletMarkers, addCurvedRoutes } from './useMapLayers'
+export { addPalletMarkers, addCurvedRoutes, updateMarkerHighlights } from './useMapLayers'

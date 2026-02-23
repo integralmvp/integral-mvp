@@ -30,9 +30,13 @@ export function addMiniMapArrowImages(miniMap: mapboxgl.Map): void {
   purpleArrow.src = createArrowSvgUrl(ARROW_COLORS.magenta.fill, ARROW_COLORS.magenta.stroke, 16)
 }
 
-// 파렛트 마커 추가
-export function addPalletMarkers(map: mapboxgl.Map): void {
+/**
+ * 파렛트 마커 추가
+ * @returns offerId → marker HTMLElement 맵 (하이라이트 업데이트에 사용)
+ */
+export function addPalletMarkers(map: mapboxgl.Map): Map<string, HTMLElement> {
   console.log('[MapboxContainer] Adding pallet markers...')
+  const markerElementMap = new Map<string, HTMLElement>()
 
   getAllStorageOffers().forEach((storage) => {
     console.log(`[Marker] ${storage.location.name}:`, {
@@ -46,8 +50,8 @@ export function addPalletMarkers(map: mapboxgl.Map): void {
     const size = getPalletMarkerSize(capacity)
 
     const el = document.createElement('div')
-    el.className = 'pallet-marker'
-    el.dataset.productId = storage.id  // PR4: 하이라이트용 ID
+    el.className = 'offer-marker'
+    el.dataset.offerId = storage.id
     el.style.width = `${size}px`
     el.style.height = `${size}px`
     el.style.cursor = 'pointer'
@@ -57,12 +61,12 @@ export function addPalletMarkers(map: mapboxgl.Map): void {
         height: 100%;
         transition: transform 0.2s ease;
         transform-origin: center center;
-      " class="pallet-marker-inner">
+      " class="offer-marker-inner">
         ${createPalletSvg(size)}
       </div>
     `
 
-    const innerDiv = el.querySelector('.pallet-marker-inner') as HTMLElement
+    const innerDiv = el.querySelector('.offer-marker-inner') as HTMLElement
     el.addEventListener('mouseenter', () => {
       if (innerDiv) innerDiv.style.transform = 'scale(1.2)'
     })
@@ -95,6 +99,36 @@ export function addPalletMarkers(map: mapboxgl.Map): void {
     el.addEventListener('mouseleave', () => {
       popup.remove()
     })
+
+    markerElementMap.set(storage.id, el)
+  })
+
+  return markerElementMap
+}
+
+/**
+ * 하이라이트 상태 업데이트
+ * highlightedIds에 있는 마커는 .offer-marker--highlighted 클래스를 추가,
+ * 없는 마커는 제거. previewResult가 null이면 모든 하이라이트 제거.
+ *
+ * @param highlightedIds - 하이라이트할 offer ID Set (null이면 전체 해제)
+ * @param markerElementMap - offerId → HTMLElement 맵
+ */
+export function updateMarkerHighlights(
+  highlightedIds: Set<string> | null,
+  markerElementMap: Map<string, HTMLElement>
+): void {
+  markerElementMap.forEach((el, offerId) => {
+    if (highlightedIds && highlightedIds.size > 0) {
+      if (highlightedIds.has(offerId)) {
+        el.classList.add('offer-marker--highlighted')
+      } else {
+        el.classList.remove('offer-marker--highlighted')
+      }
+    } else {
+      // previewResult 없음 → 전체 하이라이트 해제 (모든 마커 기본 표시)
+      el.classList.remove('offer-marker--highlighted')
+    }
   })
 }
 

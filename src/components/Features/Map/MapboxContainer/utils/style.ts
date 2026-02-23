@@ -50,7 +50,10 @@ export function createPalletSvg(size: number): string {
   `
 }
 
-// PR4: 구매 가능 상품 하이라이트 마커 (물방울 + O 표시)
+/**
+ * @deprecated 외부 import 사용처 없음 (하이라이트 로직이 CSS 클래스 기반으로 변경됨).
+ * createHighlightMarkerHtml과 함께 제거 예정. 현재는 createHighlightMarkerHtml에서만 사용.
+ */
 export function createAvailableMarkerSvg(): string {
   return `
     <svg width="32" height="42" viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg">

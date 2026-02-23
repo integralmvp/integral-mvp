@@ -62,7 +62,10 @@ export function computeDemand(
 }
 
 /**
- * 면적 입력 기반 수요 계산 (Fallback)
+ * 면적 입력 기반 수요 계산
+ *
+ * @deprecated 현재 사용처 없음 (UI는 박스 입력 기반 computeDemand 사용).
+ * 실수로 사용하지 말 것. 제거 예정.
  */
 export function computeDemandFromArea(
   areaM2: number,

@@ -1,10 +1,9 @@
-// 서비스 콘솔 상태 관리 훅 - 단일 진실 소스
-// PR3-3: UI 재설계 - 화물 등록 → 물량 입력 → 조건 입력 흐름 반영
-// Code Data System MVP: CargoInfo, DemandSession, Event 연동
-// PR4: Regulation Engine 연동 - 검색 시 규정 필터링
-// PR6: Matching Pipeline 통합 - 프리뷰/검색 결과 동기화
+// 서비스 콘솔 상태 관리 훅 - Facade (단일 진실 소스)
+// 기능 로직은 각 서브훅에 위임:
+//   - useCargoRegistration: 화물 UI 상태 + 등록/물량 액션
+//   - useMatchingPreview: 파이프라인 실행 + 검색 스냅샷
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type {
   CargoUI,
   RegisteredCargo,
@@ -15,44 +14,33 @@ import type {
   StorageProduct,
   RouteProduct,
 } from '../../../../types/models'
-import { computeDemand, type BoxInput, type DemandResult } from '../../../../engine/cube'
+import type { DemandResult } from '../../../../engine/cube'
+import type { PipelineCounts } from '../../../../layers/matching'
+import type { SearchResult } from '../../../../layers/types'
 import {
-  runMatchingPipeline,
-  runCombinedPipeline,
-  type PipelineCounts,
-  type SearchConditions,
-} from '../../../../layers/matching'
-import { checkQuickRulesWithLogging } from '../../../../layers/matching/regulation/rules'
-import {
-  logDemandSessionCreated,
-  logResourceChecked,
-} from '../../../../infra/storage/event/eventLog'
-import {
-  addCargo as addCargoToStore,
-  removeCargo as removeCargoFromStore,
   loadOrCreateActiveDemand,
-  addCargoToDemand,
-  removeCargoFromDemand,
-  setQuantitiesAndCubes,
   setStorageCondition as setStorageConditionInStore,
   setTransportCondition as setTransportConditionInStore,
-  recordSearchExecution,
   resetActiveDemand,
 } from '../../../../infra/storage'
-import { CUBE_CONFIG } from '../../../../engine/cube/cubeConfig'
-import { getAllStorageOffers, getAllRouteOffers } from '../../../../infra/storage/info/offer.repo'
-import { useSearchResult } from '../../../../contexts/SearchResultContext'
+import { useCargoRegistration } from './useCargoRegistration'
+import { useMatchingPreview } from './useMatchingPreview'
 
-export type ServiceType = 'storage' | 'transport' | 'both'
+/**
+ * UIServiceType: UI 레벨 서비스 탭 타입 (소문자)
+ * 도메인 레벨 ServiceType('STORAGE'|'ROUTE'|'BOTH')과 구분하기 위해 별칭 제공.
+ * - UI/컴포넌트 코드에서는 UIServiceType 사용 권장
+ * - 도메인 변환은 toModelServiceType() 사용
+ */
+export type UIServiceType = 'storage' | 'transport' | 'both'
+/** @deprecated UIServiceType으로 마이그레이션 예정. 현재는 alias로 동작. */
+export type ServiceType = UIServiceType
 
 // UI 단계 정의
 export type FlowStep = 'cargo-registration' | 'quantity-input' | 'condition-input'
 
-// 화물 ID 생성용 카운터
-let cargoIdCounter = 0
-
 // ServiceType 변환 (UI → Model)
-function toModelServiceType(uiType: ServiceType): ServiceTypeModel {
+function toModelServiceType(uiType: UIServiceType): ServiceTypeModel {
   switch (uiType) {
     case 'storage': return 'STORAGE'
     case 'transport': return 'ROUTE'
@@ -68,16 +56,11 @@ export interface PreviewMatch {
   counts: PipelineCounts
 }
 
-// PR6: 검색 결과 타입 (스냅샷)
-export interface SearchResult {
-  storageProducts: StorageProduct[]
-  routeProducts: RouteProduct[]
-  counts: PipelineCounts
-  searchedAt: string
-}
+// SearchResult 타입 re-export (단일 진실 소스: layers/types/matchingTypes.ts)
+export type { SearchResult }
 
 export interface ServiceConsoleState {
-  activeTab: ServiceType
+  activeTab: UIServiceType
   currentStep: FlowStep
   expandedField: string | null
 
@@ -115,7 +98,7 @@ export interface ServiceConsoleState {
 }
 
 export interface ServiceConsoleActions {
-  setActiveTab: (tab: ServiceType) => void
+  setActiveTab: (tab: UIServiceType) => void
   setCurrentStep: (step: FlowStep) => void
   handleFieldClick: (fieldId: string) => void
   advanceAccordion: (nextFieldId: string) => void
@@ -151,36 +134,19 @@ export interface ServiceConsoleActions {
 }
 
 export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleActions] {
-  const [activeTab, setActiveTab] = useState<ServiceType>('storage')
+  // ── 공유 상태 (탭/단계/조건/주문/선택) ──────────────────────────────
+  const [activeTab, setActiveTabState] = useState<UIServiceType>('storage')
   const [currentStep, setCurrentStep] = useState<FlowStep>('cargo-registration')
   const [expandedField, setExpandedField] = useState<string | null>('cargo-registration')
 
-  // 화물 등록 상태
-  const [cargos, setCargos] = useState<CargoUI[]>([])
-  const [registeredCargos, setRegisteredCargos] = useState<RegisteredCargo[]>([])
-
-  // 보관 조건
-  const [storageCondition, setStorageCondition] = useState<StorageCondition>({})
-
-  // 운송 조건
-  const [transportCondition, setTransportCondition] = useState<TransportCondition>({})
-
-  // 보관+운송 순서
+  const [storageCondition, setStorageConditionState] = useState<StorageCondition>({})
+  const [transportCondition, setTransportConditionState] = useState<TransportCondition>({})
   const [serviceOrder, setServiceOrder] = useState<ServiceOrder>(null)
 
-  // Code Data System: 현재 Demand ID
   const [currentDemandId, setCurrentDemandId] = useState<string | null>(null)
 
-  // PR6: 검색 결과 상태 (스냅샷)
-  const [searchResult, setSearchResultLocal] = useState<SearchResult | null>(null)
-  const [isSearching, setIsSearching] = useState(false)
-
-  // PR7: 선택 상태
   const [selectedStorageId, setSelectedStorageId] = useState<string | undefined>()
   const [selectedRouteId, setSelectedRouteId] = useState<string | undefined>()
-
-  // PR6: Context 연동
-  const { setPreviewResult, setSearchResult: setSearchResultContext } = useSearchResult()
 
   // 탭 변경 시 DemandSession 초기화/로드
   useEffect(() => {
@@ -188,317 +154,32 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setCurrentDemandId(demand.demandId)
   }, [activeTab])
 
-  // 물량 입력 결과 계산
-  const { totalCubes, totalPallets, demandResult } = useMemo(() => {
-    const cargosWithQuantity = registeredCargos.filter(c => c.quantity !== undefined && c.quantity > 0)
-
-    if (cargosWithQuantity.length === 0) {
-      return { totalCubes: 0, totalPallets: 0, demandResult: null }
-    }
-
-    // 모든 화물을 BoxInput으로 변환하여 통합 계산
-    const boxInputs: BoxInput[] = cargosWithQuantity.map(cargo => ({
-      widthMm: cargo.width,
-      depthMm: cargo.depth,
-      heightMm: cargo.height,
-      count: cargo.quantity || 0,
-    }))
-
-    const mode = activeTab === 'transport' ? 'ROUTE' : 'STORAGE'
-    const result = computeDemand(boxInputs, mode)
-
-    return {
-      totalCubes: result.demandCubes,
-      totalPallets: result.demandPallets || Math.ceil(result.demandCubes / 128),
-      demandResult: result,
-    }
-  }, [registeredCargos, activeTab])
-
-  // PR6: 프리뷰 매칭 (실시간, 파이프라인 단일 소스)
-  const previewMatch = useMemo<PreviewMatch>(() => {
-    // 세션 정보 구성
-    const session = {
-      demandId: currentDemandId || undefined,
-      totalCubes,
-      totalPallets,
-      cargos: registeredCargos.map(cargo => ({
-        id: cargo.id,
-        sumCm: cargo.sumCm,
-        weightKg: cargo.weightKg,
-        moduleType: cargo.moduleType,
-        itemCode: cargo.itemCode,
-        weightBand: cargo.weightBand,
-        sizeBand: cargo.sizeBand,
-      })),
-    }
-
-    // 조건 구성 (PR7-pre: 코드 기반 조건 우선)
-    const conditions: SearchConditions = {
-      // Storage 조건 - 코드 우선
-      storageLocationCode: storageCondition.locationCode,
-      storageLocation: storageCondition.location,
-      startDate: storageCondition.startDate,
-      endDate: storageCondition.endDate,
-      // Route 조건 - 코드 우선
-      originCode: transportCondition.originCode,
-      destinationCode: transportCondition.destinationCode,
-      origin: transportCondition.origin,
-      destination: transportCondition.destination,
-      transportDate: transportCondition.transportDate,
-    }
-
-    // 탭별 파이프라인 실행
-    if (activeTab === 'storage') {
-      const result = runMatchingPipeline({
-        mode: 'STORAGE',
-        offers: getAllStorageOffers(),
-        session,
-        conditions,
-        sort: 'LATEST',
-      })
-
-      return {
-        storageProducts: result.matchedOffers,
-        routeProducts: [],
-        matchedOfferIds: result.matchedOfferIds,
-        counts: result.counts,
-      }
-    }
-
-    if (activeTab === 'transport') {
-      const result = runMatchingPipeline({
-        mode: 'ROUTE',
-        offers: getAllRouteOffers(),
-        session,
-        conditions,
-        sort: 'LATEST',
-      })
-
-      return {
-        storageProducts: [],
-        routeProducts: result.matchedOffers,
-        matchedOfferIds: result.matchedOfferIds,
-        counts: result.counts,
-      }
-    }
-
-    // both 탭
-    const combinedResult = runCombinedPipeline({
-      storageOffers: getAllStorageOffers(),
-      routeOffers: getAllRouteOffers(),
-      session,
-      conditions,
-      sort: 'LATEST',
-    })
-
-    return {
-      storageProducts: combinedResult.storage.matchedOffers,
-      routeProducts: combinedResult.route.matchedOffers,
-      matchedOfferIds: combinedResult.combinedIds,
-      counts: combinedResult.combinedCounts,
-    }
-  }, [
+  // ── 서브훅 ─────────────────────────────────────────────────────────
+  const cargoReg = useCargoRegistration(activeTab, currentDemandId)
+  const matchingPreview = useMatchingPreview(
     activeTab,
-    registeredCargos,
-    totalCubes,
-    totalPallets,
+    cargoReg.registeredCargos,
+    cargoReg.totalCubes,
+    cargoReg.totalPallets,
     storageCondition,
     transportCondition,
-    currentDemandId,
-  ])
+    currentDemandId
+  )
 
-  // PR6: Context에 프리뷰 결과 동기화 (지도 하이라이트용)
-  useEffect(() => {
-    // 화물이 있거나 조건이 있을 때만 프리뷰 결과 설정
-    // PR6 일원화: locationCode 기반으로 체크
-    const hasCargoOrCondition =
-      registeredCargos.length > 0 ||
-      storageCondition.locationCode ||
-      transportCondition.originCode ||
-      transportCondition.destinationCode
-
-    if (hasCargoOrCondition) {
-      setPreviewResult({
-        storageProducts: previewMatch.storageProducts,
-        routeProducts: previewMatch.routeProducts,
-        matchedOfferIds: previewMatch.matchedOfferIds,
-        counts: previewMatch.counts,
-        updatedAt: new Date().toISOString(),
-      })
-    } else {
-      setPreviewResult(null)
-    }
-  }, [
-    previewMatch,
-    registeredCargos.length,
-    storageCondition.locationCode,
-    transportCondition.originCode,
-    transportCondition.destinationCode,
-    setPreviewResult,
-  ])
-
-  // 화물 추가
-  const addCargo = () => {
-    const newCargo: CargoUI = {
-      id: `cargo-${++cargoIdCounter}`,
-      width: 0,
-      depth: 0,
-      height: 0,
-      completed: false,
-    }
-    setCargos([...cargos, newCargo])
-  }
-
-  // 화물 삭제
-  const removeCargo = (cargoId: string) => {
-    const cargo = registeredCargos.find(c => c.id === cargoId)
-
-    // Code Data System: CargoInfo 삭제
-    if (cargo?.cargoInfoId) {
-      removeCargoFromStore(cargo.cargoInfoId)
-
-      // DemandSession에서도 제거
-      if (currentDemandId) {
-        removeCargoFromDemand(currentDemandId, cargo.cargoInfoId)
-      }
-    }
-
-    setCargos(cargos.filter(c => c.id !== cargoId))
-    setRegisteredCargos(registeredCargos.filter(c => c.id !== cargoId))
-  }
-
-  // 화물 업데이트
-  const updateCargo = (cargoId: string, updates: Partial<CargoUI>) => {
-    setCargos(cargos.map(c =>
-      c.id === cargoId ? { ...c, ...updates } : c
-    ))
-  }
-
-  // 화물 등록 완료
-  const completeCargo = (cargoId: string) => {
-    const cargo = cargos.find(c => c.id === cargoId)
-    if (!cargo) return
-
-    // Code Data System: 규정 체크
-    checkQuickRulesWithLogging(
-      {
-        sumCm: cargo.sumCm || 0,
-        weightKg: cargo.weightKg || 0,
-        itemCode: cargo.itemCode || 'IC99',
-        moduleClass: cargo.moduleType || 'UNCLASSIFIED',
-      },
-      { kind: 'cargo', id: cargoId }
-    )
-
-    // Code Data System: CargoInfo 저장
-    const cargoInfo = addCargoToStore({
-      widthMm: cargo.width,
-      depthMm: cargo.depth,
-      heightMm: cargo.height,
-      moduleClass: cargo.moduleType || 'UNCLASSIFIED',
-      itemCode: cargo.itemCode || 'IC99',
-      weightKg: cargo.weightKg || 0,
-    })
-
-    // Code Data System: DemandSession에 화물 추가
-    if (currentDemandId) {
-      addCargoToDemand(currentDemandId, cargoInfo.id)
-    }
-
-    // 완료 상태로 업데이트
-    setCargos(cargos.map(c =>
-      c.id === cargoId ? { ...c, completed: true, cargoInfoId: cargoInfo.id } : c
-    ))
-
-    // 등록된 화물 목록에 추가
-    const registeredCargo: RegisteredCargo = {
-      ...cargo,
-      completed: true,
-      cargoNumber: registeredCargos.length + 1,
-      cargoInfoId: cargoInfo.id,
-    }
-    setRegisteredCargos([...registeredCargos, registeredCargo])
-  }
-
-  // 물량 업데이트
-  const updateCargoQuantity = (cargoId: string, quantity: number, estimatedCubes: number) => {
-    setRegisteredCargos(registeredCargos.map(c =>
-      c.id === cargoId ? { ...c, quantity, estimatedCubes } : c
-    ))
-  }
-
-  // 물량 입력 확정 → 조건 입력 단계로 이동
-  const confirmQuantityInput = () => {
-    // Code Data System: DemandSession 업데이트
-    if (currentDemandId && demandResult) {
-      const mode = activeTab === 'transport' ? 'ROUTE' : 'STORAGE'
-      const packingFactor = mode === 'STORAGE'
-        ? CUBE_CONFIG.packingFactor.STORAGE
-        : CUBE_CONFIG.packingFactor.ROUTE
-
-      // 화물별 수량 및 큐브 결과 생성
-      const quantitiesByCargoId: Record<string, number> = {}
-      const cubeResultByCargoId: Record<string, { mode: 'STORAGE' | 'ROUTE'; cubes: number }> = {}
-
-      registeredCargos.forEach(cargo => {
-        if (cargo.cargoInfoId && cargo.quantity) {
-          quantitiesByCargoId[cargo.cargoInfoId] = cargo.quantity
-          cubeResultByCargoId[cargo.cargoInfoId] = {
-            mode: mode,
-            cubes: cargo.estimatedCubes || 0,
-          }
-        }
-      })
-
-      setQuantitiesAndCubes(currentDemandId, {
-        quantitiesByCargoId,
-        cubeResultByCargoId,
-        totalCubes,
-        totalPallets: mode === 'STORAGE' ? totalPallets : undefined,
-        packingFactor,
-      })
-    }
-
-    setCurrentStep('condition-input')
-    setExpandedField('condition-input')
-  }
-
-  // 보관 조건 업데이트
+  // ── 조건 업데이트 ───────────────────────────────────────────────────
   const updateStorageCondition = (updates: Partial<StorageCondition>) => {
-    const newCondition = { ...storageCondition, ...updates }
-    setStorageCondition(newCondition)
-
-    // Code Data System: DemandSession 업데이트
-    if (currentDemandId) {
-      setStorageConditionInStore(currentDemandId, updates)
-    }
+    setStorageConditionState(prev => ({ ...prev, ...updates }))
+    if (currentDemandId) setStorageConditionInStore(currentDemandId, updates)
   }
 
-  // 운송 조건 업데이트
   const updateTransportCondition = (updates: Partial<TransportCondition>) => {
-    const newCondition = { ...transportCondition, ...updates }
-    setTransportCondition(newCondition)
-
-    // Code Data System: DemandSession 업데이트
-    if (currentDemandId) {
-      setTransportConditionInStore(currentDemandId, updates)
-    }
+    setTransportConditionState(prev => ({ ...prev, ...updates }))
+    if (currentDemandId) setTransportConditionInStore(currentDemandId, updates)
   }
 
-  // PR4: 물량 초기화
-  const resetQuantities = () => {
-    setRegisteredCargos(registeredCargos.map(c => ({
-      ...c,
-      quantity: undefined,
-      estimatedCubes: undefined,
-    })))
-  }
-
-  // PR4: 보관 조건 초기화
   const resetStorageCondition = () => {
-    setStorageCondition({})
+    setStorageConditionState({})
     if (currentDemandId) {
-      // PR6: locationCode도 함께 초기화
       setStorageConditionInStore(currentDemandId, {
         location: undefined,
         locationCode: undefined,
@@ -508,11 +189,9 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     }
   }
 
-  // PR4: 운송 조건 초기화
   const resetTransportCondition = () => {
-    setTransportCondition({})
+    setTransportConditionState({})
     if (currentDemandId) {
-      // PR6: originCode/destinationCode도 함께 초기화
       setTransportConditionInStore(currentDemandId, {
         origin: undefined,
         originCode: undefined,
@@ -523,41 +202,41 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     }
   }
 
-  // 아코디언 필드 클릭
+  // ── 아코디언 ────────────────────────────────────────────────────────
   const handleFieldClick = (fieldId: string) => {
-    setExpandedField(expandedField === fieldId ? null : fieldId)
+    setExpandedField(prev => prev === fieldId ? null : fieldId)
   }
 
-  // 다음 아코디언으로 이동
   const advanceAccordion = (nextFieldId: string) => {
     setExpandedField(nextFieldId)
   }
 
-  // 탭 변경 시 상태 리셋
-  const handleTabChange = (tab: ServiceType) => {
-    setActiveTab(tab)
+  // ── 탭 변경 ─────────────────────────────────────────────────────────
+  const handleTabChange = (tab: UIServiceType) => {
+    setActiveTabState(tab)
     setCurrentStep('cargo-registration')
     setExpandedField('cargo-registration')
-    setCargos([])
-    setRegisteredCargos([])
-    setStorageCondition({})
-    setTransportCondition({})
+    setStorageConditionState({})
+    setTransportConditionState({})
     setServiceOrder(null)
-    // PR6: 검색 결과 리셋
-    setSearchResultLocal(null)
-    setSearchResultContext(null)
-    setPreviewResult(null)
-    setIsSearching(false)
-    // PR7: 선택 상태 리셋
     setSelectedStorageId(undefined)
     setSelectedRouteId(undefined)
+    cargoReg.resetAll()
+    matchingPreview.resetSearch()
 
-    // Code Data System: 새 DemandSession 시작
     const demand = resetActiveDemand(toModelServiceType(tab))
     setCurrentDemandId(demand.demandId)
   }
 
-  // PR7: 선택 핸들러
+  // ── confirmQuantityInput (step 이동 포함) ──────────────────────────
+  const confirmQuantityInput = () => {
+    cargoReg.confirmQuantityInput(() => {
+      setCurrentStep('condition-input')
+      setExpandedField('condition-input')
+    })
+  }
+
+  // ── 선택 ─────────────────────────────────────────────────────────────
   const selectStorage = useCallback((id: string) => {
     setSelectedStorageId(id || undefined)
   }, [])
@@ -566,82 +245,23 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setSelectedRouteId(id || undefined)
   }, [])
 
-  // PR6: 검색 (프리뷰 결과를 스냅샷으로 저장)
-  const handleSearch = useCallback(() => {
-    console.log('=== PR6 검색 시작 (단일 파이프라인) ===')
-    console.log('활성 탭:', activeTab)
-    console.log('프리뷰 건수:', previewMatch.matchedOfferIds.length)
-
-    setIsSearching(true)
-
-    // PR5: 세션 생성 이벤트 로깅
-    const sessionMode = activeTab === 'transport' ? 'ROUTE' : 'STORAGE'
-    if (currentDemandId) {
-      logDemandSessionCreated(
-        currentDemandId,
-        sessionMode,
-        totalCubes,
-        sessionMode === 'STORAGE' ? totalPallets : undefined
-      )
-    }
-
-    // PR6: 프리뷰 결과를 스냅샷으로 저장
-    const result: SearchResult = {
-      storageProducts: previewMatch.storageProducts,
-      routeProducts: previewMatch.routeProducts,
-      counts: previewMatch.counts,
-      searchedAt: new Date().toISOString(),
-    }
-
-    setSearchResultLocal(result)
-    setSearchResultContext(result)
-    setIsSearching(false)
-
-    const totalResourcePassed = previewMatch.matchedOfferIds.length
-    console.log('검색 결과:', totalResourcePassed, '건')
-    console.log('단계별 건수:', previewMatch.counts)
-
-    // PR6: 이벤트 기록 (counts 포함)
-    if (currentDemandId) {
-      // 자원 체크 이벤트
-      const totalFailed =
-        previewMatch.counts.afterResource - previewMatch.counts.afterConditions
-      logResourceChecked(currentDemandId, totalResourcePassed, totalFailed)
-
-      // 검색 실행 이벤트 (counts 포함)
-      recordSearchExecution(currentDemandId, totalResourcePassed, {
-        afterRegulation: previewMatch.counts.afterRegulation,
-        afterResource: previewMatch.counts.afterResource,
-        afterConditions: previewMatch.counts.afterConditions,
-      })
-    }
-
-    console.log('=== PR6 검색 완료 ===')
-  }, [
-    activeTab,
-    previewMatch,
-    totalCubes,
-    totalPallets,
-    currentDemandId,
-    setSearchResultContext,
-  ])
-
+  // ── 조합 ─────────────────────────────────────────────────────────────
   const state: ServiceConsoleState = {
     activeTab,
     currentStep,
     expandedField,
-    cargos,
-    registeredCargos,
-    totalCubes,
-    totalPallets,
-    demandResult,
+    cargos: cargoReg.cargos,
+    registeredCargos: cargoReg.registeredCargos,
+    totalCubes: cargoReg.totalCubes,
+    totalPallets: cargoReg.totalPallets,
+    demandResult: cargoReg.demandResult,
     storageCondition,
     transportCondition,
     serviceOrder,
-    previewCount: previewMatch.matchedOfferIds.length,
+    previewCount: matchingPreview.previewMatch.matchedOfferIds.length,
     currentDemandId,
-    searchResult: searchResult,
-    isSearching,
+    searchResult: matchingPreview.searchResult,
+    isSearching: matchingPreview.isSearching,
     selectedStorageId,
     selectedRouteId,
   }
@@ -651,19 +271,19 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     setCurrentStep,
     handleFieldClick,
     advanceAccordion,
-    addCargo,
-    removeCargo,
-    updateCargo,
-    completeCargo,
-    updateCargoQuantity,
+    addCargo: cargoReg.addCargo,
+    removeCargo: cargoReg.removeCargo,
+    updateCargo: cargoReg.updateCargo,
+    completeCargo: cargoReg.completeCargo,
+    updateCargoQuantity: cargoReg.updateCargoQuantity,
     confirmQuantityInput,
     updateStorageCondition,
     updateTransportCondition,
-    resetQuantities,
+    resetQuantities: cargoReg.resetQuantities,
     resetStorageCondition,
     resetTransportCondition,
     setServiceOrder,
-    handleSearch,
+    handleSearch: matchingPreview.handleSearch,
     selectStorage,
     selectRoute,
   }
