@@ -79,9 +79,10 @@ export interface BoxBasedAreaSelection {
 // ============ Code Data System - CargoInfo ============
 export interface CargoInfo {
   id: string
+  signature: string  // CDS record type identifier ('INFO_CARGO')
   ownerId: string
 
-  signature: {
+  taxonomy: {
     moduleClass: ModuleClassification
     itemCode: string
     weightBand: WeightBand

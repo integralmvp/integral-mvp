@@ -3,27 +3,12 @@
  * 수요 세션 도메인 타입 정의
  */
 
-import type { RegionCode } from './codes'
+export type { StorageCondition, TransportCondition } from './condition'
+import type { StorageCondition, TransportCondition } from './condition'
 
 // ============ 서비스 유형 ============
 export type ServiceType = 'STORAGE' | 'ROUTE' | 'BOTH'
 export type ServiceOrder = 'storage-first' | 'transport-first' | null
-
-// ============ 조건 입력 상태 ============
-export interface StorageCondition {
-  location?: string           // 보관 장소 표시용 (name)
-  locationCode?: RegionCode   // 보관 장소 법정동 코드 (필터링 SoT)
-  startDate?: string
-  endDate?: string
-}
-
-export interface TransportCondition {
-  origin?: string
-  originCode?: RegionCode
-  destination?: string
-  destinationCode?: RegionCode
-  transportDate?: string
-}
 
 // ============ 수요 세션 상태 ============
 export type DemandStatus =
@@ -36,6 +21,7 @@ export type DemandStatus =
 // ============ DemandSession ============
 export interface DemandSession {
   demandId: string
+  signature: string   // CDS record type identifier ('INFO_DEMAND_SESSION')
   ownerId: string
 
   serviceType: ServiceType

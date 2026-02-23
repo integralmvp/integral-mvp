@@ -66,9 +66,9 @@ console.log('\n[1.2] CargoInfo 저장 확인')
 console.log('  - ID:', cargoInfo.id)
 console.log('  - 저장됨:', cargoInfo ? '✅' : '❌')
 
-// 1.3 Signature 확인
-console.log('\n[1.3] CargoInfo.signature 확인')
-const sig = cargoInfo.signature
+// 1.3 Taxonomy 확인
+console.log('\n[1.3] CargoInfo.taxonomy 확인')
+const sig = cargoInfo.taxonomy
 console.log('  - itemCode:', sig.itemCode, sig.itemCode ? '✅' : '❌')
 console.log('  - weightBand:', sig.weightBand, sig.weightBand ? '✅' : '❌')
 console.log('  - sizeBand:', sig.sizeBand, sig.sizeBand ? '✅' : '❌')
@@ -93,11 +93,11 @@ console.log('  - 사유:', ruleResult.reasons.join(', '))
 console.log('\n[1.5] EventLog 확인')
 const events = getEvents()
 const cargoCreatedEvent = events.find(e => e.eventType === 'CARGO_CREATED')
-const sigUpdatedEvent = events.find(e => e.eventType === 'CARGO_SIGNATURE_UPDATED')
+const sigUpdatedEvent = events.find(e => e.eventType === 'CARGO_TAXONOMY_UPDATED')
 const ruleCheckedEvent = events.find(e => e.eventType === 'RULE_CHECKED')
 
 console.log('  - CARGO_CREATED:', cargoCreatedEvent ? '✅' : '❌')
-console.log('  - CARGO_SIGNATURE_UPDATED:', sigUpdatedEvent ? '✅' : '❌')
+console.log('  - CARGO_TAXONOMY_UPDATED:', sigUpdatedEvent ? '✅' : '❌')
 console.log('  - RULE_CHECKED:', ruleCheckedEvent ? '✅' : '❌')
 
 // 1.6 DemandSession 확인
@@ -114,6 +114,7 @@ console.log('  - cargoIds 포함:', updatedDemand?.cargoIds.includes(cargoInfo.i
 
 const test1Passed =
   cargoInfo &&
+  cargoInfo.signature === 'INFO_CARGO' &&
   sig.itemCode &&
   sig.weightBand &&
   sig.sizeBand &&

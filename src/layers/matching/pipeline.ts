@@ -303,8 +303,8 @@ function applySorting<T extends StorageProduct | RouteProduct>(
       return [...offers].sort((a, b) => b.id.localeCompare(a.id))
 
     case 'PRICE_ASC':
-      // 스텁: price 오름차순
-      return [...offers].sort((a, b) => a.price - b.price)
+      // unitPricePerCube 기준 오름차순 (SoT)
+      return [...offers].sort((a, b) => a.unitPricePerCube - b.unitPricePerCube)
 
     case 'DISTANCE_ASC':
       // 스텁: MVP에서는 정렬 없이 반환 (거리 계산 필요)

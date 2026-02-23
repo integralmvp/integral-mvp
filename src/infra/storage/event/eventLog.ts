@@ -9,7 +9,7 @@ import type {
   PlatformEvent,
   PlatformEventType,
   EventSubject,
-  EventSignature,
+  CargoTaxonomyContext,
 } from '../../../types/models'
 import { STORAGE_KEYS } from '../keys'
 import { makeEventId } from '../../dataspec/id/makeId'
@@ -57,7 +57,7 @@ export function logEvent(params: {
   eventType: PlatformEventType
   subject: EventSubject
   actorId?: string
-  signature?: EventSignature
+  context?: CargoTaxonomyContext
   fields?: Record<string, unknown>
 }): PlatformEvent {
   const event: PlatformEvent = {
@@ -66,7 +66,7 @@ export function logEvent(params: {
     eventType: params.eventType,
     actorId: params.actorId || DEFAULT_ACTOR_ID,
     subject: params.subject,
-    signature: params.signature,
+    context: params.context,
     fields: params.fields,
   }
 
@@ -162,11 +162,11 @@ export function clearEventLog(): void {
 /**
  * 화물 생성 이벤트
  */
-export function logCargoCreated(cargoId: string, signature?: EventSignature): PlatformEvent {
+export function logCargoCreated(cargoId: string, context?: CargoTaxonomyContext): PlatformEvent {
   return logEvent({
     eventType: 'CARGO_CREATED',
     subject: { kind: 'cargo', id: cargoId },
-    signature,
+    context,
   })
 }
 
@@ -181,14 +181,21 @@ export function logCargoRemoved(cargoId: string): PlatformEvent {
 }
 
 /**
- * 화물 시그니처 업데이트 이벤트
+ * 화물 택소노미 업데이트 이벤트
  */
-export function logCargoSignatureUpdated(cargoId: string, signature: EventSignature): PlatformEvent {
+export function logCargoTaxonomyUpdated(cargoId: string, context: CargoTaxonomyContext): PlatformEvent {
   return logEvent({
-    eventType: 'CARGO_SIGNATURE_UPDATED',
+    eventType: 'CARGO_TAXONOMY_UPDATED',
     subject: { kind: 'cargo', id: cargoId },
-    signature,
+    context,
   })
+}
+
+/**
+ * @deprecated logCargoSignatureUpdated → logCargoTaxonomyUpdated로 리네임
+ */
+export function logCargoSignatureUpdated(cargoId: string, context: CargoTaxonomyContext): PlatformEvent {
+  return logCargoTaxonomyUpdated(cargoId, context)
 }
 
 /**

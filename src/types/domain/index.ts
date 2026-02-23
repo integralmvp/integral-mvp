@@ -62,6 +62,7 @@ export type {
 export type {
   EventSubject,
   EventSignature,
+  CargoTaxonomyContext,
   PlatformEventType,
   PlatformEvent,
   SearchExecutedFields,

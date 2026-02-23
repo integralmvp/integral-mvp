@@ -84,6 +84,7 @@ export function createDemand(params: {
 
   const demand: DemandSession = {
     demandId: makeDemandId(),
+    signature: 'INFO_DEMAND_SESSION',
     ownerId: params.ownerId || DEFAULT_OWNER_ID,
     serviceType: params.serviceType,
     order: params.order,
