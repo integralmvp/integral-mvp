@@ -123,10 +123,9 @@ describe('지역 범위 필터링 (PR7-pre)', () => {
 
       const result = filterRouteByConditions(ROUTE_PRODUCTS, conditions)
 
-      // 육지 출발(R5, R6)은 originCode가 빈 문자열이므로 제외
-      const ids = result.map(p => p.id)
-      expect(ids).not.toContain('R5')
-      expect(ids).not.toContain('R6')
+      // 육지 출발(originCode='')은 제주시 출발 필터에서 제외되어야 함
+      const hasEmptyOrigin = result.some(p => p.originCode === '')
+      expect(hasEmptyOrigin).toBe(false)
     })
 
     it('조건 없으면 전체 반환', () => {

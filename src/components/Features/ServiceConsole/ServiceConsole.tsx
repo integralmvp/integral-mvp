@@ -8,7 +8,7 @@ import { useServiceConsoleState, type ServiceType } from './hooks'
 import { StorageTabSection, TransportTabSection, BothTabSection } from './sections'
 import { SlotCounter, SearchResultModal, DealPage } from './ui'
 import { useSearchResult } from '../../../contexts/SearchResultContext'
-import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../data/mock/mockData'
+import { getStorageOfferById, getRouteOfferById } from '../../../infra/storage/info/offer.repo'
 
 // 탭 버튼 컴포넌트
 interface TabButtonProps {
@@ -245,8 +245,8 @@ export default function ServiceConsole() {
         isOpen={isDealPageOpen}
         onClose={handleCloseDealPage}
         activeTab={state.activeTab}
-        storageProduct={state.selectedStorageId ? STORAGE_PRODUCTS.find(p => p.id === state.selectedStorageId) : undefined}
-        routeProduct={state.selectedRouteId ? ROUTE_PRODUCTS.find(p => p.id === state.selectedRouteId) : undefined}
+        storageProduct={state.selectedStorageId ? getStorageOfferById(state.selectedStorageId) : undefined}
+        routeProduct={state.selectedRouteId ? getRouteOfferById(state.selectedRouteId) : undefined}
         registeredCargos={state.registeredCargos}
         totalCubes={state.totalCubes}
         totalPallets={state.totalPallets}

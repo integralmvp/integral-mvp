@@ -1,30 +1,56 @@
 /**
- * Provider Repository - mock 기반 구현
+ * Provider Repository — localStorage 기반 구현
  *
- * MVP: PROVIDERS 배열을 단일 접근점으로 래핑
- * PR8+ (DB 연동) 이후 저장소 구체화
+ * 설계:
+ * - 최초 로드 시 localStorage 없으면 PROVIDER_RECORDS → builders → seed 저장
+ * - 이후 모든 조회는 in-memory 캐시 기반
+ * - Provider 는 MVP에서 변경 없음 (조회 전용)
  */
 
 import type { ProviderInfo } from '../../../types/models'
-import { PROVIDERS } from '../../../data/mock/records/providers'
+import { STORAGE_KEYS } from '../keys'
+import { buildSeedProviders } from '../../../data/mock/builders'
 
-/**
- * 업체 전체 조회
- */
+// ── in-memory 캐시 ───────────────────────────────────────────────────
+let _cache: ProviderInfo[] | null = null
+
+// ── 초기화 ──────────────────────────────────────────────────────────
+
+function initIfNeeded(): void {
+  if (_cache !== null) return
+
+  const stored = localStorage.getItem(STORAGE_KEYS.PROVIDERS)
+  if (stored) {
+    try {
+      _cache = JSON.parse(stored) as ProviderInfo[]
+      return
+    } catch {
+      console.warn('[provider.repo] localStorage parse error, re-seeding...')
+    }
+  }
+
+  // 최초 seed
+  _cache = buildSeedProviders()
+  try {
+    localStorage.setItem(STORAGE_KEYS.PROVIDERS, JSON.stringify(_cache))
+  } catch (e) {
+    console.error('[provider.repo] Failed to persist providers:', e)
+  }
+}
+
+// ── 조회 ────────────────────────────────────────────────────────────
+
 export function getAllProviders(): ProviderInfo[] {
-  return PROVIDERS
+  initIfNeeded()
+  return _cache!
 }
 
-/**
- * 업체 단건 조회 (ID)
- */
 export function getProviderById(id: string): ProviderInfo | undefined {
-  return PROVIDERS.find(p => p.id === id)
+  initIfNeeded()
+  return _cache!.find(p => p.id === id)
 }
 
-/**
- * 업체 단건 조회 (서비스 타입별)
- */
 export function getProvidersByServiceType(serviceType: ProviderInfo['serviceType']): ProviderInfo[] {
-  return PROVIDERS.filter(p => p.serviceType === serviceType)
+  initIfNeeded()
+  return _cache!.filter(p => p.serviceType === serviceType)
 }
