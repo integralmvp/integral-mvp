@@ -1,6 +1,6 @@
 // 지도 레이어 관리 훅
 import mapboxgl from 'mapbox-gl'
-import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../../../data/mock/mockData'
+import { getAllStorageOffers, getAllRouteOffers } from '../../../../../infra/storage/info/offer.repo'
 import { calculateIconRotate, generateBezierCurve, calculateBearing } from '../utils/geo'
 import { createArrowSvgUrl, ARROW_COLORS, getPalletMarkerSize, createPalletSvg, ROUTE_COLORS } from '../utils/style'
 
@@ -34,7 +34,7 @@ export function addMiniMapArrowImages(miniMap: mapboxgl.Map): void {
 export function addPalletMarkers(map: mapboxgl.Map): void {
   console.log('[MapboxContainer] Adding pallet markers...')
 
-  STORAGE_PRODUCTS.forEach((storage) => {
+  getAllStorageOffers().forEach((storage) => {
     console.log(`[Marker] ${storage.location.name}:`, {
       lng: storage.location.lng,
       lat: storage.location.lat,
@@ -100,7 +100,7 @@ export function addPalletMarkers(map: mapboxgl.Map): void {
 
 // 곡선 경로 추가
 export function addCurvedRoutes(map: mapboxgl.Map): void {
-  const intraRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'INTRA_JEJU')
+  const intraRoutes = getAllRouteOffers().filter((r) => r.routeScope === 'INTRA_JEJU')
 
   intraRoutes.forEach((route) => {
     const start = [route.origin.lng, route.origin.lat]
@@ -160,8 +160,8 @@ export function addCurvedRoutes(map: mapboxgl.Map): void {
 
 // 미니맵에 입도/출도 경로 추가
 export function addMiniMapRoutes(miniMap: mapboxgl.Map): void {
-  const inboundRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'SEA' && r.direction === 'INBOUND')
-  const outboundRoutes = ROUTE_PRODUCTS.filter((r) => r.routeScope === 'SEA' && r.direction === 'OUTBOUND')
+  const inboundRoutes = getAllRouteOffers().filter((r) => r.routeScope === 'SEA' && r.direction === 'INBOUND')
+  const outboundRoutes = getAllRouteOffers().filter((r) => r.routeScope === 'SEA' && r.direction === 'OUTBOUND')
 
   // 입도 경로 추가 (녹색)
   inboundRoutes.forEach((route, idx) => {

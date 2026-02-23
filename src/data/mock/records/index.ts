@@ -2,4 +2,5 @@
  * Mock Records barrel
  */
 
-export { PROVIDERS, findProvider } from './providers'
+export { PROVIDER_RECORDS } from './providers'
+export { OFFER_RECORDS } from './offers'

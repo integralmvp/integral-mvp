@@ -14,6 +14,15 @@ export interface ProviderFields {
   weightLimitKg?: number
 }
 
+// ============ InfoProviderRecord (CDS 레코드 타입) ============
+export interface InfoProviderRecord {
+  id: string              // 'PROVIDER_S1' 등 의미적 식별자 (offer 레코드 providerId와 매핑)
+  signature: 'INFO_PROVIDER'
+  fields: ProviderFields
+  createdAt: string       // ISO 8601
+  version: number
+}
+
 // ============ 필드 스키마 객체 ============
 export const PROVIDER_FIELD_SCHEMA = {
   name:             { type: 'string',  required: true,  description: '업체명' },

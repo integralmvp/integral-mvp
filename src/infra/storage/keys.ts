@@ -34,6 +34,11 @@ export const STORAGE_KEYS = {
 
   // 설정
   SETTINGS: `${APP_PREFIX}_${VERSION}_settings`,
+
+  // CDS Seed repo (Offer / Provider)
+  STORAGE_OFFERS: `${APP_PREFIX}_${VERSION}_storage_offers`,
+  ROUTE_OFFERS: `${APP_PREFIX}_${VERSION}_route_offers`,
+  PROVIDERS: `${APP_PREFIX}_${VERSION}_providers`,
 } as const
 
 /**

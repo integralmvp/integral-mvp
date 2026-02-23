@@ -40,7 +40,7 @@ import {
   resetActiveDemand,
 } from '../../../../infra/storage'
 import { CUBE_CONFIG } from '../../../../engine/cube/cubeConfig'
-import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../../data/mock/mockData'
+import { getAllStorageOffers, getAllRouteOffers } from '../../../../infra/storage/info/offer.repo'
 import { useSearchResult } from '../../../../contexts/SearchResultContext'
 
 export type ServiceType = 'storage' | 'transport' | 'both'
@@ -251,7 +251,7 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     if (activeTab === 'storage') {
       const result = runMatchingPipeline({
         mode: 'STORAGE',
-        offers: STORAGE_PRODUCTS,
+        offers: getAllStorageOffers(),
         session,
         conditions,
         sort: 'LATEST',
@@ -268,7 +268,7 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
     if (activeTab === 'transport') {
       const result = runMatchingPipeline({
         mode: 'ROUTE',
-        offers: ROUTE_PRODUCTS,
+        offers: getAllRouteOffers(),
         session,
         conditions,
         sort: 'LATEST',
@@ -284,8 +284,8 @@ export function useServiceConsoleState(): [ServiceConsoleState, ServiceConsoleAc
 
     // both 탭
     const combinedResult = runCombinedPipeline({
-      storageOffers: STORAGE_PRODUCTS,
-      routeOffers: ROUTE_PRODUCTS,
+      storageOffers: getAllStorageOffers(),
+      routeOffers: getAllRouteOffers(),
       session,
       conditions,
       sort: 'LATEST',

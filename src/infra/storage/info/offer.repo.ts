@@ -1,52 +1,99 @@
 /**
- * Offer Repository - mock 기반 구현
+ * Offer Repository — localStorage 기반 구현
  *
- * MVP: STORAGE_PRODUCTS / ROUTE_PRODUCTS 배열을 단일 접근점으로 래핑
- * 메모리상 mutable 상태 유지 (remainingCubes 차감 등)
- * PR8+ (DB 연동) 이후 저장소 구체화
+ * 설계:
+ * - 최초 로드 시 localStorage 없으면 OFFER_RECORDS → builders → seed 저장
+ * - 이후 모든 조회/변경은 in-memory 캐시(= localStorage 동기화) 기반
+ * - updateStorageOfferResource / updateRouteOfferResource 는 캐시 객체를 직접 변경 후 localStorage 동기화
+ *   → 동일 참조를 반환하므로 매칭 파이프라인의 useMemo도 최신 remainingCubes를 읽음
+ *
+ * G4: 저장/조회가 localStorage 기반
+ * G5: buildSeedOffers() 내부에서 seed 검증 실행 (throw 가능)
+ * G6: 새로고침 후 remainingCubes/remainingPayloadKg 유지
  */
 
 import type { StorageProduct, RouteProduct } from '../../../types/models'
-import { STORAGE_PRODUCTS, ROUTE_PRODUCTS } from '../../../data/mock/mockData'
+import { STORAGE_KEYS } from '../keys'
+import { buildSeedOffers } from '../../../data/mock/builders'
 
-/**
- * 보관 상품 전체 조회
- */
+// ── in-memory 캐시 (단일 진실 소스) ────────────────────────────────
+let _storageCache: StorageProduct[] | null = null
+let _routeCache: RouteProduct[] | null = null
+
+// ── 초기화 ──────────────────────────────────────────────────────────
+
+function initIfNeeded(): void {
+  if (_storageCache !== null && _routeCache !== null) return
+
+  const storedStorage = localStorage.getItem(STORAGE_KEYS.STORAGE_OFFERS)
+  const storedRoute = localStorage.getItem(STORAGE_KEYS.ROUTE_OFFERS)
+
+  if (storedStorage && storedRoute) {
+    // localStorage 에서 로드 (G6: 새로고침 후 remaining 유지)
+    try {
+      _storageCache = JSON.parse(storedStorage) as StorageProduct[]
+      _routeCache = JSON.parse(storedRoute) as RouteProduct[]
+      return
+    } catch {
+      console.warn('[offer.repo] localStorage parse error, re-seeding...')
+    }
+  }
+
+  // 최초 seed (G5: buildSeedOffers 내부에서 validateOfferSeed 실행)
+  const { storageProducts, routeProducts } = buildSeedOffers()
+  _storageCache = storageProducts
+  _routeCache = routeProducts
+  _persistStorage()
+  _persistRoute()
+}
+
+function _persistStorage(): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.STORAGE_OFFERS, JSON.stringify(_storageCache))
+  } catch (e) {
+    console.error('[offer.repo] Failed to persist storage offers:', e)
+  }
+}
+
+function _persistRoute(): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.ROUTE_OFFERS, JSON.stringify(_routeCache))
+  } catch (e) {
+    console.error('[offer.repo] Failed to persist route offers:', e)
+  }
+}
+
+// ── 조회 ────────────────────────────────────────────────────────────
+
 export function getAllStorageOffers(): StorageProduct[] {
-  return STORAGE_PRODUCTS
+  initIfNeeded()
+  return _storageCache!
 }
 
-/**
- * 운송 상품 전체 조회
- */
 export function getAllRouteOffers(): RouteProduct[] {
-  return ROUTE_PRODUCTS
+  initIfNeeded()
+  return _routeCache!
 }
 
-/**
- * 보관 상품 단건 조회
- */
 export function getStorageOfferById(id: string): StorageProduct | undefined {
-  return STORAGE_PRODUCTS.find(o => o.id === id)
+  initIfNeeded()
+  return _storageCache!.find(o => o.id === id)
 }
 
-/**
- * 운송 상품 단건 조회
- */
 export function getRouteOfferById(id: string): RouteProduct | undefined {
-  return ROUTE_PRODUCTS.find(o => o.id === id)
+  initIfNeeded()
+  return _routeCache!.find(o => o.id === id)
 }
 
-/**
- * 상품 단건 조회 (타입 불문)
- */
 export function getOfferById(id: string): StorageProduct | RouteProduct | undefined {
   return getStorageOfferById(id) ?? getRouteOfferById(id)
 }
 
+// ── 자원 업데이트 ────────────────────────────────────────────────────
+
 /**
  * 보관 상품 자원 업데이트 (remainingCubes, remainingPayloadKg)
- * MVP: 메모리상 직접 변경 (배열은 참조 타입)
+ * 캐시 객체를 in-place 수정 후 localStorage 동기화
  */
 export function updateStorageOfferResource(
   id: string,
@@ -59,6 +106,7 @@ export function updateStorageOfferResource(
   if (updates.remainingPayloadKg !== undefined) {
     offer.remainingPayloadKg = updates.remainingPayloadKg
   }
+  _persistStorage()
 
   return offer
 }
@@ -77,6 +125,7 @@ export function updateRouteOfferResource(
   if (updates.remainingPayloadKg !== undefined) {
     offer.remainingPayloadKg = updates.remainingPayloadKg
   }
+  _persistRoute()
 
   return offer
 }
