@@ -704,4 +704,328 @@ interface StorageProduct {
 
 ---
 
-*(섹션 8-11은 다음 커밋에서 계속)*
+---
+
+# 8. Legacy / Stub / Dead Code 분석
+
+## 8-1. Stub (기능 선언되었으나 실제 미작동)
+
+### 날짜 필터 (조건 레이어)
+
+```typescript
+// layers/matching/condition/conditionFilters.ts
+export function hasDateConditions(conditions: SearchConditions): {
+  hasStorageDate: boolean
+  hasTransportDate: boolean
+}
+```
+
+- **현황**: 날짜 조건 입력 여부만 체크, 실제 offer 날짜 범위 필터링 없음
+- **이유**: offer 타입에 `availableFrom/To` 필드가 없음 (PR7 이후 설계 예정)
+- **위험도**: 중간 — 사용자가 날짜 입력해도 필터링 적용 안됨 (UI에서 날짜 설정 후 검색 시 전체 결과 반환)
+- **제거/완성 계획**: Offer에 날짜 가용 필드 추가 후 실제 필터 구현 필요
+
+### DISTANCE_ASC 정렬
+
+```typescript
+// layers/matching/pipeline.ts:applySorting
+case 'DISTANCE_ASC':
+  return [...offers]   // 스텁: 거리 계산 없이 원본 반환
+```
+
+- **현황**: 정렬 없이 원본 배열 반환
+- **이유**: 좌표 기반 거리 계산 + 사용자 기준점 미구현
+- **위험도**: 낮음 — UI에서 DISTANCE_ASC 정렬 선택지 미노출
+- **완성 계획**: 사용자 위치 또는 선택 조건 좌표 기반 haversine 거리 계산 필요
+
+### BothTabSection 통합 파이프라인
+
+```typescript
+// sections/BothTabSection.tsx
+const POLICY_LOCKED = true  // 서비스 미제공 정책
+```
+
+- **현황**: 보관+운송 연계 서비스 전체 정책 잠금
+- **이유**: 연계 상품 매칭(STORAGE+ROUTE 동시), 날짜 자동 연동, 복합 정산이 미완성
+- **위험도**: 없음 — POLICY_LOCKED으로 UI 완전 비활성화
+- **완성 계획**: `runCombinedPipeline()` 완성 + 연계 조건 UX + 복합 DealPage 구현 후 해제
+
+### ItemCode / WeightBand / SizeBand 라벨 변환
+
+- **현황**: 타입 정의는 있으나 `ITEM_CODE_LABELS`, `WEIGHT_BAND_LABELS` 미정의
+- **이유**: UI에서 현재 raw code 또는 한글 문자열이 직접 사용됨
+- **위험도**: 낮음 — MVP 더미 데이터 범위에서는 표시 일관성 유지 중
+- **완성 계획**: featureCodes.ts와 동일 패턴으로 LABELS + formatLabel 함수 추가 필요
+
+## 8-2. Dead Code
+
+### `computeDemandFromArea` (`engine/cube/index.ts:70`)
+
+```typescript
+/** @deprecated 현재 사용처 없음. 제거 예정. */
+export function computeDemandFromArea(areaM2: number, mode: DemandMode)
+```
+
+- **사용처**: src/ 전체 검색 결과 정의 파일 외 **0건**
+- **위험도**: 없음
+- **조치**: 안전하게 제거 가능
+
+### `createAvailableMarkerSvg` + `createHighlightMarkerHtml` (`MapboxContainer/utils/style.ts`)
+
+```typescript
+/** @deprecated 외부 import 사용처 없음. 제거 예정. */
+export function createAvailableMarkerSvg(): string { ... }
+
+// 위 함수만 호출하는 또 다른 dead function
+export function createHighlightMarkerHtml(): string {
+  return `...${ createAvailableMarkerSvg() }...`
+}
+```
+
+- **사용처**: style.ts 내부에서만 순환 참조 — 외부 import **0건**
+- **이유**: CommandLayout의 DOM 조작 제거 시 함께 orphan됨
+- **위험도**: 없음
+- **조치**: 두 함수 모두 안전하게 제거 가능
+
+### `types/models.ts` Compat Bridge
+
+```typescript
+/** @deprecated 직접 import 금지. types/domain/* 로 이동 중. */
+```
+
+- **사용처**: 35개 파일에서 import 중 — 즉시 제거 불가
+- **역할**: 하위 호환 re-export만 담당 (runtime 영향 없음)
+- **조치**: 점진적 마이그레이션 후 최종 제거
+
+## 8-3. 위험도 분류
+
+| 항목 | 분류 | 즉시 제거 가능 여부 |
+|------|------|-------------------|
+| `computeDemandFromArea` | Dead Code | ✅ 즉시 제거 가능 |
+| `createAvailableMarkerSvg` | Dead Code | ✅ 즉시 제거 가능 |
+| `createHighlightMarkerHtml` | Dead Code | ✅ 즉시 제거 가능 |
+| 날짜 필터 stub | Stub | ❌ Offer 스키마 확장 후 완성 |
+| DISTANCE_ASC 정렬 stub | Stub | ❌ 거리 계산 구현 후 완성 |
+| BothTabSection POLICY_LOCKED | 정책 잠금 | ❌ 연계 UX 완성 후 해제 |
+| `types/models.ts` compat | Legacy | ⚠️ 점진적 마이그레이션 |
+| `ServiceType` @deprecated alias | Legacy | ⚠️ DealPage 전환 후 제거 |
+
+---
+
+# 9. 리스크 및 구조적 한계
+
+## 9-1. 현재 구조의 한계
+
+### L1. localStorage 단일 영속성
+
+- **현황**: 모든 데이터(Offer 재고, 이벤트 로그, Cargo, DemandSession)가 localStorage에만 저장됨
+- **한계**: 브라우저 탭 간 공유 불가, 시크릿 모드 무효, 용량 제한(~5MB)
+- **위험**: 이벤트 로그 MAX_EVENTS=1000 초과 시 자동 trim (오래된 이벤트 손실)
+- **준비**: Repo 패턴으로 추상화 완료 → backend 연결 시 repo 구현체만 교체하면 됨
+
+### L2. In-memory 캐시 동기화
+
+- **현황**: `_storageCache`, `_routeCache`는 module-level 변수 (싱글턴)
+- **한계**: React 상태 외부에 있어 캐시 변경이 React 렌더링 트리거를 보장하지 않음
+- **현재 해결**: `useMemo`의 dependency가 `getAllStorageOffers()` 결과가 아닌 UI 상태 변수 기반 → 재고 차감 후 `handleSearch()` 재실행으로 최신값 반영됨
+- **위험**: 재고 차감 후 즉시 previewMatch가 갱신되지 않을 수 있음 (단, 검색 버튼 재클릭으로 해소)
+
+### L3. Cargo CDS 연결 미완
+
+- **현황**: `CargoUI → RegisteredCargo` (UI 상태) ↔ `InfoCargoRecord` (CDS) 간 연결이 느슨
+- **한계**: cargo 상태가 CDS 레코드로 완전히 매핑되지 않아 이벤트 로그에서 cargo 추적이 불완전
+- **현재 해결**: DemandSession 수준의 이벤트 로그(CUBE_CALCULATED 등)로 부분 추적
+- **준비**: `cargo.repo.ts`와 `infra/dataspec/fields/info/cargo.fields.ts`는 확장 구조 이미 존재
+
+### L4. 두 개의 SearchResultModal
+
+```
+src/components/Features/ServiceConsole/
+  ├── ui/SearchResultModal.tsx       (구버전?)
+  └── modals/SearchResultModal.tsx   (신버전?)
+```
+
+- **현황**: `ui/`와 `modals/` 폴더에 동일 이름 파일 존재 — 어느 것이 실제 사용되는지 확인 필요
+- **위험**: 코드 중복 또는 버전 혼용 가능성
+- **조치**: 사용처 확인 후 미사용 파일 제거 필요
+
+## 9-2. 확장 시 위험
+
+### R1. Backend 연결 시 repo 교체
+
+- **준비도**: 높음 — 모든 데이터 접근이 `infra/storage/info/*.repo.ts`를 통해 추상화됨
+- **위험**: `_storageCache` in-place 수정 패턴(`offer.remainingCubes =`) → backend에서는 불변성 전략 필요
+- **조치**: `updateStorageOfferResource()` 시그니처는 그대로 두고 내부 구현만 API 호출로 교체
+
+### R2. 상품 등록 페이지 확장
+
+- **준비도**: 중간 — `InfoOfferRecord` 스키마는 완성됨
+- **위험**: 현재 seed 레코드(8 storage + 8 route)가 하드코딩되어 있어 동적 등록 시 seed 충돌 방지 로직 필요
+- **조치**: `offer.repo.ts`에 `addOffer()` 함수 추가 + localStorage 즉시 persist
+
+### R3. 다중 사용자 / 실시간
+
+- **준비도**: 낮음 — 현재 전체가 단일 사용자 localStorage 기반
+- **위험**: 여러 사용자가 동일 재고에 접근하는 경합 조건(race condition) 처리 미구현
+- **조치**: backend + 낙관적 잠금(optimistic locking) 또는 큐 기반 재고 처리 필요
+
+---
+
+# 10. 최종 아키텍처 평가
+
+## 10-1. 현재 상태 한 줄 정의
+
+> **"단일 파이프라인 + CDS 기반 구조가 완결되었으며, 큐브 거래 엔진이 실제로 구동된다. 단, localStorage 영속성 한계와 일부 stub/legacy가 남아있으며, backend 연결 준비는 완료된 상태다."**
+
+## 10-2. 완성도 점수
+
+| 영역 | 점수 | 세부 내용 |
+|------|------|----------|
+| **구조 (Architecture)** | 92/100 | 레이어 분리, SoT 원칙, 단일 파이프라인 완성. legacy compat bridge 잔존 |
+| **데이터 (Data)** | 88/100 | Repo-only 흐름, RegionCode 체계, seed 검증. Cargo CDS 연결 느슨 |
+| **엔진 (Engine)** | 95/100 | 큐브 계산, 정산, 재고 차감 모두 실제 구동. DISTANCE_ASC stub |
+| **UI (UI/UX)** | 85/100 | 지도 동기화, 마커 하이라이트, DealPage 정산 시각화 완성. 날짜 필터 미작동 |
+| **CDS** | 80/100 | signature 체계, FeatureCode 완성. ItemCode 라벨 변환 미완 |
+| **테스트** | 70/100 | conditionFilters.test.ts, codeDataSystem.test.ts 존재. 커버리지 확인 필요 |
+
+---
+
+# 11. 최종 개발 청사진 (가장 중요)
+
+## 11-1. 다음 단계
+
+### Phase A: 즉시 처리 가능 (Dead Code 제거)
+
+```
+1. engine/cube/index.ts:70  → computeDemandFromArea 제거
+2. MapboxContainer/utils/style.ts → createAvailableMarkerSvg + createHighlightMarkerHtml 제거
+3. ui/SearchResultModal.tsx vs modals/SearchResultModal.tsx → 중복 확인 후 미사용 제거
+4. DealPage.tsx → ServiceType → UIServiceType 직접 import 전환
+```
+
+### Phase B: PR7 완성 (재고 차감 + 거래 확정)
+
+```
+1. PR7: remainingCubes 차감 → localStorage 영속 (이미 구현됨 ✅)
+2. 거래 확정 이벤트 로그 완성 (DEAL_CONFIRMED, SETTLEMENT_CALCULATED 이미 구현됨 ✅)
+3. DemandSession → Deal 레코드 생성 (deal.repo.ts 구조 완성 필요)
+```
+
+### Phase C: 상품 등록 페이지
+
+```
+1. Provider 인증 흐름 설계 (MVP: 더미 Provider)
+2. InfoOfferRecord 입력 폼 구현 (이미 schema 있음 → UI만 필요)
+3. offer.repo.addOffer() 함수 추가
+4. 신규 등록 상품의 Mapbox 마커 동적 추가
+```
+
+### Phase D: 날짜 필터 + 거리 정렬 완성
+
+```
+1. Offer 스키마에 availableFrom / availableTo 필드 추가
+2. conditionFilters.ts 날짜 범위 필터 실제 구현
+3. DISTANCE_ASC: haversine 거리 계산 + 사용자 기준점 설정
+```
+
+### Phase E: Backend 연결
+
+```
+1. infra/storage/info/*.repo.ts → API 클라이언트 교체
+2. infra/storage/event/eventLog.ts → API append 교체
+3. 인증 (JWT/OAuth) 레이어 추가
+4. 낙관적 잠금으로 재고 충돌 방지
+```
+
+## 11-2. 반드시 유지해야 할 핵심 원칙
+
+### 원칙 1: Cube SoT (절대 불변)
+```
+모든 수요, 용량, 재고, 정산은 큐브(250mm³) 단위로 계산
+→ unitPricePerCube, capacityCubes, remainingCubes, billableCubes
+→ 별도 "총 가격" 필드를 SoT로 사용 금지
+```
+
+### 원칙 2: CDS SoT (확장하되 분산 금지)
+```
+모든 코드셋은 infra/dataspec/codedata/에서 단일 정의
+→ FeatureCode, ItemCode, WeightBand, SizeBand, RegionCode
+→ 코드 → 라벨 변환은 반드시 format* 함수를 통해서만
+→ UI에 raw code 직접 노출 금지
+```
+
+### 원칙 3: Repo-Only Data Flow (불변)
+```
+모든 Offer 데이터는 infra/storage/info/offer.repo.ts 경유
+→ getAllStorageOffers() / getAllRouteOffers() 만 사용
+→ STORAGE_PRODUCTS를 필터링/거래 로직에 직접 사용 금지
+→ mock의 표시용 어댑터(JEJU_LOCATIONS 등) → 로직 사용 금지
+```
+
+### 원칙 4: Single Pipeline SoT (불변)
+```
+모든 검색 결과는 runMatchingPipeline() 통해서만
+→ 지도 하이라이트, 리스트, 검색 카운트 모두 동일 소스
+→ 컴포넌트별 별도 필터링 로직 금지
+→ shadow computation 금지
+```
+
+### 원칙 5: Layer Contract (불변)
+```
+Regulation → Resource → Condition → Trade 순서 강제
+→ Condition이 Regulation보다 먼저 실행 금지
+→ Trade 로직이 Regulation/Resource 레이어에 누출 금지
+→ engine/에 React import 금지 (순수 함수만)
+```
+
+## 11-3. 절대 깨지면 안 되는 것
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  1. CUBE_SPEC.volumeM3 = 0.015625 m³ (250mm³)                     │
+│     CUBES_PER_PALLET = 128                                          │
+│     PACKING_FACTOR = { STORAGE: 1.15, ROUTE: 1.10 }               │
+│     → 이 상수를 바꾸면 모든 재고 비교가 무효화됨                    │
+│                                                                     │
+│  2. runMatchingPipeline의 파이프라인 순서                           │
+│     Reg(1) → Res(2) → Cond(3) → Sort(4)                           │
+│     → 순서 변경 시 "통과 불가 상품이 조건 필터에 노출"되는          │
+│       데이터 무결성 파괴                                             │
+│                                                                     │
+│  3. offer.repo.ts의 in-memory 캐시 동일 참조 구조                  │
+│     → mockData.STORAGE_PRODUCTS와 getAllStorageOffers()가 동일 배열 │
+│       참조 → updateStorageOfferResource() 후 즉시 반영됨            │
+│     → deep copy 또는 새 배열 반환으로 변경 시 재고 차감이           │
+│       매칭 파이프라인에 반영 안됨                                    │
+│                                                                     │
+│  4. INFO_SIGNATURES / EVT_SIGNATURES 값                            │
+│     → 이 값들이 localStorage에 저장된 이벤트 로그의 eventType과    │
+│       직접 매핑됨 → 값 변경 시 기존 로그 조회 불가                  │
+│                                                                     │
+│  5. SearchResult 타입의 단일 SoT                                    │
+│     → layers/types/matchingTypes.ts 외에 별도 정의 금지             │
+│     → 컴포넌트별 변형 타입 생성 금지                                │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 종합 결론
+
+> **이 구조로 계속 가도 되는가?** — **YES.**
+> Cube SoT + CDS SoT + Single Pipeline + 4-Layer Contract가 모두 작동 중이며 구조적 견고성이 확보됨.
+
+> **어디를 건드리면 무너지는가?** — 위 "절대 깨지면 안 되는 것" 5개 항목.
+> 특히 cubeConfig 상수, 파이프라인 순서, repo 캐시 참조 구조.
+
+> **다음 단계에서 무엇을 해야 하는가?**
+> 1. Dead code 3개 즉시 제거 (computeDemandFromArea, 두 marker 함수)
+> 2. SearchResultModal 중복 파일 확인 및 정리
+> 3. ItemCode 라벨 변환 완성 (featureCodes.ts 패턴 적용)
+> 4. Phase B~E 순서로 backend 연결 준비
+
+---
+
+**작성 완료**: 2026-02-24
+**기준 커밋**: `04a7ddd` (Final Stabilization Patch — CDS 기반 완결)
+**다음 리뷰 시점**: PR7 완성 후 (재고 차감 + 거래 확정 완성 시점)
