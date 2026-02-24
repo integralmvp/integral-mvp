@@ -4,6 +4,7 @@
  */
 
 import type { StorageProduct, RouteProduct } from '../../../../types/models'
+import { formatFeatureLabel } from '../../../../infra/dataspec/codedata/features/featureCodes'
 
 interface ProductDetailModalProps {
   isOpen: boolean
@@ -78,7 +79,7 @@ export default function ProductDetailModal({
                     <div className="flex gap-1 flex-wrap">
                       {storageProduct!.features.map((feature, i) => (
                         <span key={i} className="text-xs bg-teal-100 text-teal-700 px-2 py-1 rounded-full">
-                          {feature}
+                          {formatFeatureLabel(feature)}
                         </span>
                       ))}
                     </div>

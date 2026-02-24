@@ -9,6 +9,7 @@ export type {
   MatchingPipelineResult,
   PipelineCounts,
   PreviewResult,
+  SearchResult,
   StorageConditionFilterParams,
   RouteConditionFilterParams,
 } from './matchingTypes'

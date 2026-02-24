@@ -20,6 +20,7 @@ import type { SearchConditions } from '../../types/matchingTypes'
  * - 예: 50|110|250|00 (제주도 제주시 한림읍)
  *
  * 유효 자릿수:
+ * - 시도 레벨 (XX00000000): 앞 2자리 (예: '5000000000' = 제주특별자치도)
  * - 시군구 레벨 (XXXXX00000): 앞 5자리
  * - 읍면동 레벨 (XXXXXXXX00): 앞 8자리
  * - 리 레벨 (XXXXXXXXXX): 전체 10자리
@@ -28,6 +29,11 @@ function getEffectivePrefix(code: string): string {
   // 리 자리(뒤 2자리)가 00이 아니면 리 레벨
   if (!code.endsWith('00')) {
     return code
+  }
+
+  // 시도 레벨 (XX + 8개의 0): 앞 2자리 (예: '5000000000' = 제주특별자치도)
+  if (code.slice(2) === '00000000') {
+    return code.slice(0, 2)
   }
 
   // 읍면동 자리(6~8자리)가 000이면 시군구 레벨

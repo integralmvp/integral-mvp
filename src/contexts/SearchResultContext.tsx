@@ -12,15 +12,10 @@
 
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react'
 import type { StorageProduct, RouteProduct } from '../types/models'
-import type { PipelineCounts } from '../layers/matching'
+import type { PipelineCounts, SearchResult } from '../layers/types'
 
-// 검색 결과 타입 (스냅샷용)
-export interface SearchResultData {
-  storageProducts: StorageProduct[]
-  routeProducts: RouteProduct[]
-  counts: PipelineCounts
-  searchedAt: string
-}
+// SearchResult re-export for consumers (단일 진실 소스: layers/types/matchingTypes.ts)
+export type { SearchResult }
 
 // 프리뷰 결과 타입 (실시간 업데이트용)
 export interface PreviewResultData {
@@ -38,8 +33,8 @@ interface SearchResultContextValue {
   setPreviewResult: (result: PreviewResultData | null) => void
 
   // 검색 결과 (클릭 스냅샷, 리스트 출력 기준)
-  searchResult: SearchResultData | null
-  setSearchResult: (result: SearchResultData | null) => void
+  searchResult: SearchResult | null
+  setSearchResult: (result: SearchResult | null) => void
 
   // 하이라이트 ID (프리뷰 기반)
   highlightedIds: Set<string>
@@ -54,7 +49,7 @@ const SearchResultContext = createContext<SearchResultContextValue | undefined>(
 // Provider 컴포넌트
 export function SearchResultProvider({ children }: { children: ReactNode }) {
   const [previewResult, setPreviewResultState] = useState<PreviewResultData | null>(null)
-  const [searchResult, setSearchResultState] = useState<SearchResultData | null>(null)
+  const [searchResult, setSearchResultState] = useState<SearchResult | null>(null)
 
   // 하이라이트할 상품 ID 목록 계산 (프리뷰 기반)
   const highlightedIds = useMemo(() => {
@@ -68,7 +63,7 @@ export function SearchResultProvider({ children }: { children: ReactNode }) {
     setPreviewResultState(result)
   }, [])
 
-  const setSearchResult = useCallback((result: SearchResultData | null) => {
+  const setSearchResult = useCallback((result: SearchResult | null) => {
     setSearchResultState(result)
   }, [])
 

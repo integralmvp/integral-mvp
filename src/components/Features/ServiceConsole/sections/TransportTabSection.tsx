@@ -349,6 +349,7 @@ export default function TransportTabSection({
               key={cargo.id}
               cargo={cargo}
               onQuantityChange={onUpdateQuantity}
+              mode="ROUTE"
             />
           ))}
 

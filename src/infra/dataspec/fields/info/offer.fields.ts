@@ -3,6 +3,8 @@
  * 공간/경로 상품 데이터 필드 정의 (타입 + schema 객체)
  */
 
+import type { FeatureCode } from '../../codedata/features/featureCodes'
+
 // ============ 필드 타입 (CDS 핵심 스키마) ============
 export interface OfferFields {
   offerType: 'STORAGE' | 'ROUTE'
@@ -29,7 +31,7 @@ export interface OfferFields {
     hazmatSupported?: boolean
   }
   /** 기능 코드 목록 */
-  features?: string[]
+  features?: FeatureCode[]
 }
 
 // ============ CDS 레코드용 확장 필드 (UI DTO 재구성에 필요한 모든 필드) ============
@@ -61,7 +63,7 @@ export interface OfferRecordFields {
   locationRegion?: string           // 표시용 지역 라벨
   storageType?: '상온' | '냉장' | '냉동'
   capacityText?: string             // '파렛트 30개' 등 표시용
-  features?: string[]               // FeatureCode[]
+  features?: FeatureCode[]
 
   // ROUTE 전용
   originCode?: string               // 출발지 법정동 코드 ('' = 육지 항만)

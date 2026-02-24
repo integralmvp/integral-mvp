@@ -1,6 +1,9 @@
 // 보관+운송 탭 섹션 - 3행 그리드 레이아웃 (1.35fr/1fr/1fr)
 // 상단: 순서 전환 UI (보관 ↔ 운송) - 순서에 따라 버튼 재정렬
 // 동일 영역에서 보관/운송 그리드 전환 렌더링
+//
+// Sec0 정책: 보관+운송 동시 탭은 MVP 서비스 미제공 → POLICY_LOCKED으로 잠금
+const POLICY_LOCKED = true
 import { useState, useEffect, useRef } from 'react'
 import type {
   CargoUI,
@@ -263,6 +266,23 @@ export default function BothTabSection({
   // 첫 번째 버튼과 두 번째 버튼 결정 (순서에 따라)
   const firstButton = effectiveOrder === 'storage-first' ? 'storage' : 'transport'
   const secondButton = effectiveOrder === 'storage-first' ? 'transport' : 'storage'
+
+  // Sec0: 보관+운송 동시 탭 — 서비스 미제공 정책 (Policy Lock)
+  if (POLICY_LOCKED) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center gap-3 px-6 text-center">
+        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+          <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+          </svg>
+        </div>
+        <div>
+          <div className="text-sm font-semibold text-slate-600">준비중</div>
+          <div className="text-xs text-slate-400 mt-0.5">보관+운송 연계 서비스는 준비중입니다</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -561,6 +581,7 @@ export default function BothTabSection({
               key={cargo.id}
               cargo={cargo}
               onQuantityChange={onUpdateQuantity}
+              mode={activeView === 'storage' ? 'STORAGE' : 'ROUTE'}
             />
           ))}
 
