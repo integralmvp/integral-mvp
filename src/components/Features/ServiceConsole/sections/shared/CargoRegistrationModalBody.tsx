@@ -1,5 +1,5 @@
-import type { CargoUI, RegisteredCargo } from '../../../../types/models'
-import { CargoRegistrationCard, CargoSummaryCard } from '../ui'
+import type { CargoUI, RegisteredCargo } from '../../../../../types/models'
+import { CargoRegistrationCard, CargoSummaryCard } from '../../ui'
 
 interface CargoRegistrationModalBodyProps {
   registeredCargos: RegisteredCargo[]

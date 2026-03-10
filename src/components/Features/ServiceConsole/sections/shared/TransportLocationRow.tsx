@@ -1,6 +1,6 @@
-import type { TransportCondition } from '../../../../types/models'
-import { GridCell, ResetButton } from '../ui'
-import { getLocationName } from '../utils/tabSectionUtils'
+import type { TransportCondition } from '../../../../../types/models'
+import { GridCell, ResetButton } from '../../ui'
+import { getLocationName } from '../../utils/tabSectionUtils'
 
 interface TransportLocationRowProps {
   transportCondition: TransportCondition

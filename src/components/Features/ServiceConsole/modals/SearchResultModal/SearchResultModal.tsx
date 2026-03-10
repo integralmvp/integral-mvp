@@ -9,17 +9,17 @@
  */
 
 import { useState } from 'react'
-import type { StorageProduct, RouteProduct, StorageCondition, TransportCondition, RegisteredCargo, ServiceOrder } from '../../../../types/models'
-import type { RegulationSummary } from '../../../../layers/matching/regulation'
-import type { ServiceType } from '../hooks/useServiceConsoleState'
-import ProductDetailModal from './ProductDetailModal'
-import { StorageProductCard } from '../ui/StorageProductCard'
-import { RouteProductCard } from '../ui/RouteProductCard'
-import { SearchConditionSummary } from '../ui/SearchConditionSummary'
-import { BothTabHeader } from '../ui/BothTabHeader'
-import type { BothModalTab } from '../ui/BothTabHeader'
-import { SearchResultSelectionPanel } from '../ui/SearchResultSelectionPanel'
-import { SearchResultModalHeader } from '../ui/SearchResultModalHeader'
+import type { StorageProduct, RouteProduct, StorageCondition, TransportCondition, RegisteredCargo, ServiceOrder } from '../../../../../types/models'
+import type { RegulationSummary } from '../../../../../layers/matching/regulation'
+import type { ServiceType } from '../../hooks/useServiceConsoleState'
+import ProductDetailModal from '../ProductDetailModal'
+import { StorageProductCard } from './StorageProductCard'
+import { RouteProductCard } from './RouteProductCard'
+import { SearchConditionSummary } from './SearchConditionSummary'
+import { BothTabHeader } from './BothTabHeader'
+import type { BothModalTab } from './BothTabHeader'
+import { SearchResultSelectionPanel } from './SearchResultSelectionPanel'
+import { SearchResultModalHeader } from './SearchResultModalHeader'
 
 interface SearchResultModalProps {
   isOpen: boolean

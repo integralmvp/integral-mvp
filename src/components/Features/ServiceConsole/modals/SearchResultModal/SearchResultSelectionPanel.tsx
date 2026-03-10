@@ -1,5 +1,5 @@
-import type { StorageProduct, RouteProduct } from '../../../../types/models'
-import type { ServiceType } from '../hooks/useServiceConsoleState'
+import type { StorageProduct, RouteProduct } from '../../../../../types/models'
+import type { ServiceType } from '../../hooks/useServiceConsoleState'
 
 interface SearchResultSelectionPanelProps {
   activeTab: ServiceType

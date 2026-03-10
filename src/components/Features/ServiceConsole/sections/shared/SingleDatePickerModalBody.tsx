@@ -1,4 +1,4 @@
-import { DatePicker } from '../ui'
+import { DatePicker } from '../../ui'
 
 interface SingleDatePickerModalBodyProps {
   date: string | undefined

@@ -1,5 +1,5 @@
-import type { StorageProduct } from '../../../../types/models'
-import { formatFeatureLabel } from '../../../../infra/dataspec/codedata/features/featureCodes'
+import type { StorageProduct } from '../../../../../types/models'
+import { formatFeatureLabel } from '../../../../../infra/dataspec/codedata/features/featureCodes'
 
 interface StorageProductCardProps {
   product: StorageProduct

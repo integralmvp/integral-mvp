@@ -1,4 +1,4 @@
-import { LocationDropdown } from '../ui'
+import { LocationDropdown } from '../../ui'
 
 interface LocationSelectionModalBodyProps {
   value: string | undefined

@@ -1,4 +1,4 @@
-import type { RouteProduct } from '../../../../types/models'
+import type { RouteProduct } from '../../../../../types/models'
 
 interface RouteProductCardProps {
   product: RouteProduct
