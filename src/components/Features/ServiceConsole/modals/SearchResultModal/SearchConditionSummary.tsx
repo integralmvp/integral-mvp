@@ -1,5 +1,5 @@
-import type { StorageCondition, TransportCondition, RegisteredCargo, ServiceOrder } from '../../../../types/models'
-import type { ServiceType } from '../hooks/useServiceConsoleState'
+import type { StorageCondition, TransportCondition, RegisteredCargo, ServiceOrder } from '../../../../../types/models'
+import type { ServiceType } from '../../hooks/useServiceConsoleState'
 
 // storageCondition.location / transportCondition.origin·destination은 이미 표시용 이름(display name)을 저장
 // RegionCode 기반 필터링은 매칭 파이프라인에서 수행됨

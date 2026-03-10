@@ -1,5 +1,5 @@
-import type { ServiceType } from '../hooks/useServiceConsoleState'
-import type { RegulationSummary } from '../../../../layers/matching/regulation'
+import type { ServiceType } from '../../hooks/useServiceConsoleState'
+import type { RegulationSummary } from '../../../../../layers/matching/regulation'
 
 const TAB_HEADERS: Record<ServiceType, { title: string; subtitle: string }> = {
   storage: {

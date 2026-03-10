@@ -3,7 +3,7 @@
  */
 
 export { default as InputModal } from './InputModal'
-export { default as SearchResultModal } from './SearchResultModal'
+export { default as SearchResultModal } from './SearchResultModal/SearchResultModal'
 export { default as ProductDetailModal } from './ProductDetailModal'
 export type { ModalKey, ModalPayload } from './modalTypes'
 export { MODAL_REGISTRY } from './modalRegistry'

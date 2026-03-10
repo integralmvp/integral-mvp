@@ -1,6 +1,6 @@
-import type { RegisteredCargo } from '../../../../types/models'
-import type { DemandResult } from '../../../../engine/cube'
-import { QuantityInputCard, ConversionResult } from '../ui'
+import type { RegisteredCargo } from '../../../../../types/models'
+import type { DemandResult } from '../../../../../engine/cube'
+import { QuantityInputCard, ConversionResult } from '../../ui'
 
 interface QuantityInputModalBodyProps {
   registeredCargos: RegisteredCargo[]

@@ -12,36 +12,36 @@ import type {
   TransportCondition,
   DealOption,
   UserInfo,
-} from '../../../../types/models'
-import { DEMO_USER } from '../../../../data/mock/mockData'
-import type { ServiceType } from '../hooks/useServiceConsoleState'
+} from '../../../../../types/models'
+import { DEMO_USER } from '../../../../../data/mock/mockData'
+import type { ServiceType } from '../../hooks/useServiceConsoleState'
 import {
   calcBillableCubes,
   calcEstimatedTotal,
   calcStorageEstimate,
   type OptionSurcharge,
-} from '../../../../engine/pricing/cubeSettlement'
+} from '../../../../../engine/pricing/cubeSettlement'
 import {
   allocateResource,
   type AllocateResourceParams,
-} from '../../../../layers/matching/resource'
+} from '../../../../../layers/matching/resource'
 import {
   logDealConfirmed,
   logSettlementCalculated,
   logResourceAllocated,
   makeDealId,
-} from '../../../../infra/storage'
-import { DealUserSection } from './deal/DealUserSection'
-import { DealCargoSummary } from './deal/DealCargoSummary'
-import { DealOptionsSection } from './deal/DealOptionsSection'
-import { DealPickupSection } from './deal/DealPickupSection'
-import { DealPricingSection, type DealCostCalculation } from './deal/DealPricingSection'
-import { DealContractModal } from './deal/DealContractModal'
-import { DealConfirmCard } from './deal/DealConfirmCard'
-import { DealHeaderSection } from './deal/DealHeaderSection'
-import { DealMemoSection } from './deal/DealMemoSection'
-import { DealContractSection } from './deal/DealContractSection'
-import { DealFooterButtons } from './deal/DealFooterButtons'
+} from '../../../../../infra/storage'
+import { DealUserSection } from './DealUserSection'
+import { DealCargoSummary } from './DealCargoSummary'
+import { DealOptionsSection } from './DealOptionsSection'
+import { DealPickupSection } from './DealPickupSection'
+import { DealPricingSection, type DealCostCalculation } from './DealPricingSection'
+import { DealContractModal } from './DealContractModal'
+import { DealConfirmCard } from './DealConfirmCard'
+import { DealHeaderSection } from './DealHeaderSection'
+import { DealMemoSection } from './DealMemoSection'
+import { DealContractSection } from './DealContractSection'
+import { DealFooterButtons } from './DealFooterButtons'
 
 interface DealPageProps {
   isOpen: boolean

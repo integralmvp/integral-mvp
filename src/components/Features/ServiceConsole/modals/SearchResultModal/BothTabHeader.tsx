@@ -1,4 +1,4 @@
-import type { ServiceOrder } from '../../../../types/models'
+import type { ServiceOrder } from '../../../../../types/models'
 
 export type BothModalTab = 'integrated' | 'storage' | 'transport'
 

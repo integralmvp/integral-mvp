@@ -4,21 +4,21 @@
 // 3행: 보관 기간 (시작일 | 종료일)
 // PR6 일원화: RegionCode 기반 장소 관리
 import { useState } from 'react'
-import type { CargoUI, RegisteredCargo, StorageCondition } from '../../../../types/models'
-import type { DemandResult } from '../../../../engine/cube'
-import { getRegionByCode } from '../../../../infra/dataspec/codedata/regions/regionCodesJeju'
-import { formatDate, getLocationName } from '../utils/tabSectionUtils'
-import { InputModal } from '../modals'
+import type { CargoUI, RegisteredCargo, StorageCondition } from '../../../../../types/models'
+import type { DemandResult } from '../../../../../engine/cube'
+import { getRegionByCode } from '../../../../../infra/dataspec/codedata/regions/regionCodesJeju'
+import { formatDate, getLocationName } from '../../utils/tabSectionUtils'
+import { InputModal } from '../../modals'
 import {
   GridCell,
   CargoCarousel,
   CargoAddButton,
   DatePicker,
   ResetButton,
-} from '../ui'
-import { CargoRegistrationModalBody } from '../ui/CargoRegistrationModalBody'
-import { QuantityInputModalBody } from '../ui/QuantityInputModalBody'
-import { LocationSelectionModalBody } from '../ui/LocationSelectionModalBody'
+} from '../../ui'
+import { CargoRegistrationModalBody } from '../shared/CargoRegistrationModalBody'
+import { QuantityInputModalBody } from '../shared/QuantityInputModalBody'
+import { LocationSelectionModalBody } from '../shared/LocationSelectionModalBody'
 
 interface StorageTabSectionProps {
   // 화물 등록
