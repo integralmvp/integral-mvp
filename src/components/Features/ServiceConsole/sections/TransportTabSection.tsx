@@ -7,19 +7,19 @@ import { useState } from 'react'
 import type { CargoUI, RegisteredCargo, TransportCondition } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine/cube'
 import { getRegionByCode } from '../../../../infra/dataspec/codedata/regions/regionCodesJeju'
+import { formatDate } from '../utils/tabSectionUtils'
 import { InputModal } from '../modals'
 import {
   GridCell,
   CargoCarousel,
   CargoAddButton,
-  CargoRegistrationCard,
-  QuantityInputCard,
-  LocationDropdown,
-  DatePicker,
-  ConversionResult,
-  CargoSummaryCard,
   ResetButton,
 } from '../ui'
+import { CargoRegistrationModalBody } from '../ui/CargoRegistrationModalBody'
+import { QuantityInputModalBody } from '../ui/QuantityInputModalBody'
+import { LocationSelectionModalBody } from '../ui/LocationSelectionModalBody'
+import { TransportLocationRow } from '../ui/TransportLocationRow'
+import { SingleDatePickerModalBody } from '../ui/SingleDatePickerModalBody'
 
 interface TransportTabSectionProps {
   // 화물 등록
@@ -79,23 +79,6 @@ export default function TransportTabSection({
   // 물량 입력 완료 여부
   const allQuantitiesEntered = registeredCargos.length > 0 &&
     registeredCargos.every(c => c.quantity !== undefined && c.quantity > 0)
-
-  // 날짜 포맷
-  const formatDate = (date?: string) => {
-    if (!date) return null
-    const d = new Date(date)
-    return `${d.getMonth() + 1}/${d.getDate()}`
-  }
-
-  // 장소명 가져오기 (RegionCode → name)
-  const getLocationName = (regionCode?: string) => {
-    if (!regionCode) return null
-    const region = getRegionByCode(regionCode)
-    if (!region) return regionCode
-    // 간결한 이름 반환 (예: "제주시 애월읍" → "애월읍")
-    const parts = region.name.split(' ')
-    return parts[parts.length - 1]
-  }
 
   // 모달 열기 (임시 상태 초기화)
   const openModal = (modal: ModalType) => {
@@ -203,54 +186,13 @@ export default function TransportTabSection({
       </div>
 
       {/* 2행: 출발지 ↔ 도착지 */}
-      <div className="flex items-stretch gap-1 min-h-0">
-        {/* 출발지 */}
-        <div className="flex-1">
-          <GridCell
-            label="출발지"
-            icon="origin"
-            onClick={() => openModal('origin')}
-            headerAction={
-              <ResetButton
-                onClick={() => onResetTransportCondition?.()}
-                disabled={!transportCondition.originCode && !transportCondition.destinationCode && !transportCondition.transportDate}
-              />
-            }
-          >
-            {transportCondition.originCode ? (
-              <span className="text-sm font-medium">{getLocationName(transportCondition.originCode)}</span>
-            ) : (
-              <span className="text-slate-400 text-xs">선택</span>
-            )}
-          </GridCell>
-        </div>
-
-        {/* 양방향 화살표 버튼 */}
-        <button
-          onClick={handleSwapLocations}
-          className="flex-shrink-0 w-7 flex items-center justify-center text-teal-700 hover:text-teal-800 hover:bg-teal-50 rounded-lg transition-colors"
-          title="출발지/도착지 교환"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-          </svg>
-        </button>
-
-        {/* 도착지 */}
-        <div className="flex-1">
-          <GridCell
-            label="도착지"
-            icon="destination"
-            onClick={() => openModal('destination')}
-          >
-            {transportCondition.destinationCode ? (
-              <span className="text-sm font-medium">{getLocationName(transportCondition.destinationCode)}</span>
-            ) : (
-              <span className="text-slate-400 text-xs">선택</span>
-            )}
-          </GridCell>
-        </div>
-      </div>
+      <TransportLocationRow
+        transportCondition={transportCondition}
+        onOpenOrigin={() => openModal('origin')}
+        onOpenDestination={() => openModal('destination')}
+        onSwap={handleSwapLocations}
+        onResetTransportCondition={onResetTransportCondition}
+      />
 
       {/* 3행: 운송 날짜 */}
       <div className="min-h-0">
@@ -275,59 +217,15 @@ export default function TransportTabSection({
         onClose={() => setActiveModal(null)}
         title="화물 등록"
       >
-        <div className="space-y-4">
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
-            <p className="text-xs text-slate-600">
-              박스 규격, 품목, 중량을 입력하여 화물을 등록합니다.
-            </p>
-          </div>
-
-          {/* 등록된 화물 목록 */}
-          {registeredCargos.length > 0 && (
-            <div className="space-y-2">
-              <div className="text-xs font-semibold text-slate-700">등록된 화물</div>
-              <div className="flex flex-wrap gap-2">
-                {registeredCargos.map((cargo, idx) => (
-                  <CargoSummaryCard
-                    key={cargo.id}
-                    cargo={cargo}
-                    index={idx}
-                    onRemove={onRemoveCargo}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 등록 대기 중인 화물 카드 */}
-          {pendingCargos.map((cargo, index) => (
-            <CargoRegistrationCard
-              key={cargo.id}
-              cargo={cargo}
-              index={registeredCargos.length + index}
-              onRemove={onRemoveCargo}
-              onChange={onUpdateCargo}
-              onComplete={onCompleteCargo}
-            />
-          ))}
-
-          {/* 화물 추가 버튼 */}
-          <button
-            onClick={onAddCargo}
-            className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
-          >
-            + 화물 추가하기
-          </button>
-
-          {registeredCargos.length > 0 && pendingCargos.length === 0 && (
-            <button
-              onClick={() => setActiveModal(null)}
-              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              등록을 완료하시겠습니까?
-            </button>
-          )}
-        </div>
+        <CargoRegistrationModalBody
+          registeredCargos={registeredCargos}
+          pendingCargos={pendingCargos}
+          onAddCargo={onAddCargo}
+          onRemoveCargo={onRemoveCargo}
+          onUpdateCargo={onUpdateCargo}
+          onCompleteCargo={onCompleteCargo}
+          onClose={() => setActiveModal(null)}
+        />
       </InputModal>
 
       {/* 물량 입력 모달 */}
@@ -336,36 +234,16 @@ export default function TransportTabSection({
         onClose={() => setActiveModal(null)}
         title="물량 입력"
       >
-        <div className="space-y-4">
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
-            <p className="text-xs text-slate-600">
-              등록된 화물별 수량을 입력하면 필요한 큐브 수가 자동으로 계산됩니다.
-            </p>
-          </div>
-
-          {/* 화물별 수량 입력 */}
-          {registeredCargos.map(cargo => (
-            <QuantityInputCard
-              key={cargo.id}
-              cargo={cargo}
-              onQuantityChange={onUpdateQuantity}
-              mode="ROUTE"
-            />
-          ))}
-
-          {/* 총 환산 결과 */}
-          {allQuantitiesEntered && demandResult && (
-            <ConversionResult
-              result={demandResult}
-              mode="ROUTE"
-              onSelectConfirm={() => {
-                onConfirmQuantity()
-                setActiveModal(null)
-              }}
-              isButtonDisabled={!allQuantitiesEntered}
-            />
-          )}
-        </div>
+        <QuantityInputModalBody
+          registeredCargos={registeredCargos}
+          allQuantitiesEntered={allQuantitiesEntered}
+          demandResult={demandResult}
+          onUpdateQuantity={onUpdateQuantity}
+          onConfirmQuantity={onConfirmQuantity}
+          onClose={() => setActiveModal(null)}
+          mode="ROUTE"
+          modeLabel="큐브"
+        />
       </InputModal>
 
       {/* 출발지 선택 모달 */}
@@ -374,22 +252,12 @@ export default function TransportTabSection({
         onClose={() => setActiveModal(null)}
         title="출발지 선택"
       >
-        <div className="space-y-4">
-          <LocationDropdown
-            value={tempOriginCode}
-            onChange={setTempOriginCode}
-            placeholder="출발지 선택"
-          />
-
-          {tempOriginCode && (
-            <button
-              onClick={confirmOrigin}
-              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              선택하시겠습니까?
-            </button>
-          )}
-        </div>
+        <LocationSelectionModalBody
+          value={tempOriginCode}
+          onChange={setTempOriginCode}
+          placeholder="출발지 선택"
+          onConfirm={confirmOrigin}
+        />
       </InputModal>
 
       {/* 도착지 선택 모달 */}
@@ -398,22 +266,12 @@ export default function TransportTabSection({
         onClose={() => setActiveModal(null)}
         title="도착지 선택"
       >
-        <div className="space-y-4">
-          <LocationDropdown
-            value={tempDestinationCode}
-            onChange={setTempDestinationCode}
-            placeholder="도착지 선택"
-          />
-
-          {tempDestinationCode && (
-            <button
-              onClick={confirmDestination}
-              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              선택하시겠습니까?
-            </button>
-          )}
-        </div>
+        <LocationSelectionModalBody
+          value={tempDestinationCode}
+          onChange={setTempDestinationCode}
+          placeholder="도착지 선택"
+          onConfirm={confirmDestination}
+        />
       </InputModal>
 
       {/* 날짜 선택 모달 */}
@@ -422,22 +280,11 @@ export default function TransportTabSection({
         onClose={() => setActiveModal(null)}
         title="운송 날짜 선택"
       >
-        <div className="space-y-4">
-          <DatePicker
-            mode="single"
-            date={tempTransportDate}
-            onDateChange={setTempTransportDate}
-          />
-
-          {tempTransportDate && (
-            <button
-              onClick={confirmDate}
-              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              선택하시겠습니까?
-            </button>
-          )}
-        </div>
+        <SingleDatePickerModalBody
+          date={tempTransportDate}
+          onDateChange={setTempTransportDate}
+          onConfirm={confirmDate}
+        />
       </InputModal>
     </div>
   )
