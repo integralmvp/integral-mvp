@@ -12,14 +12,12 @@ import { useState } from 'react'
 import type { StorageProduct, RouteProduct, StorageCondition, TransportCondition, RegisteredCargo, ServiceOrder } from '../../../../types/models'
 import type { RegulationSummary } from '../../../../layers/matching/regulation'
 import type { ServiceType } from '../hooks/useServiceConsoleState'
-import { JEJU_LOCATIONS } from '../../../../data/mock/mockData'
 import ProductDetailModal from './ProductDetailModal'
 
-// 장소 ID를 한글 이름으로 변환
-const getLocationName = (locationId?: string): string => {
-  if (!locationId) return '전체'
-  const location = JEJU_LOCATIONS.find(l => l.id === locationId)
-  return location?.name || locationId
+// storageCondition.location / transportCondition.origin·destination은 이미 표시용 이름(display name)을 저장
+// RegionCode 기반 필터링은 매칭 파이프라인에서 수행됨
+const getLocationName = (displayName?: string): string => {
+  return displayName || '전체'
 }
 
 interface SearchResultModalProps {

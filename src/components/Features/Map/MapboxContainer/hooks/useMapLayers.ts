@@ -31,12 +31,11 @@ export function addMiniMapArrowImages(miniMap: mapboxgl.Map): void {
 }
 
 /**
- * 파렛트 마커 추가
- * @returns offerId → marker HTMLElement 맵 (하이라이트 업데이트에 사용)
+ * 파렛트 마커 추가 (정적 마커 - 모든 보관 상품 표시)
+ * 검색 결과 하이라이트는 useMapbox의 동적 pin marker로 처리
  */
-export function addPalletMarkers(map: mapboxgl.Map): Map<string, HTMLElement> {
+export function addPalletMarkers(map: mapboxgl.Map): void {
   console.log('[MapboxContainer] Adding pallet markers...')
-  const markerElementMap = new Map<string, HTMLElement>()
 
   getAllStorageOffers().forEach((storage) => {
     console.log(`[Marker] ${storage.location.name}:`, {
@@ -99,36 +98,6 @@ export function addPalletMarkers(map: mapboxgl.Map): Map<string, HTMLElement> {
     el.addEventListener('mouseleave', () => {
       popup.remove()
     })
-
-    markerElementMap.set(storage.id, el)
-  })
-
-  return markerElementMap
-}
-
-/**
- * 하이라이트 상태 업데이트
- * highlightedIds에 있는 마커는 .offer-marker--highlighted 클래스를 추가,
- * 없는 마커는 제거. previewResult가 null이면 모든 하이라이트 제거.
- *
- * @param highlightedIds - 하이라이트할 offer ID Set (null이면 전체 해제)
- * @param markerElementMap - offerId → HTMLElement 맵
- */
-export function updateMarkerHighlights(
-  highlightedIds: Set<string> | null,
-  markerElementMap: Map<string, HTMLElement>
-): void {
-  markerElementMap.forEach((el, offerId) => {
-    if (highlightedIds && highlightedIds.size > 0) {
-      if (highlightedIds.has(offerId)) {
-        el.classList.add('offer-marker--highlighted')
-      } else {
-        el.classList.remove('offer-marker--highlighted')
-      }
-    } else {
-      // previewResult 없음 → 전체 하이라이트 해제 (모든 마커 기본 표시)
-      el.classList.remove('offer-marker--highlighted')
-    }
   })
 }
 

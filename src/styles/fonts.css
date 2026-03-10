@@ -66,18 +66,4 @@ body {
   animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* 지도 마커 하이라이트 (offer-marker--highlighted) */
-.offer-marker--highlighted .offer-marker-inner {
-  filter: drop-shadow(0 0 6px rgba(20, 184, 166, 0.9));
-  transform: scale(1.15);
-}
 
-/* 하이라이트 상태일 때 내부 SVG 강조 (마커 바운스 인) */
-@keyframes markerHighlightIn {
-  0%   { transform: scale(0.9); opacity: 0.6; }
-  60%  { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1.15); opacity: 1; }
-}
-.offer-marker--highlighted .offer-marker-inner {
-  animation: markerHighlightIn 0.3s ease-out forwards;
-}

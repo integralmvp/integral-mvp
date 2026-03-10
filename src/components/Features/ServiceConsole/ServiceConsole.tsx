@@ -6,7 +6,8 @@
 import { useState } from 'react'
 import { useServiceConsoleState, type ServiceType } from './hooks'
 import { StorageTabSection, TransportTabSection, BothTabSection } from './sections'
-import { SlotCounter, SearchResultModal, DealPage } from './ui'
+import { SearchResultModal } from './modals'
+import { SlotCounter, DealPage } from './ui'
 import { useSearchResult } from '../../../contexts/SearchResultContext'
 import { getStorageOfferById, getRouteOfferById } from '../../../infra/storage/info/offer.repo'
 

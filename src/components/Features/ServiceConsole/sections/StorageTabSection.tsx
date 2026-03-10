@@ -7,11 +7,11 @@ import { useState } from 'react'
 import type { CargoUI, RegisteredCargo, StorageCondition } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine/cube'
 import { getRegionByCode } from '../../../../infra/dataspec/codedata/regions/regionCodesJeju'
+import { InputModal } from '../modals'
 import {
   GridCell,
   CargoCarousel,
   CargoAddButton,
-  InputModal,
   CargoRegistrationCard,
   QuantityInputCard,
   LocationDropdown,

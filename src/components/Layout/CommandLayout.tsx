@@ -1,5 +1,5 @@
 // Grid 기반 레이아웃 - 좌측(45%) 서비스 콘솔 + 우측(55%) 지도
-// 하이라이트 마커 관리는 useMapbox 훅 내부 (updateMarkerHighlights via useEffect on highlightedIds)
+// 검색 결과 pin marker 관리는 useMapbox 훅 내부 (highlightedIds 기반 동적 pin marker 생성)
 
 import ServiceConsole from '../Features/ServiceConsole'
 import MapboxContainer from '../Features/Map/MapboxContainer'
