@@ -7,19 +7,18 @@ import { useState } from 'react'
 import type { CargoUI, RegisteredCargo, StorageCondition } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine/cube'
 import { getRegionByCode } from '../../../../infra/dataspec/codedata/regions/regionCodesJeju'
+import { formatDate, getLocationName } from '../utils/tabSectionUtils'
 import { InputModal } from '../modals'
 import {
   GridCell,
   CargoCarousel,
   CargoAddButton,
-  CargoRegistrationCard,
-  QuantityInputCard,
-  LocationDropdown,
   DatePicker,
-  ConversionResult,
-  CargoSummaryCard,
   ResetButton,
 } from '../ui'
+import { CargoRegistrationModalBody } from '../ui/CargoRegistrationModalBody'
+import { QuantityInputModalBody } from '../ui/QuantityInputModalBody'
+import { LocationSelectionModalBody } from '../ui/LocationSelectionModalBody'
 
 interface StorageTabSectionProps {
   // 화물 등록
@@ -80,23 +79,6 @@ export default function StorageTabSection({
   // 물량 입력 완료 여부
   const allQuantitiesEntered = registeredCargos.length > 0 &&
     registeredCargos.every(c => c.quantity !== undefined && c.quantity > 0)
-
-  // 날짜 포맷
-  const formatDate = (date?: string) => {
-    if (!date) return null
-    const d = new Date(date)
-    return `${d.getMonth() + 1}/${d.getDate()}`
-  }
-
-  // 장소명 가져오기 (RegionCode → name)
-  const getLocationName = (regionCode?: string) => {
-    if (!regionCode) return null
-    const region = getRegionByCode(regionCode)
-    if (!region) return regionCode
-    // 간결한 이름 반환 (예: "제주시 애월읍" → "애월읍")
-    const parts = region.name.split(' ')
-    return parts[parts.length - 1]
-  }
 
   // 모달 열기 (임시 상태 초기화)
   const openModal = (modal: ModalType) => {
@@ -231,59 +213,15 @@ export default function StorageTabSection({
         onClose={() => setActiveModal(null)}
         title="화물 등록"
       >
-        <div className="space-y-4">
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
-            <p className="text-xs text-slate-600">
-              박스 규격, 품목, 중량을 입력하여 화물을 등록합니다.
-            </p>
-          </div>
-
-          {/* 등록된 화물 목록 */}
-          {registeredCargos.length > 0 && (
-            <div className="space-y-2">
-              <div className="text-xs font-semibold text-slate-700">등록된 화물</div>
-              <div className="flex flex-wrap gap-2">
-                {registeredCargos.map((cargo, idx) => (
-                  <CargoSummaryCard
-                    key={cargo.id}
-                    cargo={cargo}
-                    index={idx}
-                    onRemove={onRemoveCargo}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 등록 대기 중인 화물 카드 */}
-          {pendingCargos.map((cargo, index) => (
-            <CargoRegistrationCard
-              key={cargo.id}
-              cargo={cargo}
-              index={registeredCargos.length + index}
-              onRemove={onRemoveCargo}
-              onChange={onUpdateCargo}
-              onComplete={onCompleteCargo}
-            />
-          ))}
-
-          {/* 화물 추가 버튼 */}
-          <button
-            onClick={onAddCargo}
-            className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
-          >
-            + 화물 추가하기
-          </button>
-
-          {registeredCargos.length > 0 && pendingCargos.length === 0 && (
-            <button
-              onClick={() => setActiveModal(null)}
-              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              등록을 완료하시겠습니까?
-            </button>
-          )}
-        </div>
+        <CargoRegistrationModalBody
+          registeredCargos={registeredCargos}
+          pendingCargos={pendingCargos}
+          onAddCargo={onAddCargo}
+          onRemoveCargo={onRemoveCargo}
+          onUpdateCargo={onUpdateCargo}
+          onCompleteCargo={onCompleteCargo}
+          onClose={() => setActiveModal(null)}
+        />
       </InputModal>
 
       {/* 물량 입력 모달 */}
@@ -292,36 +230,16 @@ export default function StorageTabSection({
         onClose={() => setActiveModal(null)}
         title="물량 입력"
       >
-        <div className="space-y-4">
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2">
-            <p className="text-xs text-slate-600">
-              등록된 화물별 수량을 입력하면 필요한 파레트 수가 자동으로 계산됩니다.
-            </p>
-          </div>
-
-          {/* 화물별 수량 입력 */}
-          {registeredCargos.map(cargo => (
-            <QuantityInputCard
-              key={cargo.id}
-              cargo={cargo}
-              onQuantityChange={onUpdateQuantity}
-              mode="STORAGE"
-            />
-          ))}
-
-          {/* 총 환산 결과 */}
-          {allQuantitiesEntered && demandResult && (
-            <ConversionResult
-              result={demandResult}
-              mode="STORAGE"
-              onSelectConfirm={() => {
-                onConfirmQuantity()
-                setActiveModal(null)
-              }}
-              isButtonDisabled={!allQuantitiesEntered}
-            />
-          )}
-        </div>
+        <QuantityInputModalBody
+          registeredCargos={registeredCargos}
+          allQuantitiesEntered={allQuantitiesEntered}
+          demandResult={demandResult}
+          onUpdateQuantity={onUpdateQuantity}
+          onConfirmQuantity={onConfirmQuantity}
+          onClose={() => setActiveModal(null)}
+          mode="STORAGE"
+          modeLabel="파레트"
+        />
       </InputModal>
 
       {/* 장소 선택 모달 */}
@@ -330,22 +248,12 @@ export default function StorageTabSection({
         onClose={() => setActiveModal(null)}
         title="보관 장소 선택"
       >
-        <div className="space-y-4">
-          <LocationDropdown
-            value={tempLocationCode}
-            onChange={setTempLocationCode}
-            placeholder="보관 장소 선택"
-          />
-
-          {tempLocationCode && (
-            <button
-              onClick={confirmLocation}
-              className="w-full py-3 bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              선택하시겠습니까?
-            </button>
-          )}
-        </div>
+        <LocationSelectionModalBody
+          value={tempLocationCode}
+          onChange={setTempLocationCode}
+          placeholder="보관 장소 선택"
+          onConfirm={confirmLocation}
+        />
       </InputModal>
 
       {/* 날짜 선택 모달 */}

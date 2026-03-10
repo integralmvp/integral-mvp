@@ -18,5 +18,18 @@ export { default as SearchResultList } from './SearchResultList'
 // PR7: 거래 페이지 (모달 아님)
 export { default as DealPage } from './DealPage'
 
+// 검색 결과 모달 서브컴포넌트
+export { StorageProductCard } from './StorageProductCard'
+export { RouteProductCard } from './RouteProductCard'
+export { SearchConditionSummary } from './SearchConditionSummary'
+export { BothTabHeader } from './BothTabHeader'
+export type { BothModalTab } from './BothTabHeader'
+export { SearchResultSelectionPanel } from './SearchResultSelectionPanel'
+
+// 공통 모달 바디 컴포넌트
+export { CargoRegistrationModalBody } from './CargoRegistrationModalBody'
+export { QuantityInputModalBody } from './QuantityInputModalBody'
+export { LocationSelectionModalBody } from './LocationSelectionModalBody'
+
 // 모달 컴포넌트는 ../modals 에서 import 하세요
 // InputModal, SearchResultModal, ProductDetailModal → ServiceConsole/modals/
