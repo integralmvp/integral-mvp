@@ -3,7 +3,6 @@
 export { default as GridCell } from './GridCell'
 export { default as CargoSummaryCard, CargoCarousel, CargoAddButton } from './CargoSummaryCard'
 export { default as SlotCounter } from './SlotCounter'
-export { default as InputModal } from './InputModal'
 export { default as ResetButton } from './ResetButton'
 
 // 화물 등록/물량/조건 입력 컴포넌트
@@ -13,12 +12,11 @@ export { default as LocationDropdown } from './LocationDropdown'
 export { default as DatePicker } from './DatePicker'
 export { default as ConversionResult } from './ConversionResult'
 
-// PR4: 검색 결과
+// PR4: 검색 결과 리스트 (모달 아님)
 export { default as SearchResultList } from './SearchResultList'
-export { default as SearchResultModal } from './SearchResultModal'
 
-// PR7: 상품 상세
-export { default as ProductDetailModal } from './ProductDetailModal'
-
-// PR7: 거래 페이지
+// PR7: 거래 페이지 (모달 아님)
 export { default as DealPage } from './DealPage'
+
+// 모달 컴포넌트는 ../modals 에서 import 하세요
+// InputModal, SearchResultModal, ProductDetailModal → ServiceConsole/modals/

@@ -26,7 +26,7 @@ export {
 // ============ 통합 인터페이스 ============
 
 import { calcCubeDemand, type DemandMode, type CubeDemand } from './cubeEngine'
-import { cubesToPallets, areaToCubes } from './unitConvert'
+import { cubesToPallets } from './unitConvert'
 import type { BoxInput } from './shapeClassifier'
 
 /**
@@ -61,21 +61,4 @@ export function computeDemand(
   }
 }
 
-/**
- * 면적 입력 기반 수요 계산
- *
- * @deprecated 현재 사용처 없음 (UI는 박스 입력 기반 computeDemand 사용).
- * 실수로 사용하지 말 것. 제거 예정.
- */
-export function computeDemandFromArea(
-  areaM2: number,
-  mode: DemandMode
-): Pick<DemandResult, 'demandCubes' | 'demandPallets'> {
-  const demandCubes = areaToCubes(areaM2)
-  const demandPallets = mode === 'STORAGE' ? cubesToPallets(demandCubes) : undefined
 
-  return {
-    demandCubes,
-    demandPallets,
-  }
-}

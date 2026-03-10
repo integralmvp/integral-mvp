@@ -7,8 +7,8 @@ import {
   addPalletMarkers,
   addCurvedRoutes,
   addMiniMapRoutes,
-  updateMarkerHighlights,
 } from './useMapLayers'
+import { getAllStorageOffers } from '../../../../../infra/storage/info/offer.repo'
 import { useSearchResult } from '../../../../../contexts/SearchResultContext'
 
 // Mapbox Access Token
@@ -38,6 +38,9 @@ const MINIMAP_CONFIG = {
   interactive: false,
   attributionControl: false,
 }
+
+// 검색 결과 pin marker 색상 (teal 계열)
+const PIN_MARKER_COLOR = '#0d9488'
 
 /**
  * 카메라 패딩 적용 (좌측 45% 블러 영역 보정)
@@ -74,8 +77,8 @@ export function useMapbox(): UseMapboxResult {
   const map = useRef<mapboxgl.Map | null>(null)
   const miniMap = useRef<mapboxgl.Map | null>(null)
   const resizeObserver = useRef<ResizeObserver | null>(null)
-  // offerId → marker HTMLElement 맵 (하이라이트 제어용)
-  const markerElementMap = useRef<Map<string, HTMLElement>>(new Map())
+  // 검색 결과 매칭 상품에 동적으로 추가되는 pin markers (offerId → Marker)
+  const pinMarkersRef = useRef<Map<string, mapboxgl.Marker>>(new Map())
 
   const { highlightedIds, previewResult } = useSearchResult()
 
@@ -111,8 +114,8 @@ export function useMapbox(): UseMapboxResult {
       map.current.resize()
       applyCameraPadding(map.current)
 
-      // 마커 추가 후 markerElementMap 저장 (하이라이트 제어용)
-      markerElementMap.current = addPalletMarkers(map.current)
+      // 정적 파렛트 마커 추가 (모든 보관 상품)
+      addPalletMarkers(map.current)
       addArrowImages(map.current)
 
       setTimeout(() => {
@@ -157,19 +160,36 @@ export function useMapbox(): UseMapboxResult {
       // cleanup: observer disconnect, event listener 제거
       resizeObserver.current?.disconnect()
       window.removeEventListener('resize', handleResize)
-      markerElementMap.current.clear()
+      // 동적 pin marker 제거
+      pinMarkersRef.current.forEach(m => m.remove())
+      pinMarkersRef.current.clear()
       map.current?.remove()
       miniMap.current?.remove()
     }
   }, [handleResize])
 
-  // highlightedIds 변경 시 마커 하이라이트 업데이트
-  // previewResult가 null이면 highlightedIds는 빈 Set → 전체 해제
+  // highlightedIds 변경 시 동적 pin marker 동기화
+  // previewResult가 null이면 highlightedIds는 빈 Set → 전체 pin 제거
   useEffect(() => {
-    updateMarkerHighlights(
-      previewResult ? highlightedIds : null,
-      markerElementMap.current
-    )
+    if (!map.current) return
+
+    // 기존 pin marker 전체 제거
+    pinMarkersRef.current.forEach(m => m.remove())
+    pinMarkersRef.current.clear()
+
+    if (!previewResult || highlightedIds.size === 0) return
+
+    // 매칭된 보관 상품에 pin marker 생성 (Mapbox 기본 pin 방식)
+    const storageOffers = getAllStorageOffers()
+    storageOffers.forEach(storage => {
+      if (!highlightedIds.has(storage.id)) return
+
+      const marker = new mapboxgl.Marker({ color: PIN_MARKER_COLOR })
+        .setLngLat([storage.location.lng, storage.location.lat])
+        .addTo(map.current!)
+
+      pinMarkersRef.current.set(storage.id, marker)
+    })
   }, [highlightedIds, previewResult])
 
   return {

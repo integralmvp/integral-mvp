@@ -181,7 +181,9 @@ export default function DealPage({
       )
     }
 
-    // 최종 합산
+    // totalCost: 향후 보관 + 운송 연계 서비스에서 사용될 합산 비용.
+    // 현재 MVP에서는 단일 서비스 비용만 사용된다.
+    // UI: STORAGE → storageCost(storageResult.total), ROUTE → routeCost(routeResult.total)
     const totalCost = (storageResult?.total || 0) + (routeResult?.total || 0)
 
     return {

@@ -13,13 +13,12 @@ import type {
   ServiceOrder,
 } from '../../../../types/models'
 import type { DemandResult } from '../../../../engine/cube'
-import { JEJU_LOCATIONS } from '../../../../data/mock/mockData'
 import { getRegionByCode } from '../../../../infra/dataspec/codedata/regions/regionCodesJeju'
+import { InputModal } from '../modals'
 import {
   GridCell,
   CargoCarousel,
   CargoAddButton,
-  InputModal,
   CargoRegistrationCard,
   QuantityInputCard,
   LocationDropdown,
@@ -124,10 +123,9 @@ export default function BothTabSection({
   }
 
   // 장소명 가져오기
-  const getLocationName = (locationId?: string) => {
-    if (!locationId) return null
-    const loc = JEJU_LOCATIONS.find(l => l.id === locationId)
-    return loc?.name || locationId
+  // storageCondition.location / transportCondition.origin·destination은 이미 표시용 이름(display name)을 저장
+  const getLocationName = (displayName?: string) => {
+    return displayName || null
   }
 
   // 보관 조건 완료 체크
