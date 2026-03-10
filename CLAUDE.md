@@ -1,13 +1,12 @@
-# INTEGRAL MVP - 개발 가이드
+# INTEGRAL MVP - CLAUDE.md
 
 ## 프로젝트 개요
 
-- **프로젝트명**: INTEGRAL
-- **목적**: 제주 물류 공유 플랫폼 - 공간과 경로를 상품화하는 공유 물류 서비스
-- **버전**: MVP v3.0 (설득용 시연 목적)
+- **프로젝트명**: CUBE
+- **목적**: 제주 물류, 유통 오픈마켓 플랫폼 - 공간과 경로를 상품화하는 공유 물류 서비스
+- **현재 단계**: 상품 거래 페이지 안정화 완료, 다음 단계는 **상품 등록 페이지 + 백엔드 연결 준비**
 
-> **핵심**: 투자자/이해관계자에게 3-5분 내 서비스 가치를 전달하는 프로토타입
-> 백엔드/데이터베이스 없음, 모든 데이터는 mockData 기반
+> 핵심: 현재 상품 거래 페이지는 **큐브 거래 엔진 + Code Data System(CDS) + 규정/자원/조건/거래 레이어**가 실제 코드에 연결된 상태이며, 이후 개발은 이 구조를 절대 깨지 않는 방향으로 진행한다.
 
 ---
 
@@ -15,467 +14,314 @@
 
 - **프레임워크**: Vite + React + TypeScript
 - **스타일링**: Tailwind CSS
-- **지도**: Mapbox GL JS (light-v11)
-- **폰트**: Pretendard (메인), Inter (숫자)
+- **지도**: Mapbox GL JS
+- **폰트**: Pretendard
 
 ```env
 VITE_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
-```
+````
 
 ---
 
-## 핵심 설계 원칙
+## 핵심 설계 원칙 (불변)
 
-1. **직관성 우선** - 별도 설명 없이 화면만으로 서비스 이해 가능
-2. **지도 중심 UI** - 모든 가치는 지도에서 시각적으로 전달
-3. **싱글 페이지 구조** - 별도 라우팅 없이 모달로 모든 정보 접근
-4. **더미 데이터 기반** - 백엔드 없음, 모든 데이터는 mockData에서 관리
-5. **룰 기반 로직** - 복잡한 알고리즘 대신 단순 조건문 기반
+1. **Cube 단일 계산 단위 유지**
+   모든 내부 수량 계산은 Cube 기반으로 수행한다. Pallet은 표시/거래 단위일 뿐 내부 SoT가 아니다.
 
----
+2. **Code Data System(CDS) 중심 구조 유지**
+   데이터는 `id + signature + fields + codedata` 원칙을 따른다.
+   문자열 하드코딩보다 codedata를 우선한다.
 
-## 통합 엔진 설계 (불변 규칙)
+3. **서비스 레이어 순서 고정**
+   `Regulation → Resource → Condition → Trade`
+   이 순서를 역전하거나 UI에서 우회 구현하지 않는다.
 
-### Cube 단일 내부 계산 단위
+4. **매칭 결과 단일 진실 소스 유지**
+   검색/프리뷰/지도/리스트는 반드시 동일한 매칭 파이프라인 결과를 사용한다.
+   컴포넌트별 shadow 계산 금지.
 
-```
-┌─────────────────────────────────────────────────────────┐
-│  Cube = 250×250×250mm (0.015625 m³)                    │
-│  - 모든 내부 계산의 유일한 단위                          │
-│  - Pallet은 검색/매칭 기준에 사용하지 않음               │
-└─────────────────────────────────────────────────────────┘
-```
+5. **Repository Pattern 유지**
+   현재 localStorage 기반 repo는 향후 DB/API 구현으로 교체될 예정이므로,
+   상위 레이어는 repo 인터페이스를 기준으로만 작업한다. direct mock import 금지.
 
-### 환산 비율
-
-| 관계 | 비율 |
-|------|------|
-| 1 Pallet = N Cubes | **cubesPerPallet = 128** |
-| 1 Pallet 바닥면적 | 1.21 m² (1.1m × 1.1m) |
-| 1 Pallet 체적 | 2.178 m³ (1.1 × 1.1 × 1.8m) |
-
-### 거래 단위
-
-| 서비스 | 거래 단위 | 내부 계산 단위 |
-|--------|----------|---------------|
-| 보관 (Storage) | **Pallet** | Cube |
-| 운송 (Route) | **Cube** | Cube |
-
-### 포장 모듈의 역할
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  포장 모듈 = "형상 검증 + 표준 분류" (계산 중심 아님)     │
-│  - 소형(8분할): 550×275mm                               │
-│  - 중형(6분할): 550×366mm                               │
-│  - 대형(4분할): 650×450mm                               │
-│  - 분류 버퍼: ±10mm (절대값), 90도 회전 허용            │
-└─────────────────────────────────────────────────────────┘
-```
+6. **RegionCode 단일 소스 유지**
+   지역 필터링/검색/매칭은 법정동 10자리 코드 기반으로만 수행한다.
+   표시용 adapter 값은 로직에 사용하지 않는다.
 
 ---
 
-## Code Data System (Local-first)
+## 시스템 2축 (불변)
 
-플랫폼의 두 번째 핵심 축. "선 규정, 후 거래" 원칙을 데이터 구조로 구현.
+### 1) Cube 거래 엔진
 
-### 데이터 분류
+엔진은 다음 책임만 가진다.
 
-| 분류 | 타입 | 역할 |
-|------|------|------|
-| Info Data | `CargoInfo`, `DemandSession` | 정보 저장 (CRUD 가능) |
-| Event Data | `PlatformEvent` | 사건 기록 (append-only) |
+* 박스 치수/중량 기반 Cube 계산
+* STORAGE / ROUTE mode 분기
+* billableCubes 계산
+* storage/route 비용 계산
 
-### 플랫폼 표준 코드셋
+핵심 SoT 필드:
 
-| 코드 | 범위 | 용도 |
-|------|------|------|
-| ItemCode | IC01~IC99 | 품목 분류 (일반잡화, 농수산물 등) |
-| WeightBand | WBX/WBY/WBZ/WBH | 중량대 (5kg/10kg/20kg/초과) |
-| SizeBand | SB1~SBX | 크기대 (3변합 기준) |
+* `unitPricePerCube`
+* `capacityCubes`
+* `remainingCubes`
+* `totalCubes`
 
-### 핵심 플로우
+핵심 함수:
 
-```
-CargoInfo 생성 → signature 부여 → 규정 체크 → 자원 체크 → DemandSession 연결 → 큐브 계산 → 자원 준비
-```
+* `computeDemand()`
+* `calcBillableCubes()`
+* `calcStorageEstimate()`
+* `calcRouteEstimate()`
 
-### 이벤트 로그 (append-only)
+> 엔진은 순수 함수 계층이다. React import, localStorage 접근, UI 로직 포함 금지.
 
-모든 플랫폼 행위는 이벤트로 기록:
-- `CARGO_CREATED`, `CARGO_SIGNATURE_UPDATED`, `CARGO_REMOVED`
-- `RULE_CHECKED`, `RULES_PASSED`
-- `QUANTITY_SET`, `CUBE_CALCULATED`, `RESOURCE_READY`
-- `STORAGE_*`, `TRANSPORT_*`, `SEARCH_EXECUTED`
-- `DEMAND_SESSION_CREATED`, `RESOURCE_CHECKED` (PR5)
+### 2) Code Data System (CDS)
 
-### 저장소 구조
+CDS는 다음 네 요소로 구성된다.
 
-| 파일 | 역할 |
-|------|------|
-| `store/cargoStore.ts` | CargoInfo CRUD |
-| `store/demandStore.ts` | DemandSession 관리 |
-| `store/eventLog.ts` | 이벤트 기록/조회 |
-| `store/id.ts` | ULID 스타일 ID 생성 |
-| `engine/rules/ruleCheck.ts` | MVP 규정 체크 (크기/중량/제한품목) |
+* `id`
+* `signature`
+* `fields`
+* `codedata`
 
----
+핵심 codedata:
 
-## 프로젝트 구조
+* `ItemCode`
+* `WeightBand`
+* `SizeBand`
+* `FeatureCode`
+* `RegionCode`
 
-```
-src/
-├── engine/                    # 플랫폼 통합 엔진 (순수 함수만)
-│   ├── rules/                # 규정 체크 로직
-│   ├── regulation/           # PR4: 규정 엔진 (상품 필터링)
-│   ├── resource/             # PR5: 자원 엔진 (용량 체크)
-│   ├── session/              # PR5: 세션 관리 (검색 스냅샷)
-│   └── matching/             # PR6: 매칭 파이프라인 (단일 검색 소스)
-├── store/                     # Code Data System (localStorage 기반)
-├── contexts/                  # React Context
-│   └── SearchResultContext   # PR6: 프리뷰/검색 결과 공유 (ServiceConsole ↔ Map)
-├── data/
-│   ├── mockData.ts           # 더미 데이터 (규정 + 자원 필드 포함)
-│   ├── itemCodes.ts          # 플랫폼 품목 코드 (IC01~IC99)
-│   ├── bands.ts              # 중량/크기 밴드 정의
-│   ├── regionCodesJeju.ts    # PR7-pre: 제주 법정동 코드
-│   └── regionRepresentativeCoords.ts  # PR7-pre: 지역/항만 대표 좌표
-├── components/
-│   ├── Layout/
-│   │   ├── CommandLayout.tsx # 지도 하이라이트 마커 연동
-│   │   └── ServiceConsole/   # 3행 그리드 레이아웃 UI
-│   │       ├── ServiceConsole.tsx
-│   │       ├── sections/     # StorageTab, TransportTab, BothTab
-│   │       ├── ui/           # GridCell, InputModal, SearchResultModal 등
-│   │       └── hooks/        # useServiceConsoleState
-│   └── Map/MapboxContainer/
-├── types/models.ts           # 상품 모델 (규정 + 자원 필드 포함)
-└── styles/fonts.css
-```
+이벤트는 append-only 원칙을 따른다.
+보정이 필요하면 기존 이벤트 수정이 아니라 **새 이벤트 추가**로 처리한다.
 
 ---
 
-## Regulation Engine (PR4)
+## 서비스 레이어 구조 (불변)
 
-화물 정보 기반으로 상품을 필터링하는 규정 엔진.
+### Regulation
 
-### 핵심 규정 (4가지)
+크기 / 중량 / 품목 / 최소물량 규정 필터
 
-| 규정 | 필드 | 설명 |
-|------|------|------|
-| 크기 제한 | `maxSumCm` | 3변합 초과 시 제외 |
-| 중량 제한 | `maxWeightKg` | 중량 초과 시 제외 |
-| 품목 제한 | `allowedItemCodes` | 허용 품목 외 제외 |
-| 최소 물량 | `minCubes` | 최소 큐브 미달 시 제외 |
+### Resource
 
-### 선택적 플래그
+`remainingCubes` 기반 자원 필터
 
-| 플래그 | 설명 |
-|--------|------|
-| `tempSupported` | 온도 관리 필요 화물 지원 여부 |
-| `hazmatSupported` | 위험물 지원 여부 |
-| `allowedModuleClasses` | 허용 포장 모듈 클래스 |
+### Condition
 
-### 주요 함수 (`engine/regulation/`)
+RegionCode 기반 조건 필터
+(날짜는 현재 MVP에서 저장은 되지만 매칭에는 반영하지 않음)
 
-```typescript
-checkRegulation(cargo, offer) → RegulationDecision  // 단일 화물-상품 규정 체크
-filterOffersByRegulation(cargos, offers) → FilterResult  // 전체 필터링
-adaptCargoForRegulation(registeredCargo) → CargoForRegulation  // UI→엔진 변환
-```
+### Trade
+
+상품 선택 → 비용 계산 → 거래 확정 → 이벤트 기록
+
+> 후속 개발에서도 이 4레이어는 하나의 파이프라인으로 유지해야 한다.
 
 ---
 
-## Resource Engine (PR5)
-
-규정 통과 상품에 대해 자원(용량) 체크를 수행하는 엔진.
-
-### 자원 필드 (Offer에 추가)
-
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `capacityCubes` | number | 총 수용 가능 큐브 (정수) |
-| `remainingCubes` | number | 현재 남은 큐브 (MVP: capacity와 동일 시작) |
-
-> Storage 상품: `capacityCubes = Pallet 수 × 128`
-
-### 자원 체크 로직
-
-```typescript
-// 핵심 판단: 남은 용량 >= 수요량
-offer.remainingCubes >= demand.totalCubes → 통과
-```
-
-### 주요 함수 (`engine/resource/`)
-
-```typescript
-checkResource({ offerRemainingCubes, demandCubes }) → { pass, reason? }
-filterStorageByResource(regulationPassed, demandCubes) → ResourceFilterResult
-filterRouteByResource(regulationPassed, demandCubes) → ResourceFilterResult
-```
-
-### 검색 파이프라인 (PR4 → PR5 → PR6)
-
-```
-offers → 규정 체크 → regulationPassed → 자원 체크 → resourcePassed → 조건 필터 → 정렬 → 최종 결과
-```
-
-### DemandSession 확장
-
-```typescript
-interface DemandSession {
-  // ... 기존 필드
-
-  // PR5: 규정/자원 체크 결과 요약
-  regulationSummary?: {
-    checked: boolean
-    passedOfferIds: string[]
-    failedOfferIdsCount: number
-  }
-
-  resourceSummary?: {
-    checked: boolean
-    passedOfferIds: string[]
-    failedOfferIdsCount: number
-  }
-}
-```
-
----
-
-## Matching Pipeline (PR6)
-
-단일 검색 파이프라인으로 프리뷰/검색 결과/지도 하이라이트 동기화.
-
-### 핵심 원칙 (Single Source of Truth)
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  runMatchingPipeline = 검색 결과의 "단일 진실 소스"      │
-│  - 검색 버튼 건수: previewMatch.matchedOfferIds.length  │
-│  - 지도 하이라이트: previewMatch.matchedOfferIds        │
-│  - 검색 결과 리스트: searchResult (스냅샷)              │
-└─────────────────────────────────────────────────────────┘
-```
-
-### 파이프라인 단계 (고정 순서)
-
-1. **규정 체크 (PR4)**: 크기/중량/품목/최소물량 필터링
-2. **자원 체크 (PR5)**: 용량(remainingCubes) 필터링
-3. **조건 필터 (PR6)**: 지역/날짜 필터링
-4. **정렬 (PR6)**: MVP는 LATEST만 구현
-
-### 주요 함수 (`engine/matching/`)
-
-```typescript
-runMatchingPipeline({ mode, offers, session, conditions, sort }) → MatchingPipelineResult
-runCombinedPipeline({ storageOffers, routeOffers, session, conditions, sort }) → CombinedResult
-filterStorageByConditions(offers, conditions) → StorageProduct[]
-filterRouteByConditions(offers, conditions) → RouteProduct[]
-```
-
-### Preview/Search 분리
-
-| 구분 | 역할 | 업데이트 시점 |
-|------|------|--------------|
-| previewResult | 실시간 하이라이트 | 수량/조건 변경 시 |
-| searchResult | 리스트 출력 스냅샷 | 검색 버튼 클릭 시 |
-
-### 조건 필터 (MVP)
-
-| 조건 | Storage | Route |
-|------|---------|-------|
-| 지역 | locationCode 법정동 매칭 | originCode/destinationCode 법정동 매칭 |
-| 날짜 | 세션에 저장만 | 세션에 저장만 |
-
----
-
-## 내부 데이터 체계화 (PR7-pre)
-
-PR7 준비 과정에서 내부 코드/좌표 체계를 일원화하여 데이터 일관성 확보.
-
-### 장소 코드 체계 (RegionCode)
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  RegionCode = 법정동 코드 (10자리 문자열)                │
-│  - 예: '5011000000' = 제주시, '5013025900' = 성산읍      │
-│  - UI/State/Store/Engine 전체에서 단일 진실 소스        │
-│  - JEJU_LOCATIONS.id는 표시용으로만 사용 (로직 금지)     │
-└─────────────────────────────────────────────────────────┘
-```
-
-#### 관련 파일
-
-| 파일 | 역할 |
-|------|------|
-| `data/regionCodesJeju.ts` | 제주 법정동 코드 정의 |
-| `data/regionRepresentativeCoords.ts` | 지역/항만 대표 좌표 매핑 |
-
-#### 조건 타입 확장
-
-```typescript
-interface StorageCondition {
-  location?: string        // 표시용 (name)
-  locationCode?: RegionCode    // 필터링용 (단일 진실)
-  startDate?: string
-  endDate?: string
-}
-
-interface TransportCondition {
-  origin?: string
-  originCode?: RegionCode
-  destination?: string
-  destinationCode?: RegionCode
-  transportDate?: string
-}
-```
-
-### 좌표 체계 일원화
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  REGION_REPRESENTATIVE_COORDS = 좌표의 "단일 진실 소스"  │
-│  - 법정동 코드 기반 (예: '5011025300' → 애월읍 좌표)     │
-│  - 항만 특수 코드 (예: 'JEJU_PORT', 'BUSAN_PORT')       │
-│  - mockData.ts의 모든 상품이 이 좌표를 참조             │
-└─────────────────────────────────────────────────────────┘
-```
-
-### 물량 필터 정책
-
-```typescript
-// 물량 미입력 시 minCubes/자원 필터 스킵
-if (!session.totalCubes || session.totalCubes === 0) {
-  // minCubes 규정 체크 스킵
-  // 자원(remainingCubes) 체크 스킵
-}
-```
-
-> **원칙**: 조건을 추가할수록 결과가 줄어드는 "누적 AND 필터" 정책
-
-### 지도 오프셋 보정
-
-```typescript
-// useMapbox.ts - 좌측 45% 블러 영역 보정
-function applyCameraOffset(map: mapboxgl.Map): void {
-  const container = map.getContainer()
-  const width = container.clientWidth
-  const offsetX = (width * 0.45) / 2
-  map.easeTo({ center: MAP_CONFIG.center, offset: [offsetX, 0], duration: 0 })
-}
-```
-
-- ResizeObserver로 컨테이너 크기 변경 감지
-- window resize 이벤트 핸들러
-- 마커/레이어와 무관하게 카메라 상태만 갱신
-
----
-
-## Service Console UI 구조 (MVP 기준)
-
-### 3행 그리드 레이아웃
-
-**1행 (2열)**: 화물 정보 (좌) + 물량 정보 (우)
-**2행**: 보관 장소 / 출발지↔도착지
-**3행**: 보관 기간 / 운송 날짜
-
-### UI와 엔진의 관계
-
-- **1행**: 정보 데이터 입력
-- **2~3행**: 이벤트 조건 입력
-- **하단 검색 버튼**: 조건 확정 트리거 → 규정 체크 → 자원 체크 → 결과 표시
-
----
-
-## 제약사항
-
-### 절대 구현하지 말 것
-- 로그인/회원가입, 실제 결제, 백엔드/DB
-- 별도 페이지 라우팅, 실시간 데이터, 실제 거래
-- remainingCubes 차감 (예약/거래 확정) - PR7 이후
-- 비용 계산/추천 점수/정렬 고도화 - PR7 이후
-
-### 허용되는 범위
-- 더미 데이터 기반 UI, 모달 상세, 룰 기반 매칭, 더미 비용 계산
-
----
-
-## 코드 컨벤션 (PR3-2.5 확정)
-
-> **중요**: 코드 컨벤션 내용은 문서 업데이트 시에도 **절대 삭제하면 안된다**
+## 코드 컨벤션 (불변 - 유지)
 
 ### 폴더 및 책임 규칙
 
-| 위치 | 용도 |
-|------|------|
-| `components/common/` | 공용 컴포넌트 (2곳 이상 사용, 도메인 무관) |
-| `{feature}/ui/` | Feature 내부 UI 컴포넌트 |
-| `{feature}/sections/` | 화면 섹션 단위 구성 |
-| `{feature}/hooks/` | 상태/로직 훅 |
-| `{feature}/utils/` | 변환/검증/보조 로직 |
+| 위치                    | 용도                         |
+| --------------------- | -------------------------- |
+| `components/common/`  | 공용 컴포넌트 (2곳 이상 사용, 도메인 무관) |
+| `{feature}/ui/`       | Feature 내부 UI 컴포넌트         |
+| `{feature}/sections/` | 화면 섹션 단위 구성                |
+| `{feature}/hooks/`    | 상태/로직 훅                    |
+| `{feature}/utils/`    | 변환/검증/보조 로직                |
 
 **중요**: Feature 내부에 `components/` 폴더 생성 금지, 반드시 `ui/` 사용
 
 ### 컴포넌트 크기 가드레일
 
-- 조립(컨테이너) 컴포넌트: 200줄 목표
-- 단일 컴포넌트: 최대 300줄 초과 금지
-- 300줄 초과 시 `sections/` 또는 `ui/`로 분리
+* 조립(컨테이너) 컴포넌트: 200줄 목표
+* 단일 컴포넌트: 최대 300줄 초과 금지
+* 300줄 초과 시 `sections/` 또는 `ui/`로 분리
 
 ### UI / 로직 / 계산 분리 원칙
 
-- JSX 내부에서 계산/변환 로직 작성 금지
-- 계산/변환은 `engine/` 또는 `utils/`에서 수행
-- 상태 및 핸들러는 `hooks/`로 분리
-- `engine/`에는 순수 함수만 허용 (React import 금지)
+* JSX 내부에서 계산/변환 로직 작성 금지
+* 계산/변환은 `engine/` 또는 `utils/`에서 수행
+* 상태 및 핸들러는 `hooks/`로 분리
+* `engine/`에는 순수 함수만 허용 (React import 금지)
 
 ### 타입 정책
 
-| 타입 종류 | 위치 |
-|----------|------|
-| UI / 입력 / 상품 모델 | `types/models.ts` |
-| 엔진 / 매칭 도메인 | `engine/matchingTypes.ts` |
-| UI ↔ 엔진 변환 | `utils/`에서 담당 |
+| 타입 종류        | 위치                             |
+| ------------ | ------------------------------ |
+| 도메인 타입       | `types/domain/`                |
+| UI 타입        | `types/ui/`                    |
+| 하위 호환 bridge | `types/models.ts`              |
+| 엔진/레이어 타입    | `layers/types/` 또는 각 도메인 인접 위치 |
 
 ### 확장 대비 가드레일
 
 **탭 섹션 비대화 방지**
-- `sections/`의 탭 컴포넌트는 조립/분기 역할만 수행
-- 내부 로직/폼/UI는 `ui/` 또는 더 작은 섹션으로 분리
+
+* `sections/`의 탭 컴포넌트는 조립/분기 역할만 수행
+* 내부 로직/폼/UI는 `ui/` 또는 더 작은 섹션으로 분리
 
 **상태 훅 비대화 방지**
-- 상태 훅은 단일 진실 소스 역할만 수행
-- 계산/파생 로직은 `utils/` 또는 `engine/`으로 이동
-- 상태가 커질 경우 slice 개념으로 분리 훅 추가 허용
+
+* 상태 훅은 단일 진실 소스 역할만 수행
+* 계산/파생 로직은 `utils/` 또는 `engine/`으로 이동
+* 상태가 커질 경우 slice 개념으로 분리 훅 추가 허용
 
 **검증 로직 분산 금지**
-- 입력/조건 검증 로직은 `utils/`의 validation 파일로 집중
-- UI 컴포넌트에 검증 로직 분산 작성 금지
+
+* 입력/조건 검증 로직은 `utils/`의 validation 파일로 집중
+* UI 컴포넌트에 검증 로직 분산 작성 금지
 
 ### 작업 청소 규칙
 
 작업 종료 시 반드시 수행:
-- 미사용 파일/컴포넌트 삭제
-- 미사용 export 제거
-- dead code 제거
-- import 정리
+
+* 미사용 파일/컴포넌트 삭제
+* 미사용 export 제거
+* dead code 제거
+* import 정리
+ 
+---
+
+## 현재 데이터 흐름 기준
+
+현재 상품 거래 페이지의 데이터 흐름은 다음을 기준으로 유지한다.
+
+```text
+seed records
+→ builders
+→ repo(localStorage)
+→ facade/mockData
+→ UI / matching pipeline
+```
+
+설명:
+
+* `records`는 seed 데이터
+* `builders`는 seed를 UI DTO로 변환
+* `repo`는 현재 localStorage 기반 SoT
+* `mockData.ts`는 facade 역할만 수행
+* 실제 검색/거래/차감은 repo 기준으로 동작해야 한다
+
+향후 DB 연결 시:
+
+* `records` / `mockData facade`는 제거 가능
+* `repo` 구현만 API/DB로 교체
+* `engine`, `layers`, `components`는 최대한 유지
+
+> 즉, 현재 구조는 DB 이전 단계의 완충 구조이며, 상위 계층은 repo 인터페이스에 의존해야 한다.
 
 ---
 
-## PR 로드맵
+## 상품 거래 페이지 현재 정책
 
-| PR | 내용 | 상태 |
-|----|------|------|
-| PR1~PR3-2.5 | 초기 설정, UI 개편, 통합 엔진, 구조 리팩토링 | ✅ 완료 |
-| PR3-3 | ServiceConsole 3행 그리드 UI | ✅ 완료 |
-| PR3-4 | Code Data System MVP (Local-first) | ✅ 완료 |
-| PR4 | Regulation Engine + 검색/지도 연동 | ✅ 완료 |
-| PR5 | Resource Layer Wiring (자원 체크 + DemandSession) | ✅ 완료 |
-| PR6 | Matching Pipeline (단일 파이프라인 + UX 동기화 + 지도 동기화) | ✅ 완료 |
-| PR7-pre | 내부 데이터 체계화 (코드/좌표 일원화, 누적 필터 정책) | ✅ 완료 |
-| PR7 | 재고 차감 + 거래 확정 | 📋 예정 |
+### 현재 활성
+
+* 보관 상품
+* 운송 상품
+* 화물 등록
+* 매칭 검색
+* 상품 상세
+* 거래 시작/확정
+* 지도 marker 연동
+
+### 정책적으로 보류
+
+* 보관+운송 연계 상품(BOTH 실서비스)
+* 날짜 필터 실매칭 반영
+* 정렬 고도화
+* 실제 결제/정산 확정
+* 백엔드/실시간 데이터
+
+> 보류 기능은 TODO가 아니라 **정책 잠금 상태**로 취급한다.
 
 ---
 
-**최종 수정**: 2026.02.03 (PR7-pre 내부 데이터 체계화 완료)
+## 프로젝트 구조 (현재 기준 요약)
+
+```text
+src/
+├── engine/                    # Cube 거래 엔진, pricing 순수 함수
+├── infra/
+│   ├── dataspec/             # codedata / id / signature / fields
+│   └── storage/              # repo / eventLog (localStorage 기반)
+├── layers/                   # regulation / resource / condition / trade 흐름
+├── data/mock/                # records / builders / adapters / facade
+├── types/                    # domain / ui 중심 타입
+├── contexts/                 # SearchResultContext
+├── components/
+│   ├── Layout/
+│   ├── Features/ServiceConsole/
+│   ├── Features/Map/
+│   └── Visualizations/
+└── hooks/
+```
+
+핵심 원칙:
+
+* `engine/` = 순수 계산
+* `infra/dataspec/` = 코드와 데이터 정의
+* `infra/storage/` = 영속성 추상화
+* `layers/` = 정책/파이프라인
+* `components/` = UI
+* `types/` = 타입 정의
+* `data/mock/` = DB 전 단계 seed/facade
+
+---
+
+## 다음 개발 단계 (우선순위)
+
+### 1. 상품 등록 페이지
+
+* StorageProduct / RouteProduct 생성 폼
+* 공급자 상품 CRUD
+* 규정/자원/정산 필드 입력 UI
+* offer.repo CRUD 활용
+
+### 2. 공급자 데이터 등록/관리
+
+* provider.repo CRUD 보강
+* 공급자 대시보드
+* 상품 상태 관리
+
+### 3. 거래 생성 고도화
+
+* Deal 상태 흐름 정교화
+* 옵션 요금 체계 정리
+* 거래 목록/이력 UI
+
+### 4. 정산 엔진 고도화
+
+* billable cubes 정책 정교화
+* 정산서/영수증
+* 실제 정산 이벤트 설계
+
+### 5. 백엔드 연결
+
+* `infra/storage/` 구현부만 API/DB로 교체
+* 상위 구조(engine/layers/components)는 최대한 유지
+
+---
+
+## 절대 깨지면 안 되는 것
+
+1. `unitPricePerCube`를 가격 SoT로 유지
+2. `remainingCubes`를 자원 SoT로 유지
+3. Cube 계산을 engine 외부에서 재구현하지 않기
+4. RegionCode 외의 표시용 id를 필터링 로직에 사용하지 않기
+5. direct mock import로 검색/거래 흐름 우회하지 않기
+6. `runMatchingPipeline()` 외의 별도 검색 진실 소스 만들지 않기
+7. UI에서 규정/자원 판정을 임의로 재구현하지 않기
+8. 이벤트 로그를 수정형으로 바꾸지 않기
+
+---
+
+## 문서 역할
+
+이 문서는 **현재 상품 거래 페이지 구조를 기준으로 이후 개발 전반의 참조 기준**이다.
+세부 분석은 상품 거래 페이지 최종 전수조사 보고서를 참조하고,
+이 문서는 그 보고서의 **요약 / 지침서 버전**으로 유지한다.
