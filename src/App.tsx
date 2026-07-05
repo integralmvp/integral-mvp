@@ -8,13 +8,10 @@ import { SearchResultProvider } from './contexts/SearchResultContext'
 const isAdminMode = new URLSearchParams(window.location.search).get('mode') === 'admin'
 
 function App() {
-  if (isAdminMode) {
-    return <AdminLayout />
-  }
-
   return (
     <SearchResultProvider>
-      <CommandLayout />
+      {/* MapboxContainer가 useSearchResult를 사용하므로 관리자 모드도 Provider 내부에서 렌더 */}
+      {isAdminMode ? <AdminLayout /> : <CommandLayout />}
     </SearchResultProvider>
   )
 }
