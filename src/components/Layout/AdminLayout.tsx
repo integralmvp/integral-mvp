@@ -1,6 +1,7 @@
 // 관리자(업체측) 견적 화면 레이아웃 — CommandLayout 껍데기 복제 (화주 화면 미변경)
-// 좌측 45%: AdminQuoteConsole 자리(COMMIT-3에서 연결) / 우측 55%: MapboxContainer + HeaderWidget
+// 좌측 45%: AdminQuoteConsole / 우측 55%: MapboxContainer + HeaderWidget
 
+import AdminQuoteConsole from '../Features/AdminQuoteConsole'
 import MapboxContainer from '../Features/Map/MapboxContainer'
 import HeaderWidget from '../Features/Map/MapboxContainer/ui/HeaderWidget'
 import logoSvg from '../../assets/icons/console/logo.svg'
@@ -36,11 +37,9 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        {/* 하단: 관리자 견적 콘솔 (COMMIT-3에서 AdminQuoteConsole 연결) */}
+        {/* 하단: 관리자 견적 콘솔 */}
         <div className="flex-1 p-6 pt-0 overflow-hidden">
-          <div className="h-full flex items-center justify-center rounded-2xl border border-dashed border-teal-300 bg-white/50 text-teal-700 text-sm">
-            관리자 견적 콘솔 준비 중
-          </div>
+          <AdminQuoteConsole />
         </div>
       </div>
 
