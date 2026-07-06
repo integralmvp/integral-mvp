@@ -5,9 +5,8 @@ import type { AdminQuoteDerived } from '../hooks/useAdminQuote'
 import { REASON_LABELS, TIER_LABELS, formatWon, summarizeRejected } from '../utils/labels'
 
 interface QuoteResultCardProps {
+  /** 조회 결과 (null = 아직 조회 전) — 품목 등 근거는 조회 시점 스냅샷(derived.input) 사용 */
   derived: AdminQuoteDerived | null
-  /** 선택된 품목 (조건행 근거 표시용, 빈 값 = 미지정) */
-  item: string
   canSave: boolean
   onSave: () => void
 }
@@ -21,11 +20,11 @@ function CoordChip({ label, value }: { label: string; value: number }) {
   )
 }
 
-export default function QuoteResultCard({ derived, item, canSave, onSave }: QuoteResultCardProps) {
+export default function QuoteResultCard({ derived, canSave, onSave }: QuoteResultCardProps) {
   if (!derived) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 bg-white/50 p-6 text-center text-sm text-slate-400">
-        화물 제원(길이·폭·높이·중량)을 입력하면 견적이 실시간 계산됩니다
+        화물 정보를 입력하고 조회를 눌러주세요
       </div>
     )
   }
@@ -102,9 +101,9 @@ export default function QuoteResultCard({ derived, item, canSave, onSave }: Quot
           >
             {TIER_LABELS[pricing.적용행]} 적용
           </span>
-          {pricing.적용행 === '조건' && item && (
+          {pricing.적용행 === '조건' && derived.input.item && (
             <span className="text-[11px] font-semibold text-indigo-600">
-              품목: {item} → 조건행 {formatWon(pricing.차량당)}원
+              품목: {derived.input.item} → 조건행 {formatWon(pricing.차량당)}원
             </span>
           )}
         </div>

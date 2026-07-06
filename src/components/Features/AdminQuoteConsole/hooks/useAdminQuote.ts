@@ -1,11 +1,13 @@
 /**
- * 관리자 견적 상태/파생 훅
+ * 관리자 견적 상태 훅 — 명시적 "조회" 트리거 방식
  *
- * 계산은 전부 engine/cubeCoordinate 순수함수 호출로 파생 (JSX 내 계산 금지 원칙).
- * 저장/목록은 adminQuote.repo(localStorage, admin:quote:*) 경유 — direct 계산 재구현 없음.
+ * 입력 상태(form)와 조회 결과 상태(result)를 분리한다.
+ * 계산은 runQuote() 액션에서만 engine/cubeCoordinate 순수함수를 호출해 수행하며,
+ * 결과에는 조회 시점의 입력 스냅샷을 함께 담아 이후 입력 변경과 어긋나지 않게 한다.
+ * 저장/목록은 adminQuote.repo(localStorage, admin:quote:*) 경유 — 계산 재구현 없음.
  */
 
-import { useMemo, useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import {
   cargoCubes,
   matchVehicle,
@@ -36,7 +38,7 @@ export interface AdminQuoteForm {
   region: Region
   vehicleCount: string
   client: string // 거래처 (옵션)
-  item: string // 품목 (옵션)
+  item: string // 품목 (검증된 드롭다운 값)
 }
 
 const INITIAL_FORM: AdminQuoteForm = {
@@ -50,7 +52,18 @@ const INITIAL_FORM: AdminQuoteForm = {
   item: '',
 }
 
+/** 조회 시점의 계산 입력 스냅샷 (이후 입력 변경과 결과의 정합 유지) */
+export interface AdminQuoteInput {
+  lengthMm: number
+  widthMm: number
+  heightMm: number
+  weightKg: number
+  region: Region
+  item: string
+}
+
 export interface AdminQuoteDerived {
+  input: AdminQuoteInput
   cargo: CargoCubes
   match: MatchResult
   rejected: RejectedVehicle[]
@@ -65,19 +78,27 @@ function parsePositive(value: string): number | null {
 
 export function useAdminQuote() {
   const [form, setForm] = useState<AdminQuoteForm>(INITIAL_FORM)
+  const [result, setResult] = useState<AdminQuoteDerived | null>(null)
   const [quotes, setQuotes] = useState<AdminQuoteRecord[]>(() => getAllAdminQuotes())
 
   const setField = useCallback(<K extends keyof AdminQuoteForm>(key: K, value: AdminQuoteForm[K]) => {
     setForm(prev => ({ ...prev, [key]: value }))
   }, [])
 
-  // 실시간 파생: 입력 4제원이 모두 유효할 때만 엔진 호출
-  const derived: AdminQuoteDerived | null = useMemo(() => {
+  // 필수 4제원이 모두 유효해야 조회 가능
+  const canRun =
+    parsePositive(form.lengthMm) !== null &&
+    parsePositive(form.widthMm) !== null &&
+    parsePositive(form.heightMm) !== null &&
+    parsePositive(form.weightKg) !== null
+
+  /** 견적 조회 — 이 액션에서만 엔진 호출 (입력 도중 자동 계산 없음) */
+  const runQuote = useCallback(() => {
     const L = parsePositive(form.lengthMm)
     const W = parsePositive(form.widthMm)
     const H = parsePositive(form.heightMm)
     const kg = parsePositive(form.weightKg)
-    if (L === null || W === null || H === null || kg === null) return null
+    if (L === null || W === null || H === null || kg === null) return
 
     const count = parsePositive(form.vehicleCount) ?? 1
     const cargo = cargoCubes(L, W, H, kg)
@@ -88,48 +109,68 @@ export function useAdminQuote() {
       ? quote(RATE_TABLE, form.region, match.vehicle, count, form.item || undefined)
       : null
 
-    return { cargo, match, rejected, quoteResult, count }
+    setResult({
+      input: { lengthMm: L, widthMm: W, heightMm: H, weightKg: kg, region: form.region, item: form.item },
+      cargo,
+      match,
+      rejected,
+      quoteResult,
+      count,
+    })
   }, [form])
 
   const canSave =
-    derived !== null &&
-    derived.match.matched &&
-    derived.quoteResult !== null &&
-    !derived.quoteResult.단가미등록
+    result !== null &&
+    result.match.matched &&
+    result.quoteResult !== null &&
+    !result.quoteResult.단가미등록
 
-  const handleSave = useCallback(() => {
-    if (!derived || !derived.match.vehicle || !derived.quoteResult) return
-    const { 견적가, 큐브당 } = derived.quoteResult
-    if (견적가 === null || 큐브당 === null) return // 단가 미등록 견적은 저장 불가
+  /** 견적 저장 — 성공 시 true (호출측에서 리셋 연결) */
+  const handleSave = useCallback((): boolean => {
+    if (!result || !result.match.vehicle || !result.quoteResult) return false
+    const { 견적가, 큐브당 } = result.quoteResult
+    if (견적가 === null || 큐브당 === null) return false // 단가 미등록 견적은 저장 불가
+
     saveAdminQuote({
       cargo: {
-        length_mm: Number(form.lengthMm),
-        width_mm: Number(form.widthMm),
-        height_mm: Number(form.heightMm),
-        weight_kg: Number(form.weightKg),
-        ...derived.cargo,
+        length_mm: result.input.lengthMm,
+        width_mm: result.input.widthMm,
+        height_mm: result.input.heightMm,
+        weight_kg: result.input.weightKg,
+        ...result.cargo,
         거래처: form.client || undefined,
-        품목: form.item || undefined,
+        품목: result.input.item || undefined,
       },
-      matched_vehicle_id: derived.match.vehicle.id,
-      matched_vehicle_name: derived.match.vehicle.name,
-      reject_summary: derived.rejected.map(r => ({
+      matched_vehicle_id: result.match.vehicle.id,
+      matched_vehicle_name: result.match.vehicle.name,
+      reject_summary: result.rejected.map(r => ({
         vehicle_name: r.vehicle.name,
         reasons: r.reasons,
       })),
-      권역: form.region,
-      대수: derived.count,
-      청구큐브: derived.quoteResult.청구큐브,
+      권역: result.input.region,
+      대수: result.count,
+      청구큐브: result.quoteResult.청구큐브,
       큐브당,
       견적가,
     })
     setQuotes([...getAllAdminQuotes()])
-  }, [derived, form])
+    return true
+  }, [result, form.client])
 
   const handleDelete = useCallback((id: string) => {
     deleteAdminQuote(id)
     setQuotes([...getAllAdminQuotes()])
   }, [])
 
-  return { form, setField, derived, canSave, handleSave, quotes, handleDelete }
+  return {
+    form,
+    setField,
+    canRun,
+    runQuote,
+    result,
+    canSave,
+    handleSave,
+    quotes,
+    handleDelete,
+  }
 }

@@ -6,6 +6,9 @@ import { ADMIN_ITEM_OPTIONS, ITEM_UNSPECIFIED } from '../utils/labels'
 interface CargoInputFormProps {
   form: AdminQuoteForm
   setField: <K extends keyof AdminQuoteForm>(key: K, value: AdminQuoteForm[K]) => void
+  /** 필수 제원(길이·폭·높이·중량)이 모두 유효한지 — 조회 버튼 활성 조건 */
+  canRun: boolean
+  onRunQuote: () => void
 }
 
 const REGIONS: Region[] = ['시내', '시외']
@@ -42,7 +45,7 @@ function NumberField({
   )
 }
 
-export default function CargoInputForm({ form, setField }: CargoInputFormProps) {
+export default function CargoInputForm({ form, setField, canRun, onRunQuote }: CargoInputFormProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
       <h2 className="mb-3 text-sm font-bold text-slate-800">화물 제원 입력</h2>
@@ -111,6 +114,22 @@ export default function CargoInputForm({ form, setField }: CargoInputFormProps) 
           </select>
         </label>
       </div>
+
+      {/* 견적 조회 — 완성된 입력에서만 견적 산출 (입력 도중 자동 계산 없음) */}
+      <button
+        type="button"
+        disabled={!canRun}
+        onClick={onRunQuote}
+        className="mt-3 w-full rounded-xl bg-teal-600 py-2.5 text-sm font-bold text-white transition-colors
+                   hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+      >
+        견적 조회
+      </button>
+      {!canRun && (
+        <p className="mt-1.5 text-[10px] text-slate-400">
+          길이·폭·높이·중량을 모두 입력하면 조회할 수 있습니다
+        </p>
+      )}
     </div>
   )
 }
