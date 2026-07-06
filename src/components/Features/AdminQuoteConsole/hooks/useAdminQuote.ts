@@ -90,10 +90,16 @@ export function useAdminQuote() {
     return { cargo, match, rejected, quoteResult, count }
   }, [form])
 
-  const canSave = derived !== null && derived.match.matched && derived.quoteResult !== null
+  const canSave =
+    derived !== null &&
+    derived.match.matched &&
+    derived.quoteResult !== null &&
+    !derived.quoteResult.단가미등록
 
   const handleSave = useCallback(() => {
     if (!derived || !derived.match.vehicle || !derived.quoteResult) return
+    const { 견적가, 큐브당 } = derived.quoteResult
+    if (견적가 === null || 큐브당 === null) return // 단가 미등록 견적은 저장 불가
     saveAdminQuote({
       cargo: {
         length_mm: Number(form.lengthMm),
@@ -113,8 +119,8 @@ export function useAdminQuote() {
       권역: form.region,
       대수: derived.count,
       청구큐브: derived.quoteResult.청구큐브,
-      큐브당: derived.quoteResult.큐브당,
-      견적가: derived.quoteResult.견적가,
+      큐브당,
+      견적가,
     })
     setQuotes([...getAllAdminQuotes()])
   }, [derived, form])

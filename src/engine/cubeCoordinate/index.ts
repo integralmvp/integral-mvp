@@ -5,6 +5,7 @@ export {
   matchVehicle,
   rejectedVehicles,
   billingCube,
+  lookupRate,
   quote,
 } from './cubeCoordinate'
 export type {
@@ -14,7 +15,12 @@ export type {
   MatchResult,
   RejectedVehicle,
   Region,
+  RateTier,
+  ConditionRateRow,
+  DetailRateRow,
+  StandardRateRow,
   RateTable,
+  RateLookupResult,
   QuoteResult,
 } from './cubeCoordinate'
 export { VEHICLE_DB } from './vehicleDb'

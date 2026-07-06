@@ -54,18 +54,54 @@ export interface RejectedVehicle {
 /** 견적 권역 (MVP: 사용자가 직접 입력) */
 export type Region = '시내' | '시외'
 
-/** 냉동 단가테이블 형태 (rateTable.ts 참조) */
+/** 단가 룩업 적용행 계층 (우선순위: 조건 > 세부 > 표준) */
+export type RateTier = '조건' | '세부' | '표준'
+
+/** 조건행: 권역+차종+품목(품목군 정확일치 포함) */
+export interface ConditionRateRow {
+  권역: Region
+  차종: string
+  단가: number
+  품목군: string[]
+}
+
+/** 세부행: 권역+차종 */
+export interface DetailRateRow {
+  권역: Region
+  차종: string
+  단가: number
+}
+
+/** 표준행: 차종 */
+export interface StandardRateRow {
+  차종: string
+  단가: number
+}
+
+/** 냉동 단가테이블 3계층 형태 (rateTable.ts 참조 — adminRateTable.json 그대로) */
 export interface RateTable {
   차량형: {
-    도내비: Record<Region, number>
+    도내비: {
+      조건: ConditionRateRow[]
+      세부: DetailRateRow[]
+      표준: StandardRateRow[]
+    }
   }
+}
+
+export interface RateLookupResult {
+  단가: number
+  적용행: RateTier
 }
 
 export interface QuoteResult {
   청구큐브: number
-  큐브당: number
-  차량당: number
-  견적가: number
+  /** 단가 미등록 시 null — 0원 표시 금지 */
+  큐브당: number | null
+  차량당: number | null
+  견적가: number | null
+  적용행: RateTier | null
+  단가미등록: boolean
 }
 
 /**
@@ -136,17 +172,56 @@ export function billingCube(matchedVehicle: Vehicle, count = 1): number {
 }
 
 /**
- * 견적가 = 냉동 단가테이블 룩업 (스펙 §3). SPL 재계산 없음.
+ * 3계층 단가 룩업 — 확정 도출 결과 테이블에서 정적 룩업만 (재계산 금지)
+ * ① 조건: 권역+차종 일치 AND 품목 ∈ 품목군 (문자열 정확일치)
+ * ② 세부: 권역+차종 일치
+ * ③ 표준: 차종 일치
+ * ④ 없음: null (단가 미등록 — 호출측에서 안내 처리, 크래시 금지)
+ */
+export function lookupRate(
+  rateTable: RateTable,
+  권역: Region,
+  차종: string,
+  품목?: string
+): RateLookupResult | null {
+  const { 조건, 세부, 표준 } = rateTable.차량형.도내비
+
+  if (품목) {
+    const cond = 조건.find(
+      r => r.권역 === 권역 && r.차종 === 차종 && r.품목군.includes(품목)
+    )
+    if (cond) return { 단가: cond.단가, 적용행: '조건' }
+  }
+
+  const detail = 세부.find(r => r.권역 === 권역 && r.차종 === 차종)
+  if (detail) return { 단가: detail.단가, 적용행: '세부' }
+
+  const standard = 표준.find(r => r.차종 === 차종)
+  if (standard) return { 단가: standard.단가, 적용행: '표준' }
+
+  return null
+}
+
+/**
+ * 견적가 = 냉동 단가테이블 3계층 룩업 (lookupRate). SPL 재계산 없음.
  * 큐브당 단가는 병행 표시(그룹핑 축)일 뿐 SoT 아님.
+ * 단가 미등록(룩업 실패) 시 견적가/큐브당/차량당 null + 단가미등록 true — 0원·크래시 금지.
  */
 export function quote(
   rateTable: RateTable,
   권역: Region,
   matchedVehicle: Vehicle,
-  count = 1
+  count = 1,
+  품목?: string
 ): QuoteResult {
-  const 차량당 = rateTable['차량형']['도내비'][권역] // 냉동 표준값
   const 청구큐브 = billingCube(matchedVehicle, count)
+  const rate = lookupRate(rateTable, 권역, matchedVehicle.id, 품목)
+
+  if (rate === null) {
+    return { 청구큐브, 큐브당: null, 차량당: null, 견적가: null, 적용행: null, 단가미등록: true }
+  }
+
+  const 차량당 = rate.단가
   const 큐브당 = Math.round(차량당 / matchedVehicle.volume_cube) // 병행 표시(그룹핑 축)
-  return { 청구큐브, 큐브당, 차량당, 견적가: 차량당 * count }
+  return { 청구큐브, 큐브당, 차량당, 견적가: 차량당 * count, 적용행: rate.적용행, 단가미등록: false }
 }

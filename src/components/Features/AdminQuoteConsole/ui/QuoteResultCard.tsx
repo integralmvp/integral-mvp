@@ -72,7 +72,7 @@ export default function QuoteResultCard({ derived, canSave, onSave }: QuoteResul
       </div>
 
       {/* 청구큐브 · 큐브당 · 견적가 */}
-      {quoteResult && (
+      {quoteResult && quoteResult.견적가 !== null && quoteResult.큐브당 !== null && (
         <div className="mt-3 grid grid-cols-3 gap-2">
           <div className="rounded-xl bg-slate-50 p-3 text-center">
             <div className="text-[10px] font-semibold text-slate-500">청구큐브</div>

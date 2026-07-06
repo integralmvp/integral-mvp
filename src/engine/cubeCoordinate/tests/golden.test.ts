@@ -1,7 +1,7 @@
 /**
- * 골든 데모 화물 테스트 (CUBE_MVP_SPEC.md §4 — 엔진이 이 표를 정확히 재현해야 함)
+ * 골든 데모 화물 테스트 (CUBE_MVP_SPEC.md §4 + adminRateTable.json 3계층 룩업)
  *
- * 입력: 길이 6000 · 폭 600 · 높이 600 (mm) · 중량 300 (kg) · 권역 "시외" · 대수 1
+ * 입력: 길이 6000 · 폭 600 · 높이 600 (mm) · 중량 300 (kg) · 권역 "시외" · 품목 "파이프" · 대수 1
  * (장척 파이프 시나리오)
  */
 
@@ -11,14 +11,15 @@ import {
   matchVehicle,
   rejectedVehicles,
   billingCube,
+  lookupRate,
   quote,
   VEHICLE_DB,
   RATE_TABLE,
 } from '../index'
 
-const GOLDEN = { L: 6000, W: 600, H: 600, kg: 300, 권역: '시외' as const, 대수: 1 }
+const GOLDEN = { L: 6000, W: 600, H: 600, kg: 300, 권역: '시외' as const, 품목: '파이프', 대수: 1 }
 
-describe('골든 데모 화물 (스펙 §4)', () => {
+describe('골든 데모 화물 (스펙 §4 + 계층 단가)', () => {
   const cargo = cargoCubes(GOLDEN.L, GOLDEN.W, GOLDEN.H, GOLDEN.kg)
 
   it('큐브 좌표: 선 30 · 면 90 · 공간 270 · 중량 60', () => {
@@ -48,12 +49,55 @@ describe('골든 데모 화물 (스펙 §4)', () => {
     expect(billingCube(match.vehicle!, GOLDEN.대수)).toBe(2500)
   })
 
-  it('큐브당 72원 (시외) · 견적가 180,000원', () => {
+  it('시외·5t·파이프 → 조건행 140,000 · 큐브당 56', () => {
     const match = matchVehicle(cargo, VEHICLE_DB)
-    const result = quote(RATE_TABLE, GOLDEN.권역, match.vehicle!, GOLDEN.대수)
+    const result = quote(RATE_TABLE, GOLDEN.권역, match.vehicle!, GOLDEN.대수, GOLDEN.품목)
     expect(result.청구큐브).toBe(2500)
-    expect(result.큐브당).toBe(72)
-    expect(result.차량당).toBe(180000)
-    expect(result.견적가).toBe(180000)
+    expect(result.적용행).toBe('조건')
+    expect(result.차량당).toBe(140000)
+    expect(result.큐브당).toBe(56)
+    expect(result.견적가).toBe(140000)
+    expect(result.단가미등록).toBe(false)
+  })
+})
+
+describe('3계층 룩업 우선순위 (조건 → 세부 → 표준 → 미등록)', () => {
+  const v5t = VEHICLE_DB.find(v => v.id === '5t')!
+  const v25t = VEHICLE_DB.find(v => v.id === '25t')!
+  const v1t = VEHICLE_DB.find(v => v.id === '1t')!
+
+  it('시외·5t·품목 없음 → 세부행 150,000', () => {
+    const result = quote(RATE_TABLE, '시외', v5t, 1)
+    expect(result.적용행).toBe('세부')
+    expect(result.견적가).toBe(150000)
+    expect(result.단가미등록).toBe(false)
+  })
+
+  it('시외·25t·철근 → 조건행 190,000', () => {
+    const result = quote(RATE_TABLE, '시외', v25t, 1, '철근')
+    expect(result.적용행).toBe('조건')
+    expect(result.견적가).toBe(190000)
+  })
+
+  it('시내·25t·품목 없음 → 세부 없음, 표준행 180,000 fallback', () => {
+    const rate = lookupRate(RATE_TABLE, '시내', '25t')
+    expect(rate).toEqual({ 단가: 180000, 적용행: '표준' })
+  })
+
+  it('시내·1t → 어느 행에도 없음 → 단가 미등록 (null, 크래시·0원 금지)', () => {
+    expect(lookupRate(RATE_TABLE, '시내', '1t')).toBeNull()
+    const result = quote(RATE_TABLE, '시내', v1t, 1)
+    expect(result.단가미등록).toBe(true)
+    expect(result.견적가).toBeNull()
+    expect(result.큐브당).toBeNull()
+    expect(result.적용행).toBeNull()
+    expect(result.청구큐브).toBe(400) // 청구큐브는 단가와 무관하게 산출
+  })
+
+  it('품목이 품목군에 없으면 조건행 미적용 → 세부행 fallback (시외·5t·석재)', () => {
+    // "석재"는 25t 조건 품목군에만 존재 — 5t 조건행에는 없음
+    const result = quote(RATE_TABLE, '시외', v5t, 1, '석재')
+    expect(result.적용행).toBe('세부')
+    expect(result.견적가).toBe(150000)
   })
 })
