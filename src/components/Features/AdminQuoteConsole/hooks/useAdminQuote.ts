@@ -119,6 +119,12 @@ export function useAdminQuote() {
     })
   }, [form])
 
+  /** 폼·조회 결과 초기화 — 초기화 버튼과 견적 등록 후 리셋이 동일 동작 공유 */
+  const resetForm = useCallback(() => {
+    setForm(INITIAL_FORM)
+    setResult(null)
+  }, [])
+
   const canSave =
     result !== null &&
     result.match.matched &&
@@ -168,6 +174,7 @@ export function useAdminQuote() {
     canRun,
     runQuote,
     result,
+    resetForm,
     canSave,
     handleSave,
     quotes,

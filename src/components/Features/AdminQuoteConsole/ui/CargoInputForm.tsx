@@ -9,6 +9,8 @@ interface CargoInputFormProps {
   /** 필수 제원(길이·폭·높이·중량)이 모두 유효한지 — 조회 버튼 활성 조건 */
   canRun: boolean
   onRunQuote: () => void
+  /** 폼·조회 결과 초기화 */
+  onReset: () => void
 }
 
 const REGIONS: Region[] = ['시내', '시외']
@@ -45,7 +47,7 @@ function NumberField({
   )
 }
 
-export default function CargoInputForm({ form, setField, canRun, onRunQuote }: CargoInputFormProps) {
+export default function CargoInputForm({ form, setField, canRun, onRunQuote, onReset }: CargoInputFormProps) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
       <h2 className="mb-3 text-sm font-bold text-slate-800">화물 제원 입력</h2>
@@ -115,16 +117,26 @@ export default function CargoInputForm({ form, setField, canRun, onRunQuote }: C
         </label>
       </div>
 
-      {/* 견적 조회 — 완성된 입력에서만 견적 산출 (입력 도중 자동 계산 없음) */}
-      <button
-        type="button"
-        disabled={!canRun}
-        onClick={onRunQuote}
-        className="mt-3 w-full rounded-xl bg-teal-600 py-2.5 text-sm font-bold text-white transition-colors
-                   hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-      >
-        견적 조회
-      </button>
+      {/* 견적 조회(완성된 입력에서만 산출) + 초기화 */}
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={onReset}
+          className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-500
+                     transition-colors hover:bg-slate-50 hover:text-slate-700"
+        >
+          초기화
+        </button>
+        <button
+          type="button"
+          disabled={!canRun}
+          onClick={onRunQuote}
+          className="flex-1 rounded-xl bg-teal-600 py-2.5 text-sm font-bold text-white transition-colors
+                     hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        >
+          견적 조회
+        </button>
+      </div>
       {!canRun && (
         <p className="mt-1.5 text-[10px] text-slate-400">
           길이·폭·높이·중량을 모두 입력하면 조회할 수 있습니다
