@@ -1,6 +1,7 @@
-// 화물 제원 입력폼 — 길이·폭·높이(mm)·중량(kg)·권역·차량대수 + 거래처·품목 옵션
+// 화물 제원 입력폼 — 길이·폭·높이(mm)·중량(kg)·권역·차량대수 + 거래처·품목(검증된 드롭다운)
 import type { AdminQuoteForm } from '../hooks/useAdminQuote'
 import type { Region } from '../../../../engine/cubeCoordinate'
+import { ADMIN_ITEM_OPTIONS, ITEM_UNSPECIFIED } from '../utils/labels'
 
 interface CargoInputFormProps {
   form: AdminQuoteForm
@@ -95,14 +96,19 @@ export default function CargoInputForm({ form, setField }: CargoInputFormProps) 
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold text-slate-600">품목 <span className="text-slate-400">(옵션)</span></span>
-          <input
-            type="text"
+          <span className="text-xs font-semibold text-slate-600">품목 <span className="text-slate-400">(단가 조건행 반영)</span></span>
+          {/* 검증된 품목만 선택 — 오타/공백으로 조건행을 놓치는 문제 차단 */}
+          <select
             value={form.item}
             onChange={e => setField('item', e.target.value)}
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800
                        focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
-          />
+          >
+            <option value="">{ITEM_UNSPECIFIED}</option>
+            {ADMIN_ITEM_OPTIONS.map(item => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
         </label>
       </div>
     </div>

@@ -1,11 +1,13 @@
-// 실시간 견적 결과카드 — 큐브 좌표 · 추천차종+초과사유 · 청구큐브·큐브당·견적가(강조)
+// 실시간 견적 결과카드 — 큐브 좌표 · 추천차종+초과사유 · 적용행 배지 · 청구큐브·큐브당·견적가(강조)
 // 계산 없음: useAdminQuote 파생값을 표시만 한다.
 import { CubeIcon3D, TruckIcon } from '../../../Visualizations'
 import type { AdminQuoteDerived } from '../hooks/useAdminQuote'
-import { REASON_LABELS, formatWon, summarizeRejected } from '../utils/labels'
+import { REASON_LABELS, TIER_LABELS, formatWon, summarizeRejected } from '../utils/labels'
 
 interface QuoteResultCardProps {
   derived: AdminQuoteDerived | null
+  /** 선택된 품목 (조건행 근거 표시용, 빈 값 = 미지정) */
+  item: string
   canSave: boolean
   onSave: () => void
 }
@@ -19,7 +21,7 @@ function CoordChip({ label, value }: { label: string; value: number }) {
   )
 }
 
-export default function QuoteResultCard({ derived, canSave, onSave }: QuoteResultCardProps) {
+export default function QuoteResultCard({ derived, item, canSave, onSave }: QuoteResultCardProps) {
   if (!derived) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 bg-white/50 p-6 text-center text-sm text-slate-400">
@@ -32,6 +34,21 @@ export default function QuoteResultCard({ derived, canSave, onSave }: QuoteResul
   const rejectSummary = summarizeRejected(
     rejected.map(r => ({ vehicle_name: r.vehicle.name, reasons: r.reasons })),
   )
+  // 표시용 narrowing: 단가미등록=false면 엔진 계약상 전부 non-null (quote() 참조)
+  const pricing =
+    quoteResult &&
+    quoteResult.견적가 !== null &&
+    quoteResult.큐브당 !== null &&
+    quoteResult.차량당 !== null &&
+    quoteResult.적용행 !== null
+      ? {
+          청구큐브: quoteResult.청구큐브,
+          큐브당: quoteResult.큐브당,
+          차량당: quoteResult.차량당,
+          견적가: quoteResult.견적가,
+          적용행: quoteResult.적용행,
+        }
+      : null
 
   return (
     <div className="rounded-2xl border border-teal-200 bg-white/90 p-4 shadow-sm">
@@ -71,31 +88,71 @@ export default function QuoteResultCard({ derived, canSave, onSave }: QuoteResul
         )}
       </div>
 
-      {/* 청구큐브 · 큐브당 · 견적가 */}
-      {quoteResult && quoteResult.견적가 !== null && quoteResult.큐브당 !== null && (
-        <div className="mt-3 grid grid-cols-3 gap-2">
+      {/* 적용행 배지 (조건행은 근거와 함께 강조) */}
+      {pricing && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span
+            className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+              pricing.적용행 === '조건'
+                ? 'bg-indigo-600 text-white'
+                : pricing.적용행 === '세부'
+                  ? 'bg-teal-100 text-teal-700'
+                  : 'bg-slate-200 text-slate-600'
+            }`}
+          >
+            {TIER_LABELS[pricing.적용행]} 적용
+          </span>
+          {pricing.적용행 === '조건' && item && (
+            <span className="text-[11px] font-semibold text-indigo-600">
+              품목: {item} → 조건행 {formatWon(pricing.차량당)}원
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* 청구큐브 · 큐브당 · 견적가 (단가 미등록 시 안내로 대체) */}
+      {pricing ? (
+        <div className="mt-2 grid grid-cols-3 gap-2">
           <div className="rounded-xl bg-slate-50 p-3 text-center">
             <div className="text-[10px] font-semibold text-slate-500">청구큐브</div>
             <div className="text-base font-bold text-slate-800">
-              {formatWon(quoteResult.청구큐브)}
+              {formatWon(pricing.청구큐브)}
             </div>
             <div className="text-[10px] text-slate-400">부피큐브 × {count}대</div>
           </div>
           <div className="rounded-xl bg-slate-50 p-3 text-center">
             <div className="text-[10px] font-semibold text-slate-500">큐브당 단가</div>
             <div className="text-base font-bold text-slate-800">
-              {formatWon(quoteResult.큐브당)}<span className="text-xs font-semibold">원</span>
+              {formatWon(pricing.큐브당)}<span className="text-xs font-semibold">원</span>
             </div>
             <div className="text-[10px] text-slate-400">병행 표시</div>
           </div>
           <div className="rounded-xl bg-teal-600 p-3 text-center shadow">
             <div className="text-[10px] font-semibold text-teal-100">견적가</div>
             <div className="text-lg font-black text-white">
-              {formatWon(quoteResult.견적가)}<span className="text-xs font-bold">원</span>
+              {formatWon(pricing.견적가)}<span className="text-xs font-bold">원</span>
             </div>
             <div className="text-[10px] text-teal-100">도내비 × {count}대</div>
           </div>
         </div>
+      ) : (
+        quoteResult?.단가미등록 && (
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <div className="rounded-xl bg-slate-50 p-3 text-center">
+              <div className="text-[10px] font-semibold text-slate-500">청구큐브</div>
+              <div className="text-base font-bold text-slate-800">
+                {formatWon(quoteResult.청구큐브)}
+              </div>
+              <div className="text-[10px] text-slate-400">부피큐브 × {count}대</div>
+            </div>
+            <div className="col-span-2 flex flex-col items-center justify-center rounded-xl border border-amber-200 bg-amber-50 p-3 text-center">
+              <div className="text-sm font-bold text-amber-700">단가 미등록 — 협의 필요</div>
+              <div className="mt-0.5 text-[10px] text-amber-600">
+                해당 권역·차종 조합의 단가가 테이블에 없습니다
+              </div>
+            </div>
+          </div>
+        )
       )}
 
       {/* 견적 저장 */}

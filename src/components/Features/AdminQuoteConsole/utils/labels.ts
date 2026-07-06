@@ -1,5 +1,5 @@
 // 초과사유 코드 → 표시 라벨 (엔진 ExceedReason 코드를 UI 서사로 변환)
-import type { ExceedReason } from '../../../../engine/cubeCoordinate'
+import type { ExceedReason, RateTier } from '../../../../engine/cubeCoordinate'
 
 export const REASON_LABELS: Record<ExceedReason, string> = {
   LINE: '선초과',
@@ -8,6 +8,25 @@ export const REASON_LABELS: Record<ExceedReason, string> = {
   WEIGHT: '중량초과',
   NO_AVAILABLE_VEHICLE: '적합 차량 없음',
 }
+
+/** 단가 룩업 적용행 → 표시 라벨 */
+export const TIER_LABELS: Record<RateTier, string> = {
+  조건: '조건행',
+  세부: '세부행',
+  표준: '표준행',
+}
+
+/** 품목 드롭다운 빈 값 라벨 — 선택 시 세부/표준행 fallback */
+export const ITEM_UNSPECIFIED = '(품목 미지정)'
+
+/**
+ * 검증된 품목 옵션 — 전부 rateTable 품목군에 존재하는 정확일치 문자열.
+ * 자유 입력의 오타·공백으로 조건행을 놓치는 문제를 원천 차단.
+ */
+export const ADMIN_ITEM_OPTIONS = [
+  '파이프', '철근', '각관', '농자재', '사료', '코일', '패드', '비료',
+  '합판', '석재', '벽돌', '맥아', 'HB', '가설재', '옹벽',
+] as const
 
 export function formatWon(value: number): string {
   return value.toLocaleString('ko-KR')

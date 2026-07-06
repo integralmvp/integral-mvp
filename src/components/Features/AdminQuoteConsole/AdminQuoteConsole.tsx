@@ -11,7 +11,7 @@ export default function AdminQuoteConsole() {
   return (
     <div className="flex h-full flex-col gap-3 overflow-y-auto pr-1">
       <CargoInputForm form={form} setField={setField} />
-      <QuoteResultCard derived={derived} canSave={canSave} onSave={handleSave} />
+      <QuoteResultCard derived={derived} item={form.item} canSave={canSave} onSave={handleSave} />
       <QuoteList quotes={quotes} onDelete={handleDelete} />
     </div>
   )

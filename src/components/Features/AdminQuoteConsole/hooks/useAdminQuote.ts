@@ -83,8 +83,9 @@ export function useAdminQuote() {
     const cargo = cargoCubes(L, W, H, kg)
     const match = matchVehicle(cargo, VEHICLE_DB)
     const rejected = rejectedVehicles(cargo, VEHICLE_DB)
+    // 품목은 검증된 드롭다운 값(정확일치) — 빈 값이면 세부/표준행 fallback
     const quoteResult = match.vehicle
-      ? quote(RATE_TABLE, form.region, match.vehicle, count)
+      ? quote(RATE_TABLE, form.region, match.vehicle, count, form.item || undefined)
       : null
 
     return { cargo, match, rejected, quoteResult, count }
