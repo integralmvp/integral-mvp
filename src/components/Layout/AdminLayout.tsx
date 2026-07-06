@@ -8,7 +8,8 @@ import logoSvg from '../../assets/icons/console/logo.svg'
 
 export default function AdminLayout() {
   return (
-    <div className="h-screen grid grid-cols-[45%_55%] overflow-hidden">
+    // grid-rows-[100%]: 암시적 row가 내용 높이로 늘어나 좌측 콘솔이 뷰포트를 넘는 것 방지
+    <div className="h-screen grid grid-cols-[45%_55%] grid-rows-[100%] overflow-hidden">
       {/* 배경 지도: 전체 화면 (grid의 모든 칸 차지) */}
       <div className="col-span-2 row-start-1 col-start-1">
         <MapboxContainer />

@@ -9,15 +9,16 @@ interface QuoteListProps {
 
 export default function QuoteList({ quotes, onDelete }: QuoteListProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
-      <h2 className="mb-3 text-sm font-bold text-slate-800">
+    // 부모가 준 높이 안에서 헤더 고정 + 목록(ul)만 내부 스크롤
+    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+      <h2 className="mb-3 shrink-0 text-sm font-bold text-slate-800">
         견적 목록 <span className="text-xs font-semibold text-slate-400">({quotes.length}건)</span>
       </h2>
 
       {quotes.length === 0 ? (
         <div className="py-4 text-center text-xs text-slate-400">저장된 견적이 없습니다</div>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
           {quotes.map(q => {
             const rejectSummary = summarizeRejected(q.reject_summary)
             return (
